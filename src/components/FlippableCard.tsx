@@ -23,7 +23,7 @@ export default function FlippableCard({
       type="button"
       onClick={handleFlip}
       aria-label="Flip HERNEROS card to see the other side"
-      className={`card-reflect block cursor-pointer text-left transition-transform active:scale-[0.98] ${shadow ? "drop-shadow-2xl" : ""} ${className ?? ""}`}
+      className={`block cursor-pointer text-left transition-transform active:scale-[0.98] ${shadow ? "card-reflect drop-shadow-2xl" : ""} ${className ?? ""}`}
     >
       <div className="perspective-1600 w-full">
         <div

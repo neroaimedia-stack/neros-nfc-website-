@@ -75,7 +75,7 @@ export default function CartPage() {
       </div>
 
       <Link
-        href="mailto:hello@herneros.com?subject=Order%20Checkout"
+        href="mailto:herneros.ph@gmail.com?subject=Order%20Checkout"
         className="mt-6 block rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
       >
         Checkout

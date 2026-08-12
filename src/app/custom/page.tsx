@@ -11,7 +11,7 @@ export default function CustomOrderPage() {
         need and we&apos;ll get back to you.
       </p>
       <Link
-        href="mailto:hello@herneros.com?subject=Custom%20Order"
+        href="mailto:herneros.ph@gmail.com?subject=Custom%20Order"
         className="mt-8 rounded-full bg-black px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
       >
         Email us

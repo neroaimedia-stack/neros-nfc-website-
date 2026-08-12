@@ -16,7 +16,7 @@ export const REVIEW_PLATFORM_ORDER = [
 export const REVIEW_PLATFORMS: Record<string, ReviewPlatformStyle> = {
   Facebook: {
     label: "FOLLOW US ON FACEBOOK",
-    background: "#1877F2",
+    background: "#0866FF",
     labelTextClass: "text-white",
   },
   Instagram: {

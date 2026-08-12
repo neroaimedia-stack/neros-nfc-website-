@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NERO — Digital Identity Cards",
-  description: "Tap or scan your NERO card to share your profile instantly.",
+  title: "NEROS — Digital Identity Cards",
+  description: "Tap or scan your NEROS card to share your profile instantly.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

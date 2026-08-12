@@ -88,10 +88,7 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col rounded-3xl border border-black/10 p-8 text-center shadow-sm">
-            <span className="mx-auto rounded-full bg-black/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-black/60">
-              Coming soon
-            </span>
-            <h3 className="mt-3 text-lg font-semibold text-black">
+            <h3 className="text-lg font-semibold text-black">
               Review Card
             </h3>
             <p className="mt-2 flex-1 text-sm text-black/60">
@@ -99,10 +96,10 @@ export default function Home() {
               limited availability.
             </p>
             <Link
-              href="mailto:hello@herneros.com?subject=Review%20Card%20Pre-order"
-              className="mt-6 rounded-full border border-black px-6 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-60"
+              href="mailto:hello@herneros.com?subject=Review%20Card%20Order"
+              className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
             >
-              Pre-order
+              Buy Now
             </Link>
           </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import QrCode from "@/components/QrCode";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
 
 export default function FlippableCard({
@@ -55,15 +55,8 @@ export default function FlippableCard({
             <div className="card-corner-gloss" />
             <div className="card-sheen" />
             <div className="relative flex h-full items-center justify-center p-7">
-              <div className="relative aspect-square w-[26%] overflow-hidden rounded-xl bg-white/95 p-1.5 shadow-[0_2px_6px_rgba(0,0,0,0.15),0_8px_18px_rgba(0,0,0,0.18)] ring-1 ring-white/50">
-                <Image
-                  src="/qr-code.jpg"
-                  alt="HERNEROS profile QR code"
-                  fill
-                  sizes="120px"
-                  unoptimized
-                  className="rounded-sm object-cover"
-                />
+              <div className="relative aspect-square w-[26%] overflow-hidden rounded-xl bg-white p-1 shadow-[0_2px_6px_rgba(0,0,0,0.15),0_8px_18px_rgba(0,0,0,0.18)] ring-1 ring-white/50">
+                <QrCode color={style.qrColor} className="h-full w-full" />
               </div>
             </div>
           </div>

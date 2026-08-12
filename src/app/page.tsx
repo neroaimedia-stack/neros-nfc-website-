@@ -80,7 +80,7 @@ export default function Home() {
               Share your profile and contact info with one tap.
             </p>
             <Link
-              href="mailto:hello@herneros.com?subject=Business%20Card%20Order"
+              href="/product/business-card"
               className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
             >
               Buy Now
@@ -96,7 +96,7 @@ export default function Home() {
               limited availability.
             </p>
             <Link
-              href="mailto:hello@herneros.com?subject=Review%20Card%20Order"
+              href="/product/review-card"
               className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
             >
               Buy Now
@@ -110,7 +110,7 @@ export default function Home() {
               talk.
             </p>
             <Link
-              href="mailto:hello@herneros.com?subject=Custom%20Order"
+              href="/custom"
               className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
             >
               Talk to us

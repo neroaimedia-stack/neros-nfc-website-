@@ -1,9 +1,9 @@
 import Link from "next/link";
+import CartIcon from "@/components/CartIcon";
 
 const links = [
   { href: "/", label: "Home" },
   { href: "/account", label: "Account" },
-  { href: "/#buy", label: "Shop" },
 ];
 
 export default function Navbar() {
@@ -24,6 +24,9 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+          <li>
+            <CartIcon />
+          </li>
         </ul>
       </nav>
     </header>

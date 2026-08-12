@@ -5,7 +5,7 @@ const steps = [
   {
     title: "Tap or scan",
     description:
-      "Hold your NEROS card up to any phone, or scan the QR code on the back — no app required.",
+      "Hold your HERNEROS card up to any phone, or scan the QR code on the back — no app required.",
   },
   {
     title: "Create your profile",
@@ -28,7 +28,7 @@ export default function Home() {
             Your digital identity, one tap away.
           </h1>
           <p className="mt-5 text-lg text-black/60">
-            NEROS cards let you share your profile, links, and contact info
+            HERNEROS cards let you share your profile, links, and contact info
             instantly — just tap or scan.
           </p>
           <Link
@@ -80,7 +80,7 @@ export default function Home() {
               Share your profile and contact info with one tap.
             </p>
             <Link
-              href="mailto:hello@neros.com?subject=Business%20Card%20Order"
+              href="mailto:hello@herneros.com?subject=Business%20Card%20Order"
               className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
             >
               Buy Now
@@ -99,7 +99,7 @@ export default function Home() {
               limited availability.
             </p>
             <Link
-              href="mailto:hello@neros.com?subject=Review%20Card%20Pre-order"
+              href="mailto:hello@herneros.com?subject=Review%20Card%20Pre-order"
               className="mt-6 rounded-full border border-black px-6 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-60"
             >
               Pre-order
@@ -113,7 +113,7 @@ export default function Home() {
               talk.
             </p>
             <Link
-              href="mailto:hello@neros.com?subject=Custom%20Order"
+              href="mailto:hello@herneros.com?subject=Custom%20Order"
               className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
             >
               Talk to us

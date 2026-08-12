@@ -1,10 +1,41 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
+import { PROMO_CODES } from "@/lib/promo-codes";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal } = useCart();
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [promoError, setPromoError] = useState("");
+
+  const discountRate = appliedCode ? PROMO_CODES[appliedCode] : 0;
+  const discount = Math.round(subtotal * discountRate);
+  const total = subtotal - discount;
+
+  const handleApplyPromo = () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    if (PROMO_CODES[code]) {
+      setAppliedCode(code);
+      setPromoError("");
+    } else {
+      setAppliedCode(null);
+      setPromoError("Invalid promo code");
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedCode(null);
+    setPromoInput("");
+    setPromoError("");
+  };
+
+  const checkoutHref = `mailto:herneros.ph@gmail.com?subject=Order%20Checkout${
+    appliedCode ? `&body=Promo%20code%3A%20${appliedCode}` : ""
+  }`;
 
   if (items.length === 0) {
     return (
@@ -67,15 +98,75 @@ export default function CartPage() {
         ))}
       </div>
 
-      <div className="mt-8 flex items-center justify-between border-t border-black/10 pt-6">
-        <span className="text-sm text-black/60">Subtotal</span>
-        <span className="text-xl font-bold text-black">
-          ₱{subtotal.toLocaleString()}
-        </span>
+      <div className="mt-8 border-t border-black/10 pt-6">
+        <p className="text-sm font-semibold text-black">Promo code</p>
+        {appliedCode ? (
+          <div className="mt-3 flex items-center justify-between rounded-full border border-black/20 px-4 py-2.5">
+            <span className="text-sm font-semibold text-black">
+              {appliedCode} applied — {discountRate * 100}% off
+            </span>
+            <button
+              type="button"
+              onClick={handleRemovePromo}
+              className="text-xs text-black/40 underline hover:text-black"
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3 flex gap-2">
+            <input
+              type="text"
+              value={promoInput}
+              onChange={(e) => setPromoInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleApplyPromo();
+                }
+              }}
+              placeholder="Enter code"
+              className="w-full rounded-full border border-black/20 px-4 py-2.5 text-sm uppercase outline-none focus:border-black"
+            />
+            <button
+              type="button"
+              onClick={handleApplyPromo}
+              className="shrink-0 rounded-full border border-black px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-60"
+            >
+              Apply
+            </button>
+          </div>
+        )}
+        {promoError && (
+          <p className="mt-2 text-xs text-red-600">{promoError}</p>
+        )}
+      </div>
+
+      <div className="mt-6 flex flex-col gap-2 border-t border-black/10 pt-6">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-black/60">Subtotal</span>
+          <span className="text-sm font-semibold text-black">
+            ₱{subtotal.toLocaleString()}
+          </span>
+        </div>
+        {appliedCode && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-black/60">Discount</span>
+            <span className="text-sm font-semibold text-black">
+              −₱{discount.toLocaleString()}
+            </span>
+          </div>
+        )}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-black/60">Total</span>
+          <span className="text-xl font-bold text-black">
+            ₱{total.toLocaleString()}
+          </span>
+        </div>
       </div>
 
       <Link
-        href="mailto:herneros.ph@gmail.com?subject=Order%20Checkout"
+        href={checkoutHref}
         className="mt-6 block rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
       >
         Checkout

@@ -1,24 +1,39 @@
-const SIZE = 21;
+const SIZE = 25;
 const FINDER_CORNERS: [number, number][] = [
   [0, 0],
   [SIZE - 7, 0],
   [0, SIZE - 7],
 ];
+const ALIGNMENT_ORIGIN: [number, number] = [16, 16];
 
-function isFinderModule(x: number, y: number, cx: number, cy: number) {
-  const lx = x - cx;
-  const ly = y - cy;
+function inBox(x: number, y: number, bx: number, by: number, size: number) {
+  return x >= bx && x < bx + size && y >= by && y < by + size;
+}
+
+function isFinderModule(lx: number, ly: number) {
   const onRing = lx === 0 || lx === 6 || ly === 0 || ly === 6;
   const onCore = lx >= 2 && lx <= 4 && ly >= 2 && ly <= 4;
   return onRing || onCore;
 }
 
+function isAlignmentModule(lx: number, ly: number) {
+  const onRing = lx === 0 || lx === 4 || ly === 0 || ly === 4;
+  const isCenter = lx === 2 && ly === 2;
+  return onRing || isCenter;
+}
+
 function moduleOn(x: number, y: number) {
-  const finder = FINDER_CORNERS.find(
-    ([cx, cy]) => x >= cx && x < cx + 7 && y >= cy && y < cy + 7
-  );
-  if (finder) return isFinderModule(x, y, finder[0], finder[1]);
-  return (x * 7 + y * 13 + x * y) % 5 < 2;
+  for (const [cx, cy] of FINDER_CORNERS) {
+    if (inBox(x, y, cx, cy, 7)) return isFinderModule(x - cx, y - cy);
+  }
+
+  const [acx, acy] = ALIGNMENT_ORIGIN;
+  if (inBox(x, y, acx, acy, 5)) return isAlignmentModule(x - acx, y - acy);
+
+  if (y === 6 && x >= 8 && x <= SIZE - 9) return x % 2 === 0;
+  if (x === 6 && y >= 8 && y <= SIZE - 9) return y % 2 === 0;
+
+  return (x * 3 + y * 5 + x * y * 2) % 7 < 4;
 }
 
 export default function QrMock({ className }: { className?: string }) {

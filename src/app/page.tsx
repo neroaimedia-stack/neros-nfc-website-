@@ -92,8 +92,8 @@ export default function Home() {
               Review Card
             </h3>
             <p className="mt-2 flex-1 text-sm text-black/60">
-              Drive customers straight to your review page. Low exposure —
-              limited availability.
+              Drive customers straight to your review page, or your business
+              social media pages.
             </p>
             <Link
               href="/product/review-card"

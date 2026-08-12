@@ -16,7 +16,7 @@ export default function CardMockup() {
     setColorIndex((i) => (i + 1) % CARD_COLOR_ORDER.length);
 
   return (
-    <div className="flex w-full max-w-lg items-center justify-center gap-10">
+    <div className="flex w-full min-w-0 max-w-xl items-center justify-center gap-10">
       <button
         type="button"
         onClick={handlePrev}
@@ -34,7 +34,7 @@ export default function CardMockup() {
         </svg>
       </button>
 
-      <FlippableCard color={color} className="flex-1" />
+      <FlippableCard color={color} className="w-[400px] max-w-full" />
 
       <button
         type="button"

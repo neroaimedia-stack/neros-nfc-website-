@@ -22,8 +22,8 @@ const steps = [
 export default function Home() {
   return (
     <main className="flex flex-col">
-      <section className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pb-20 pt-16 md:flex-row md:justify-between md:pt-24">
-        <div className="max-w-lg text-center md:text-left">
+      <section className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pb-20 pt-16 lg:flex-row lg:justify-between lg:pt-24">
+        <div className="max-w-lg text-center lg:text-left">
           <h1 className="text-4xl font-bold tracking-tight text-black md:text-5xl">
             Your digital identity, one tap away.
           </h1>
@@ -125,12 +125,20 @@ export default function Home() {
           <p className="mt-4 text-white/60">
             Claim your card and set up your profile in under a minute.
           </p>
-          <Link
-            href="/account"
-            className="mt-8 inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-80"
-          >
-            Set Up
-          </Link>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/account"
+              className="inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-80"
+            >
+              Set Up
+            </Link>
+            <Link
+              href="mailto:herneros.ph@gmail.com?subject=Support"
+              className="inline-block rounded-full border border-white px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+            >
+              Support
+            </Link>
+          </div>
         </div>
       </section>
     </main>

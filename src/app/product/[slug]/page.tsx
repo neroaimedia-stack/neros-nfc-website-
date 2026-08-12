@@ -44,9 +44,9 @@ export default function ProductPage() {
   };
 
   return (
-    <main className="mx-auto grid w-full max-w-5xl gap-12 px-6 py-16 md:grid-cols-2 md:items-start">
-      <div className="rounded-2xl border border-black/10 bg-neutral-50 p-10">
-        <FlippableCard className="mx-auto w-full max-w-sm" color={color} shadow={false} />
+    <main className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-12 px-6 py-16 lg:grid-cols-2 lg:items-start">
+      <div className="rounded-2xl border border-black/10 bg-neutral-50 p-8">
+        <FlippableCard className="mx-auto w-[400px] max-w-full" color={color} shadow={false} />
       </div>
 
       <div>

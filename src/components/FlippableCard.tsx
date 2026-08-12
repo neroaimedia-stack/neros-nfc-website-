@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import QrMock from "@/components/QrMock";
+import Image from "next/image";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
 
 export default function FlippableCard({
@@ -53,8 +53,14 @@ export default function FlippableCard({
             <div className="card-corner-gloss" />
             <div className="card-sheen" />
             <div className="relative flex h-full items-center justify-center p-7">
-              <div className="aspect-square w-[26%] rounded-xl bg-white/95 p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.3)] ring-1 ring-white/50">
-                <QrMock className="h-full w-full rounded-sm" />
+              <div className="relative aspect-square w-[26%] overflow-hidden rounded-xl bg-white/95 p-1.5 shadow-[0_6px_20px_rgba(0,0,0,0.3)] ring-1 ring-white/50">
+                <Image
+                  src="/qr-code.jpg"
+                  alt="HERNEROS profile QR code"
+                  fill
+                  sizes="120px"
+                  className="rounded-sm object-cover"
+                />
               </div>
             </div>
           </div>

@@ -1,14 +1,43 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import QrMock from "@/components/QrMock";
 
+const AUTO_FLIP_INTERVAL = 4500;
+
 export default function CardMockup() {
+  const [flipped, setFlipped] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setFlipped((prev) => !prev);
+    }, AUTO_FLIP_INTERVAL);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const handleFlip = () => {
+    setFlipped((prev) => !prev);
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setFlipped((prev) => !prev);
+    }, AUTO_FLIP_INTERVAL);
+  };
+
   return (
-    <div
-      className="card-reflect w-full max-w-sm drop-shadow-2xl"
-      role="img"
-      aria-label="HERNEROS NFC card, front and back"
+    <button
+      type="button"
+      onClick={handleFlip}
+      aria-label="Flip HERNEROS NFC card to see the other side"
+      className="card-reflect block w-full max-w-sm cursor-pointer drop-shadow-2xl transition-transform active:scale-[0.98]"
     >
       <div className="perspective-1600 w-full">
-        <div className="card-flip preserve-3d relative aspect-[340/214]">
+        <div
+          className="card-flip-transition preserve-3d relative aspect-[340/214]"
+          style={{ transform: `rotateY(${flipped ? 180 : 0}deg)` }}
+        >
           <div className="backface-hidden absolute inset-0 overflow-hidden rounded-[18px] bg-neutral-950">
             <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-transparent" />
             <div className="card-sheen" />
@@ -33,6 +62,6 @@ export default function CardMockup() {
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }

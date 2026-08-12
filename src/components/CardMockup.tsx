@@ -28,7 +28,7 @@ export default function CardMockup() {
             </div>
           </div>
           <span className="absolute bottom-4 right-5 text-xs font-semibold tracking-wide text-white/80">
-            her
+            HER
           </span>
         </div>
       </div>

@@ -5,7 +5,7 @@ const steps = [
   {
     title: "Tap or scan",
     description:
-      "Hold your HERNEROS card up to any phone, or scan the QR code on the back — no app required.",
+      "Hold your herneros card up to any phone, or scan the QR code on the back — no app required.",
   },
   {
     title: "Create your profile",
@@ -28,7 +28,7 @@ export default function Home() {
             Your digital identity, one tap away.
           </h1>
           <p className="mt-5 text-lg text-black/60">
-            HERNEROS cards let you share your profile, links, and contact info
+            herneros cards let you share your profile, links, and contact info
             instantly — just tap or scan.
           </p>
           <Link

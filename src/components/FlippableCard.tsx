@@ -7,9 +7,11 @@ import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
 export default function FlippableCard({
   color = DEFAULT_CARD_COLOR,
   className,
+  shadow = true,
 }: {
   color?: string;
   className?: string;
+  shadow?: boolean;
 }) {
   const [flipped, setFlipped] = useState(false);
   const style = CARD_COLORS[color] ?? CARD_COLORS[DEFAULT_CARD_COLOR];
@@ -21,7 +23,7 @@ export default function FlippableCard({
       type="button"
       onClick={handleFlip}
       aria-label="Flip HERNEROS card to see the other side"
-      className={`card-reflect block cursor-pointer text-left drop-shadow-2xl transition-transform active:scale-[0.98] ${className ?? ""}`}
+      className={`card-reflect block cursor-pointer text-left transition-transform active:scale-[0.98] ${shadow ? "drop-shadow-2xl" : ""} ${className ?? ""}`}
     >
       <div className="perspective-1600 w-full">
         <div

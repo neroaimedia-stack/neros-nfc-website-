@@ -16,47 +16,42 @@ export default function CardMockup() {
     setColorIndex((i) => (i + 1) % CARD_COLOR_ORDER.length);
 
   return (
-    <div className="flex w-full max-w-sm flex-col items-center gap-4">
-      <div className="flex w-full items-center justify-center gap-4">
-        <button
-          type="button"
-          onClick={handlePrev}
-          aria-label="Previous color"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/5 text-black/40 transition-colors hover:bg-black/10 hover:text-black/70"
+    <div className="flex w-full max-w-lg items-center justify-center gap-10">
+      <button
+        type="button"
+        onClick={handlePrev}
+        aria-label="Previous color"
+        className="flex h-9 w-9 shrink-0 items-center justify-center text-black/40 transition-colors hover:text-black/70"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="h-5 w-5"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="h-4 w-4"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
-          </svg>
-        </button>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
 
-        <FlippableCard color={color} className="flex-1" />
+      <FlippableCard color={color} className="flex-1" />
 
-        <button
-          type="button"
-          onClick={handleNext}
-          aria-label="Next color"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/5 text-black/40 transition-colors hover:bg-black/10 hover:text-black/70"
+      <button
+        type="button"
+        onClick={handleNext}
+        aria-label="Next color"
+        className="flex h-9 w-9 shrink-0 items-center justify-center text-black/40 transition-colors hover:text-black/70"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="h-5 w-5"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="h-4 w-4"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
-          </svg>
-        </button>
-      </div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-black/40">
-        {color}
-      </p>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
+        </svg>
+      </button>
     </div>
   );
 }

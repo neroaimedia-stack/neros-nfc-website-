@@ -1,29 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import QrMock from "@/components/QrMock";
-
-const AUTO_FLIP_INTERVAL = 4500;
 
 export default function CardMockup() {
   const [flipped, setFlipped] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setFlipped((prev) => !prev);
-    }, AUTO_FLIP_INTERVAL);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
 
   const handleFlip = () => {
     setFlipped((prev) => !prev);
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setFlipped((prev) => !prev);
-    }, AUTO_FLIP_INTERVAL);
   };
 
   return (

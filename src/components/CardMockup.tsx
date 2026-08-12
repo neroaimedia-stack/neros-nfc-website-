@@ -5,7 +5,7 @@ export default function CardMockup() {
     <div
       className="card-reflect w-full max-w-sm drop-shadow-2xl"
       role="img"
-      aria-label="NEROS NFC card, front and back"
+      aria-label="HERNEROS NFC card, front and back"
     >
       <div className="perspective-1600 w-full">
         <div className="card-flip preserve-3d relative aspect-[340/214]">
@@ -14,7 +14,7 @@ export default function CardMockup() {
             <div className="card-sheen" />
             <div className="relative flex h-full flex-col justify-between p-7">
               <span className="text-xl font-bold tracking-tight text-white">
-                NEROS
+                HERNEROS
               </span>
               <span className="text-sm tracking-[0.2em] text-white/85">
                 TAP &amp; SCAN
@@ -30,9 +30,6 @@ export default function CardMockup() {
                 <QrMock className="h-full w-full" />
               </div>
             </div>
-            <span className="absolute bottom-4 right-5 text-xs font-semibold tracking-wide text-white/80">
-              HER
-            </span>
           </div>
         </div>
       </div>

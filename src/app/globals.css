@@ -35,7 +35,22 @@ html {
 }
 
 .card-flip-transition {
-  transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-corner-gloss {
+  position: absolute;
+  top: -45%;
+  right: -45%;
+  width: 90%;
+  height: 90%;
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 255, 255, 0.65),
+    rgba(255, 255, 255, 0.18) 40%,
+    transparent 68%
+  );
+  pointer-events: none;
 }
 
 .card-reflect {

@@ -12,14 +12,7 @@ export const products: Record<string, Product> = {
     title: "HERNEROS Business Card",
     price: 999,
     compareAtPrice: 2500,
-    colors: [
-      "Jet Black",
-      "Pastel Pink",
-      "Evening Blue",
-      "Pearl White",
-      "Light Mint",
-      "Jet Black - Gold",
-    ],
+    colors: ["Jet Black", "Pastel Pink", "Evening Blue", "Pearl White"],
   },
   "review-card": {
     slug: "review-card",

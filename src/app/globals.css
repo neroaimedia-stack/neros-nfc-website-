@@ -22,22 +22,6 @@ html {
   scroll-behavior: smooth;
 }
 
-.perspective-1600 {
-  perspective: 1600px;
-}
-
-.preserve-3d {
-  transform-style: preserve-3d;
-}
-
-.backface-hidden {
-  backface-visibility: hidden;
-}
-
-.card-flip-transition {
-  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .card-edge-shade {
   position: absolute;
   inset: 0;
@@ -75,16 +59,17 @@ html {
 }
 
 .card-shadow {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12))
-    drop-shadow(0 8px 12px rgba(0, 0, 0, 0.14))
-    drop-shadow(0 24px 40px rgba(0, 0, 0, 0.2));
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 8px 12px rgba(0, 0, 0, 0.14),
+    0 24px 40px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes card-sheen {
   0% {
     transform: translateX(-220%) rotate(20deg);
   }
-  55%,
+  81%,
   100% {
     transform: translateX(340%) rotate(20deg);
   }
@@ -99,20 +84,16 @@ html {
   background: linear-gradient(
     100deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.03) 15%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0.03) 85%,
+    rgba(255, 255, 255, 0.05) 15%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0.05) 85%,
     transparent 100%
   );
-  animation: card-sheen 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: card-sheen 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-flip-transition {
-    transition: none;
-  }
-
   .card-sheen {
     display: none;
   }

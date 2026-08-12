@@ -3,7 +3,7 @@ export type CardColorStyle = {
   cardGradient: string;
   textClass: string;
   subTextClass: string;
-  ringClass?: string;
+  borderClass?: string;
 };
 
 export const DEFAULT_CARD_COLOR = "Jet Black";
@@ -40,6 +40,6 @@ export const CARD_COLORS: Record<string, CardColorStyle> = {
       "linear-gradient(135deg, #ffffff 0%, #f7f7f9 28%, #e7e7ec 58%, #fbfbfc 100%)",
     textClass: "text-black",
     subTextClass: "text-black/70",
-    ringClass: "ring-1 ring-black/20",
+    borderClass: "border border-black/8",
   },
 };

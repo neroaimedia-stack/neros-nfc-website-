@@ -4,13 +4,16 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import FlippableCard from "@/components/FlippableCard";
+import ReviewCardMock from "@/components/ReviewCardMock";
 import { products } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
+import { REVIEW_PLATFORMS } from "@/lib/review-platforms";
 
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
   const product = products[params.slug];
+  const isReview = product?.slug === "review-card";
   const { addItem } = useCart();
   const [color, setColor] = useState(product?.colors[0] ?? "");
   const [quantity, setQuantity] = useState(1);
@@ -46,7 +49,19 @@ export default function ProductPage() {
   return (
     <main className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-12 px-6 py-16 lg:grid-cols-2 lg:items-start">
       <div className="rounded-2xl border border-black/10 bg-neutral-50 p-8">
-        <FlippableCard className="mx-auto w-[400px] max-w-full" color={color} shadow={false} />
+        {isReview ? (
+          <ReviewCardMock
+            className="mx-auto w-[400px] max-w-full"
+            platform={color}
+            shadow={false}
+          />
+        ) : (
+          <FlippableCard
+            className="mx-auto w-[400px] max-w-full"
+            color={color}
+            shadow={false}
+          />
+        )}
       </div>
 
       <div>
@@ -77,13 +92,15 @@ export default function ProductPage() {
         <div className="mt-8 rounded-2xl border border-black/10 p-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-              Select Finish
+              {isReview ? "Select Platform" : "Select Finish"}
             </span>
             <span className="text-sm font-semibold text-black">{color}</span>
           </div>
           <div className="mt-3 flex items-center gap-3">
             {product.colors.map((c) => {
-              const swatch = (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR]).swatch;
+              const swatch = isReview
+                ? REVIEW_PLATFORMS[c]?.background
+                : (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR]).swatch;
               return (
                 <button
                   key={c}

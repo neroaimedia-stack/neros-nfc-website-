@@ -19,6 +19,6 @@ export const products: Record<string, Product> = {
     title: "HERNEROS Review Card",
     price: 599,
     compareAtPrice: 2500,
-    colors: ["Jet Black", "Pearl White"],
+    colors: ["Facebook", "Instagram", "TikTok", "Google Review"],
   },
 };

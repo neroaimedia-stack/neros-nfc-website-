@@ -38,6 +38,17 @@ html {
   transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.card-edge-shade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 140% at 50% 15%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
 .card-corner-gloss {
   position: absolute;
   top: -45%;

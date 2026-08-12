@@ -36,9 +36,10 @@ export const CARD_COLORS: Record<string, CardColorStyle> = {
   },
   "Pearl White": {
     swatch: "linear-gradient(135deg, #ffffff, #e4e4e4)",
-    cardGradient: "linear-gradient(135deg, #ffffff, #ececec)",
+    cardGradient:
+      "linear-gradient(135deg, #ffffff 0%, #f7f7f9 28%, #e7e7ec 58%, #fbfbfc 100%)",
     textClass: "text-black",
-    subTextClass: "text-black/60",
-    ringClass: "ring-1 ring-black/15",
+    subTextClass: "text-black/70",
+    ringClass: "ring-1 ring-black/20",
   },
 };

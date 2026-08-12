@@ -33,7 +33,8 @@ export default function FlippableCard({
             className={`backface-hidden absolute inset-0 overflow-hidden rounded-[18px] ${style.ringClass ?? ""}`}
             style={{ background: style.cardGradient }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10" />
+            <div className="card-edge-shade" />
             <div className="card-corner-gloss" />
             <div className="card-sheen" />
             <div className="relative flex h-full flex-col justify-between p-7">
@@ -50,7 +51,8 @@ export default function FlippableCard({
             className={`backface-hidden absolute inset-0 overflow-hidden rounded-[18px] [transform:rotateY(180deg)] ${style.ringClass ?? ""}`}
             style={{ background: style.cardGradient }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10" />
+            <div className="card-edge-shade" />
             <div className="card-corner-gloss" />
             <div className="card-sheen" />
           </div>

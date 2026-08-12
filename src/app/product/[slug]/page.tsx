@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import CardFace from "@/components/CardFace";
+import FlippableCard from "@/components/FlippableCard";
 import { products } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
@@ -46,20 +46,22 @@ export default function ProductPage() {
   return (
     <main className="mx-auto grid w-full max-w-5xl gap-12 px-6 py-16 md:grid-cols-2 md:items-start">
       <div className="rounded-2xl border border-black/10 bg-neutral-50 p-10">
-        <CardFace className="mx-auto w-full max-w-sm" color={color} />
+        <FlippableCard className="mx-auto w-full max-w-sm" color={color} />
       </div>
 
       <div>
-        <h1 className="text-3xl font-bold text-black">{product.title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-black">
+          {product.title}
+        </h1>
 
         <div className="mt-4 flex items-center gap-3">
           {product.compareAtPrice && (
             <span className="text-lg text-black/40 line-through">
-              {product.compareAtPrice.toLocaleString()}
+              ₱{product.compareAtPrice.toLocaleString()}
             </span>
           )}
           <span className="text-2xl font-bold text-black">
-            {product.price.toLocaleString()}
+            ₱{product.price.toLocaleString()}
           </span>
           {product.compareAtPrice && (
             <span className="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">
@@ -68,13 +70,13 @@ export default function ProductPage() {
           )}
         </div>
 
-        <p className="mt-2 text-sm text-black/50 underline decoration-black/30 underline-offset-2">
+        <p className="mt-2 text-sm text-black/60 underline decoration-black/30 underline-offset-2">
           Shipping calculated at checkout.
         </p>
 
         <div className="mt-8 rounded-2xl border border-black/10 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wide text-black/50">
+            <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
               Select Finish
             </span>
             <span className="text-sm font-semibold text-black">{color}</span>
@@ -102,7 +104,7 @@ export default function ProductPage() {
         </div>
 
         <div className="mt-8">
-          <p className="text-sm font-medium text-black">Quantity</p>
+          <p className="text-sm font-semibold text-black">Quantity</p>
           <div className="mt-3 inline-flex items-center rounded-full border border-black/20">
             <button
               type="button"

@@ -60,7 +60,7 @@ export default function CartPage() {
                 </button>
               </div>
               <span className="w-16 text-right font-semibold text-black">
-                {(item.price * item.quantity).toLocaleString()}
+                ₱{(item.price * item.quantity).toLocaleString()}
               </span>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default function CartPage() {
       <div className="mt-8 flex items-center justify-between border-t border-black/10 pt-6">
         <span className="text-sm text-black/60">Subtotal</span>
         <span className="text-xl font-bold text-black">
-          {subtotal.toLocaleString()}
+          ₱{subtotal.toLocaleString()}
         </span>
       </div>
 

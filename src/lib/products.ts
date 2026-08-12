@@ -10,14 +10,14 @@ export const products: Record<string, Product> = {
   "business-card": {
     slug: "business-card",
     title: "HERNEROS Business Card",
-    price: 999,
+    price: 599,
     compareAtPrice: 2500,
     colors: ["Jet Black", "Pastel Pink", "Evening Blue", "Pearl White"],
   },
   "review-card": {
     slug: "review-card",
     title: "HERNEROS Review Card",
-    price: 999,
+    price: 599,
     compareAtPrice: 2500,
     colors: ["Jet Black", "Pearl White"],
   },

@@ -14,7 +14,7 @@ export const products: Record<string, Product> = {
     compareAtPrice: 2500,
     colors: [
       "Jet Black",
-      "Soft Blush",
+      "Pastel Pink",
       "Evening Blue",
       "Pearl White",
       "Light Mint",

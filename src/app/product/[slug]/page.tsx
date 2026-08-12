@@ -6,6 +6,7 @@ import Link from "next/link";
 import CardFace from "@/components/CardFace";
 import { products } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
+import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
 
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
@@ -45,10 +46,7 @@ export default function ProductPage() {
   return (
     <main className="mx-auto grid w-full max-w-5xl gap-12 px-6 py-16 md:grid-cols-2 md:items-start">
       <div className="rounded-2xl border border-black/10 bg-neutral-50 p-10">
-        <CardFace className="mx-auto w-full max-w-sm" />
-        <p className="mt-6 text-center text-sm font-bold uppercase tracking-wide text-black">
-          {color}
-        </p>
+        <CardFace className="mx-auto w-full max-w-sm" color={color} />
       </div>
 
       <div>
@@ -74,23 +72,32 @@ export default function ProductPage() {
           Shipping calculated at checkout.
         </p>
 
-        <div className="mt-8">
-          <p className="text-sm font-medium text-black">Card Color</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {product.colors.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setColor(c)}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                  color === c
-                    ? "border-black bg-black text-white"
-                    : "border-black/20 text-black hover:border-black"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
+        <div className="mt-8 rounded-2xl border border-black/10 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wide text-black/50">
+              Select Finish
+            </span>
+            <span className="text-sm font-semibold text-black">{color}</span>
+          </div>
+          <div className="mt-3 flex items-center gap-3">
+            {product.colors.map((c) => {
+              const swatch = (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR]).swatch;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  aria-label={c}
+                  aria-pressed={color === c}
+                  className={`h-8 w-8 rounded-full transition-all ${
+                    color === c
+                      ? "ring-2 ring-black ring-offset-2"
+                      : "ring-1 ring-black/10 hover:ring-black/40"
+                  }`}
+                  style={{ background: swatch }}
+                />
+              );
+            })}
           </div>
         </div>
 

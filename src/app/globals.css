@@ -89,10 +89,6 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-flip {
-    animation: none;
-  }
-
   .card-sheen {
     display: none;
   }

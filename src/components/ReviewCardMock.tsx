@@ -17,11 +17,11 @@ export default function ReviewCardMock({
     REVIEW_PLATFORMS[platform] ?? REVIEW_PLATFORMS[DEFAULT_REVIEW_PLATFORM];
 
   return (
-    <div className={`block ${className ?? ""}`} style={{ transform: "rotate(-3deg) scale(0.82)" }}>
+    <div className={`block ${className ?? ""}`} style={{ transform: "rotate(-4deg) scale(0.8)" }}>
       <div style={{ perspective: "1000px" }}>
         <div
           className="review-tilt relative"
-          style={{ transform: "rotateY(22deg) rotateX(4deg)" }}
+          style={{ transform: "rotateY(28deg) rotateX(5deg)" }}
         >
           <div
             className={`relative flex aspect-square flex-col overflow-hidden rounded-[32px] ${shadow ? "review-card-shadow" : ""}`}
@@ -81,21 +81,14 @@ export default function ReviewCardMock({
           </div>
 
           <div
-            className="review-card-edge absolute inset-y-0 left-0 w-24 overflow-hidden rounded-l-[32px]"
+            className="review-card-edge absolute left-0 top-8 bottom-8 w-24"
             style={{
               transformOrigin: "left center",
               transform: "rotateY(-90deg) translateZ(9px)",
-              background: style.background,
+              background:
+                "linear-gradient(to bottom, #ffffff 0%, #ffffff 8%, #c4c4c4 50%, #ffffff 92%, #ffffff 100%)",
             }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(0,0,0,0.4))",
-              }}
-            />
-          </div>
+          />
         </div>
       </div>
     </div>

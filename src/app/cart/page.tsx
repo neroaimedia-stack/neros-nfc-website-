@@ -4,16 +4,22 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { PROMO_CODES } from "@/lib/promo-codes";
+import { useCurrency } from "@/lib/currency-context";
+import { formatCurrency, fromUSD } from "@/lib/currency";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal } = useCart();
+  const currency = useCurrency();
   const [promoInput, setPromoInput] = useState("");
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [promoError, setPromoError] = useState("");
 
   const discountRate = appliedCode ? PROMO_CODES[appliedCode] : 0;
-  const discount = Math.round(subtotal * discountRate);
+  const discount = subtotal * discountRate;
   const total = subtotal - discount;
+
+  const display = (amountUSD: number) =>
+    formatCurrency(fromUSD(amountUSD, currency), currency);
 
   const handleApplyPromo = () => {
     const code = promoInput.trim().toUpperCase();
@@ -90,8 +96,8 @@ export default function CartPage() {
                   +
                 </button>
               </div>
-              <span className="w-16 text-right font-semibold text-black">
-                ₱{(item.price * item.quantity).toLocaleString()}
+              <span className="w-20 text-right font-semibold text-black">
+                {display(item.price * item.quantity)}
               </span>
             </div>
           </div>
@@ -146,21 +152,21 @@ export default function CartPage() {
         <div className="flex items-center justify-between">
           <span className="text-sm text-black/60">Subtotal</span>
           <span className="text-sm font-semibold text-black">
-            ₱{subtotal.toLocaleString()}
+            {display(subtotal)}
           </span>
         </div>
         {appliedCode && (
           <div className="flex items-center justify-between">
             <span className="text-sm text-black/60">Discount</span>
             <span className="text-sm font-semibold text-black">
-              −₱{discount.toLocaleString()}
+              −{display(discount)}
             </span>
           </div>
         )}
         <div className="flex items-center justify-between">
           <span className="text-sm text-black/60">Total</span>
           <span className="text-xl font-bold text-black">
-            ₱{total.toLocaleString()}
+            {display(total)}
           </span>
         </div>
       </div>

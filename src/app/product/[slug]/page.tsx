@@ -9,12 +9,15 @@ import { products } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
 import { REVIEW_PLATFORMS } from "@/lib/review-platforms";
+import { useCurrency } from "@/lib/currency-context";
+import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
 
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
   const product = products[params.slug];
   const isReview = product?.slug === "review-card";
   const { addItem } = useCart();
+  const currency = useCurrency();
   const [color, setColor] = useState(product?.colors[0] ?? "");
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
@@ -33,13 +36,22 @@ export default function ProductPage() {
     );
   }
 
+  const priceUSD = toUSD(product.price, product.currency);
+  const compareAtPriceUSD = product.compareAtPrice
+    ? toUSD(product.compareAtPrice, product.currency)
+    : undefined;
+  const displayPrice = formatCurrency(fromUSD(priceUSD, currency), currency);
+  const displayCompareAtPrice = compareAtPriceUSD
+    ? formatCurrency(fromUSD(compareAtPriceUSD, currency), currency)
+    : undefined;
+
   const handleAddToCart = () => {
     addItem({
       id: `${product.slug}-${color}`,
       productSlug: product.slug,
       title: product.title,
       color,
-      price: product.price,
+      price: priceUSD,
       quantity,
     });
     setAdded(true);
@@ -70,13 +82,13 @@ export default function ProductPage() {
         </h1>
 
         <div className="mt-4 flex items-center gap-3">
-          {product.compareAtPrice && (
+          {displayCompareAtPrice && (
             <span className="text-lg text-black/40 line-through">
-              ₱{product.compareAtPrice.toLocaleString()}
+              {displayCompareAtPrice}
             </span>
           )}
           <span className="text-2xl font-bold text-black">
-            ₱{product.price.toLocaleString()}
+            {displayPrice}
           </span>
           {product.compareAtPrice && (
             <span className="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">

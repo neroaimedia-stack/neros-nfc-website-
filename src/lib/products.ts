@@ -3,6 +3,7 @@ export type Product = {
   title: string;
   price: number;
   compareAtPrice?: number;
+  currency: string;
   colors: string[];
 };
 
@@ -12,13 +13,15 @@ export const products: Record<string, Product> = {
     title: "HERNEROS Business Card",
     price: 599,
     compareAtPrice: 2500,
+    currency: "PHP",
     colors: ["Jet Black"],
   },
   "review-card": {
     slug: "review-card",
     title: "HERNEROS Review Card",
-    price: 599,
-    compareAtPrice: 2500,
+    price: 40,
+    compareAtPrice: 150,
+    currency: "USD",
     colors: ["Facebook", "Instagram", "TikTok", "Google Review"],
   },
 };

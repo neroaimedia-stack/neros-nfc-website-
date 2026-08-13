@@ -13,6 +13,7 @@ export type CartItem = {
   productSlug: string;
   title: string;
   color: string;
+  /** Price in USD, regardless of the product's native currency. */
   price: number;
   quantity: number;
 };

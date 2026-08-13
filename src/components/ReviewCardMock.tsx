@@ -19,7 +19,7 @@ export default function ReviewCardMock({
   return (
     <div className={`block ${className ?? ""}`}>
       <div
-        className={`relative aspect-square w-full overflow-hidden rounded-[32px] ${shadow ? "review-card-shadow" : ""}`}
+        className={`relative aspect-square w-full overflow-hidden rounded-[8%] ${shadow ? "review-card-shadow" : ""}`}
       >
         <Image
           src={style.image}

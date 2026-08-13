@@ -38,11 +38,11 @@ export default function FlippableCard({
             <div className="card-edge-shade" />
             <div className="card-corner-gloss" />
             <div className="card-sheen" />
-            <div className="relative flex h-full flex-col justify-end gap-2 p-7">
+            <div className="relative flex h-full flex-col justify-end gap-1 p-7">
               <span className={`text-xl font-bold tracking-tight uppercase ${style.textClass}`}>
                 Hernero Cruz
               </span>
-              <span className={`text-sm tracking-[0.2em] uppercase ${style.subTextClass}`}>
+              <span className={`text-xs tracking-[0.2em] uppercase ${style.subTextClass}`}>
                 CEO &amp; Founder
               </span>
             </div>

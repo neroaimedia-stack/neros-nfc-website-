@@ -63,8 +63,8 @@ html {
   height: 90%;
   background: radial-gradient(
     circle at top right,
-    rgba(255, 255, 255, 0.65),
-    rgba(255, 255, 255, 0.18) 40%,
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.1) 40%,
     transparent 68%
   );
   pointer-events: none;
@@ -107,7 +107,7 @@ html {
     100deg,
     transparent 0%,
     rgba(255, 255, 255, 0.05) 15%,
-    rgba(255, 255, 255, 0.42) 50%,
+    rgba(255, 255, 255, 0.25) 50%,
     rgba(255, 255, 255, 0.05) 85%,
     transparent 100%
   );

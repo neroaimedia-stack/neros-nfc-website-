@@ -52,24 +52,26 @@ export default function ReviewCardMock({
             </defs>
             <g filter={`url(#${waveShadowId})`}>
               <path
-                d="M0,18 C130,36 270,4 400,18 L400,40 L0,40 Z"
+                d="M0,20 C25,6 75,6 100,20 C125,34 175,34 200,20 C225,6 275,6 300,20 C325,34 375,34 400,20 L400,40 L0,40 Z"
                 fill="#ffffff"
               />
             </g>
             <path
-              d="M0,18 C130,36 270,4 400,18"
+              d="M0,20 C25,6 75,6 100,20 C125,34 175,34 200,20 C225,6 275,6 300,20 C325,34 375,34 400,20"
               fill="none"
               stroke={style.waveAccent}
               strokeWidth="4"
               strokeLinecap="round"
+              strokeLinejoin="round"
               transform="translate(0,3)"
             />
             <path
-              d="M0,18 C130,36 270,4 400,18"
+              d="M0,20 C25,6 75,6 100,20 C125,34 175,34 200,20 C225,6 275,6 300,20 C325,34 375,34 400,20"
               fill="none"
               stroke="#ffffff"
               strokeWidth="3"
               strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
 

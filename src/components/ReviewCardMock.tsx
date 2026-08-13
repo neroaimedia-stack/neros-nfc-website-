@@ -15,6 +15,7 @@ export default function ReviewCardMock({
 }) {
   const style =
     REVIEW_PLATFORMS[platform] ?? REVIEW_PLATFORMS[DEFAULT_REVIEW_PLATFORM];
+  const waveShadowId = `review-wave-shadow-${platform.replace(/\s+/g, "-")}`;
 
   return (
     <div className={`block ${className ?? ""}`}>
@@ -40,26 +41,35 @@ export default function ReviewCardMock({
 
         <div className="relative bg-white">
           <svg
-            className="absolute inset-x-0 -top-6 h-7 w-full sm:-top-9 sm:h-9"
-            viewBox="0 0 400 36"
+            className="absolute inset-x-0 -top-7 h-8 w-full sm:-top-10 sm:h-10"
+            viewBox="0 0 400 40"
             preserveAspectRatio="none"
           >
+            <defs>
+              <filter id={waveShadowId} x="-10%" y="-20%" width="120%" height="160%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000000" floodOpacity="0.15" />
+              </filter>
+            </defs>
+            <g filter={`url(#${waveShadowId})`}>
+              <path
+                d="M0,18 C130,36 270,4 400,18 L400,40 L0,40 Z"
+                fill="#ffffff"
+              />
+            </g>
             <path
-              d="M0,16 C120,30 280,2 400,16 L400,36 L0,36 Z"
-              fill="#ffffff"
-            />
-            <path
-              d="M0,16 C120,30 280,2 400,16"
+              d="M0,18 C130,36 270,4 400,18"
               fill="none"
-              stroke="#a9c8f0"
-              strokeWidth="3.5"
-              transform="translate(0,2.5)"
+              stroke={style.waveAccent}
+              strokeWidth="4"
+              strokeLinecap="round"
+              transform="translate(0,3)"
             />
             <path
-              d="M0,16 C120,30 280,2 400,16"
+              d="M0,18 C130,36 270,4 400,18"
               fill="none"
               stroke="#ffffff"
               strokeWidth="3"
+              strokeLinecap="round"
             />
           </svg>
 

@@ -50,21 +50,21 @@ export default function ReviewCardMock({
             </defs>
             <g filter={`url(#${waveShadowId})`}>
               <path
-                d="M0,20 C25,6 75,6 100,20 C125,34 175,34 200,20 C225,6 275,6 300,20 C325,34 375,34 400,20 L400,40 L0,40 Z"
+                d="M0,18 C130,30 270,8 400,18 L400,40 L0,40 Z"
                 fill="#ffffff"
               />
             </g>
             <path
-              d="M0,20 C25,6 75,6 100,20 C125,34 175,34 200,20 C225,6 275,6 300,20 C325,34 375,34 400,20"
+              d="M0,18 C130,30 270,8 400,18"
               fill="none"
               stroke={style.waveAccent}
-              strokeWidth="4"
+              strokeWidth="3.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              transform="translate(0,3)"
+              transform="translate(0,1.5)"
             />
             <path
-              d="M0,20 C25,6 75,6 100,20 C125,34 175,34 200,20 C225,6 275,6 300,20 C325,34 375,34 400,20"
+              d="M0,18 C130,30 270,8 400,18"
               fill="none"
               stroke="#ffffff"
               strokeWidth="3"
@@ -73,7 +73,7 @@ export default function ReviewCardMock({
             />
           </svg>
 
-          <div className="absolute -top-10 left-1/2 z-10 -translate-x-1/2 sm:-top-12">
+          <div className="absolute -top-[28px] left-1/2 z-10 -translate-x-1/2 sm:-top-[34px]">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_6px_18px_rgba(0,0,0,0.18)] sm:h-24 sm:w-24">
               <PlatformIcon platform={platform} className="h-10 w-10 sm:h-12 sm:w-12" />
             </div>

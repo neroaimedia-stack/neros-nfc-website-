@@ -103,32 +103,36 @@ export function StarRow({ className }: { className?: string }) {
 export function ContactlessIcon({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 264 152"
+      viewBox="0 0 220 130"
       className={className ?? "w-52"}
       fill="none"
       stroke="currentColor"
-      strokeWidth="6"
+      strokeWidth="5.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <ellipse cx="80" cy="76" rx="74" ry="50" />
-      <path d="M44 58A22 22 0 0 1 44 94" />
-      <path d="M60 48A34 34 0 0 1 60 104" />
-      <path d="M76 38A46 46 0 0 1 76 114" />
+      <ellipse cx="72" cy="65" rx="66" ry="44" />
+      <path d="M40 47A22 22 0 0 1 40 83" />
+      <path d="M55 37A34 34 0 0 1 55 93" />
+      <path d="M70 27A46 46 0 0 1 70 103" />
 
       <rect
-        x="182"
+        x="132"
         y="10"
-        width="44"
-        height="62"
-        rx="6"
-        transform="rotate(20 204 41)"
+        width="42"
+        height="66"
+        rx="8"
+        transform="rotate(16 153 43)"
         fill="#ffffff"
       />
-      <rect x="188" y="80" width="46" height="72" rx="20" fill="#ffffff" />
-      <path d="M198 84h-26a12 12 0 0 0 0 24h26" fill="#ffffff" />
-      <path d="M202 108h-30a12 12 0 0 0 0 24h30" fill="#ffffff" />
-      <path d="M206 132h-26a10 10 0 0 0 0 20h26" fill="#ffffff" />
+      <line
+        x1="148"
+        y1="60"
+        x2="150"
+        y2="60"
+        strokeWidth="7"
+        transform="rotate(16 153 43)"
+      />
     </svg>
   );
 }

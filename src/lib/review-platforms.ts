@@ -1,8 +1,8 @@
 export type ReviewPlatformStyle = {
   label: string;
+  labelAccent?: string;
   background: string;
   labelTextClass: string;
-  waveAccent: string;
   tapLabel?: string;
   showStars?: boolean;
   badgeIcon?: boolean;
@@ -19,23 +19,23 @@ export const REVIEW_PLATFORM_ORDER = [
 
 export const REVIEW_PLATFORMS: Record<string, ReviewPlatformStyle> = {
   Facebook: {
-    label: "FOLLOW US ON FACEBOOK",
+    label: "FOLLOW US",
+    labelAccent: "ON FACEBOOK",
     background: "#0866FF",
     labelTextClass: "text-white",
-    waveAccent: "#90baff",
   },
   Instagram: {
-    label: "FOLLOW US ON INSTAGRAM",
+    label: "FOLLOW US",
+    labelAccent: "ON INSTAGRAM",
     background:
       "linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)",
     labelTextClass: "text-white",
-    waveAccent: "#f7a0c4",
   },
   TikTok: {
-    label: "FOLLOW US ON TIKTOK",
+    label: "FOLLOW US",
+    labelAccent: "ON TIKTOK",
     background: "#0a0a0a",
     labelTextClass: "text-white",
-    waveAccent: "#87f9f6",
   },
   "Google Review": {
     label: "WE WOULD APPRECIATE\nYOUR GOOGLE REVIEW!",
@@ -44,6 +44,5 @@ export const REVIEW_PLATFORMS: Record<string, ReviewPlatformStyle> = {
     tapLabel: "Tap to rate your experience",
     showStars: true,
     badgeIcon: true,
-    waveAccent: "#98c0f5",
   },
 };

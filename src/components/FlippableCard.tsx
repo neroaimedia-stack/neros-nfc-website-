@@ -122,18 +122,22 @@ export default function FlippableCard({
                   transform: `rotateY(${flipped ? 180 : 0}deg)`,
                 }}
               >
-                <div
-                  className={`backface-hidden absolute inset-0 overflow-hidden rounded-[18px] ${style.borderClass ?? ""}`}
-                  style={{ background: style.cardGradient }}
-                >
-                  <CardFaceContent variant="front" style={style} />
+                <div className="backface-hidden absolute inset-0">
+                  <div
+                    className={`h-full w-full overflow-hidden rounded-[18px] ${style.borderClass ?? ""}`}
+                    style={{ background: style.cardGradient }}
+                  >
+                    <CardFaceContent variant="front" style={style} />
+                  </div>
                 </div>
 
-                <div
-                  className={`backface-hidden absolute inset-0 overflow-hidden rounded-[18px] [transform:rotateY(180deg)] ${style.borderClass ?? ""}`}
-                  style={{ background: style.cardGradient }}
-                >
-                  <CardFaceContent variant="back" style={style} />
+                <div className="backface-hidden absolute inset-0 [transform:rotateY(180deg)]">
+                  <div
+                    className={`h-full w-full overflow-hidden rounded-[18px] ${style.borderClass ?? ""}`}
+                    style={{ background: style.cardGradient }}
+                  >
+                    <CardFaceContent variant="back" style={style} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -150,7 +154,6 @@ export default function FlippableCard({
               top: CARD_HEIGHT + REFLECTION_GAP,
               left: 0,
               transform: "scaleY(-1)",
-              filter: "blur(0.5px)",
               WebkitMaskImage:
                 "linear-gradient(to top, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.16) 40%, rgba(0,0,0,0.04) 75%, rgba(0,0,0,0) 100%)",
               maskImage:

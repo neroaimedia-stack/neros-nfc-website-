@@ -1,11 +1,7 @@
 function FacebookIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className ?? "h-16 w-16"} fill="none">
-      <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1.4" />
-      <path
-        fill="white"
-        d="M13.5 8.5h1.6V6.32c-.28-.04-1.23-.12-2.34-.12-2.32 0-3.9 1.46-3.9 4.14v2.06H6.9v2.75h2.96V19.7h2.76v-6.55h2.14l.34-2.75h-2.48v-1.8c0-.8.22-1.35 1.38-1.35Z"
-      />
+    <svg viewBox="0 0 24 24" className={className ?? "h-16 w-16"} fill="#0866FF">
+      <path d="M13.5 8.5h1.6V6.32c-.28-.04-1.23-.12-2.34-.12-2.32 0-3.9 1.46-3.9 4.14v2.06H6.9v2.75h2.96V19.7h2.76v-6.55h2.14l.34-2.75h-2.48v-1.8c0-.8.22-1.35 1.38-1.35Z" />
     </svg>
   );
 }
@@ -83,25 +79,6 @@ export default function PlatformIcon({
     default:
       return <FacebookIcon className={className} />;
   }
-}
-
-export function StarRow({ className }: { className?: string }) {
-  const star =
-    "M12 2.5l2.9 6.02 6.55.77-4.83 4.55 1.28 6.5L12 17.13 6.1 20.34l1.28-6.5-4.83-4.55 6.55-.77Z";
-  return (
-    <div className={`flex items-center gap-1 sm:gap-1.5 ${className ?? ""}`}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <svg
-          key={i}
-          viewBox="0 0 24 24"
-          className="h-3.5 w-3.5 sm:h-5 sm:w-5"
-          fill="#FFC107"
-        >
-          <path d={star} />
-        </svg>
-      ))}
-    </div>
-  );
 }
 
 export function ContactlessIcon({ className }: { className?: string }) {

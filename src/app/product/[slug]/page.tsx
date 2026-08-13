@@ -65,7 +65,6 @@ export default function ProductPage() {
           <ReviewCardMock
             className="mx-auto w-[400px] max-w-full"
             platform={color}
-            shadow={false}
           />
         ) : (
           <FlippableCard

@@ -22,15 +22,6 @@ export const products: Record<string, Product> = {
     price: 40,
     compareAtPrice: 150,
     currency: "USD",
-    colors: [
-      "Facebook",
-      "Instagram",
-      "TikTok",
-      "Google Review",
-      "Facebook (QR Code)",
-      "Instagram (QR Code)",
-      "TikTok (QR Code)",
-      "Google Review (QR Code)",
-    ],
+    colors: ["Facebook", "Instagram", "TikTok", "Google Review"],
   },
 };

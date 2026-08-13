@@ -11,11 +11,10 @@ export const REVIEW_PLATFORM_ORDER = [
   "Instagram",
   "TikTok",
   "Google Review",
-  "Facebook (QR Code)",
-  "Instagram (QR Code)",
-  "TikTok (QR Code)",
-  "Google Review (QR Code)",
 ];
+
+/** Appended to a base platform name to look up its QR-code variant in REVIEW_PLATFORMS. */
+export const QR_VARIANT_SUFFIX = " (QR Code)";
 
 export const REVIEW_PLATFORMS: Record<string, ReviewPlatformStyle> = {
   Facebook: {

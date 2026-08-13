@@ -8,7 +8,7 @@ import ReviewCardMock from "@/components/ReviewCardMock";
 import { products } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
-import { REVIEW_PLATFORMS } from "@/lib/review-platforms";
+import { REVIEW_PLATFORMS, QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
 
@@ -19,8 +19,10 @@ export default function ProductPage() {
   const { addItem } = useCart();
   const currency = useCurrency();
   const [color, setColor] = useState(product?.colors[0] ?? "");
+  const [hasQR, setHasQR] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const variant = hasQR && isReview ? `${color}${QR_VARIANT_SUFFIX}` : color;
 
   if (!product) {
     return (
@@ -47,10 +49,10 @@ export default function ProductPage() {
 
   const handleAddToCart = () => {
     addItem({
-      id: `${product.slug}-${color}`,
+      id: `${product.slug}-${variant}`,
       productSlug: product.slug,
       title: product.title,
-      color,
+      color: variant,
       price: priceUSD,
       quantity,
     });
@@ -64,7 +66,7 @@ export default function ProductPage() {
         {isReview ? (
           <ReviewCardMock
             className="mx-auto w-[400px] max-w-full"
-            platform={color}
+            platform={variant}
           />
         ) : (
           <FlippableCard
@@ -107,51 +109,61 @@ export default function ProductPage() {
             </span>
             <span className="text-sm font-semibold text-black">{color}</span>
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             {product.colors.map((c) => {
               const swatch = isReview
                 ? REVIEW_PLATFORMS[c]?.background
                 : (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR]).swatch;
-
-              if (!isReview) {
-                return (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    aria-label={c}
-                    aria-pressed={color === c}
-                    className={`h-8 w-8 rounded-full transition-all ${
-                      color === c
-                        ? "ring-2 ring-black ring-offset-2"
-                        : "ring-1 ring-black/10 hover:ring-black/40"
-                    }`}
-                    style={{ background: swatch }}
-                  />
-                );
-              }
-
               return (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
+                  aria-label={c}
                   aria-pressed={color === c}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                  className={`h-8 w-8 rounded-full transition-all ${
                     color === c
-                      ? "border-black bg-black text-white"
-                      : "border-black/15 text-black hover:border-black/40"
+                      ? "ring-2 ring-black ring-offset-2"
+                      : "ring-1 ring-black/10 hover:ring-black/40"
                   }`}
-                >
-                  <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ background: swatch }}
-                  />
-                  {c}
-                </button>
+                  style={{ background: swatch }}
+                />
               );
             })}
           </div>
+
+          {isReview && (
+            <>
+              <div className="mt-5 flex items-center justify-between border-t border-black/10 pt-4">
+                <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                  Format
+                </span>
+                <span className="text-sm font-semibold text-black">
+                  {hasQR ? "NFC + QR Code" : "NFC Only"}
+                </span>
+              </div>
+              <div className="mt-3 flex gap-2">
+                {[
+                  { label: "NFC Only", value: false },
+                  { label: "NFC + QR Code", value: true },
+                ].map((option) => (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => setHasQR(option.value)}
+                    aria-pressed={hasQR === option.value}
+                    className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition-all ${
+                      hasQR === option.value
+                        ? "border-black bg-black text-white"
+                        : "border-black/15 text-black hover:border-black/40"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="mt-8">

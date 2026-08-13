@@ -13,6 +13,7 @@ export default function CartPage() {
   const [promoInput, setPromoInput] = useState("");
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [promoError, setPromoError] = useState("");
+  const [showPromoInput, setShowPromoInput] = useState(false);
 
   const discountRate = appliedCode ? PROMO_CODES[appliedCode] : 0;
   const discount = subtotal * discountRate;
@@ -37,6 +38,7 @@ export default function CartPage() {
     setAppliedCode(null);
     setPromoInput("");
     setPromoError("");
+    setShowPromoInput(false);
   };
 
   const checkoutBody = [
@@ -133,46 +135,60 @@ export default function CartPage() {
       </div>
 
       <div className="mt-8 border-t border-black/10 pt-6">
-        <p className="text-sm font-semibold text-black">Promo code</p>
         {appliedCode ? (
-          <div className="mt-3 flex items-center justify-between rounded-full border border-black/20 px-4 py-2.5">
-            <span className="text-sm font-semibold text-black">
-              {appliedCode} applied — {discountRate * 100}% off
-            </span>
-            <button
-              type="button"
-              onClick={handleRemovePromo}
-              className="text-xs text-black/40 underline hover:text-black"
-            >
-              Remove
-            </button>
-          </div>
+          <>
+            <p className="text-sm font-semibold text-black">Promo code</p>
+            <div className="mt-3 flex items-center justify-between rounded-full border border-black/20 px-4 py-2.5">
+              <span className="text-sm font-semibold text-black">
+                {appliedCode} applied — {discountRate * 100}% off
+              </span>
+              <button
+                type="button"
+                onClick={handleRemovePromo}
+                className="text-xs text-black/40 underline hover:text-black"
+              >
+                Remove
+              </button>
+            </div>
+          </>
+        ) : showPromoInput ? (
+          <>
+            <p className="text-sm font-semibold text-black">Promo code</p>
+            <div className="mt-3 flex gap-2">
+              <input
+                type="text"
+                autoFocus
+                value={promoInput}
+                onChange={(e) => setPromoInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleApplyPromo();
+                  }
+                }}
+                placeholder="Enter code"
+                className="w-full rounded-full border border-black/20 px-4 py-2.5 text-sm uppercase outline-none focus:border-black"
+              />
+              <button
+                type="button"
+                onClick={handleApplyPromo}
+                className="shrink-0 rounded-full border border-black px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-60"
+              >
+                Apply
+              </button>
+            </div>
+            {promoError && (
+              <p className="mt-2 text-xs text-red-600">{promoError}</p>
+            )}
+          </>
         ) : (
-          <div className="mt-3 flex gap-2">
-            <input
-              type="text"
-              value={promoInput}
-              onChange={(e) => setPromoInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleApplyPromo();
-                }
-              }}
-              placeholder="Enter code"
-              className="w-full rounded-full border border-black/20 px-4 py-2.5 text-sm uppercase outline-none focus:border-black"
-            />
-            <button
-              type="button"
-              onClick={handleApplyPromo}
-              className="shrink-0 rounded-full border border-black px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-60"
-            >
-              Apply
-            </button>
-          </div>
-        )}
-        {promoError && (
-          <p className="mt-2 text-xs text-red-600">{promoError}</p>
+          <button
+            type="button"
+            onClick={() => setShowPromoInput(true)}
+            className="text-sm font-semibold text-black underline decoration-black/30 underline-offset-2 hover:decoration-black"
+          >
+            Have a promo code?
+          </button>
         )}
       </div>
 

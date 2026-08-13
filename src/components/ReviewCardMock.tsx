@@ -26,7 +26,7 @@ export default function ReviewCardMock({
         className={`relative flex aspect-square flex-col overflow-hidden rounded-[32px] bg-white ${shadow ? "review-card-shadow" : ""}`}
       >
         <div
-          className="flex h-[38%] flex-col items-center justify-center gap-1.5 px-5 pb-3 sm:gap-3 sm:px-8 sm:pb-5"
+          className="flex h-[46%] flex-col items-center justify-center gap-1.5 px-5 pb-3 sm:gap-3 sm:px-8 sm:pb-5"
           style={{ background: style.background }}
         >
           {style.showStars && <StarRow />}
@@ -50,12 +50,12 @@ export default function ReviewCardMock({
             </defs>
             <g filter={`url(#${waveShadowId})`}>
               <path
-                d="M0,18 C130,30 270,8 400,18 L400,40 L0,40 Z"
+                d="M0,18 C130,36 270,0 400,18 L400,40 L0,40 Z"
                 fill="#ffffff"
               />
             </g>
             <path
-              d="M0,18 C130,30 270,8 400,18"
+              d="M0,18 C130,36 270,0 400,18"
               fill="none"
               stroke={style.waveAccent}
               strokeWidth="3.5"
@@ -64,7 +64,7 @@ export default function ReviewCardMock({
               transform="translate(0,1.5)"
             />
             <path
-              d="M0,18 C130,30 270,8 400,18"
+              d="M0,18 C130,36 270,0 400,18"
               fill="none"
               stroke="#ffffff"
               strokeWidth="3"

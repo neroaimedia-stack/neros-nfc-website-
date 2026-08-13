@@ -14,9 +14,13 @@ const REFLECTION_HEIGHT = CARD_HEIGHT * 0.24;
 function CardFaceContent({
   variant,
   style,
+  name = "Hernero Cruz",
+  jobTitle = "CEO & Founder",
 }: {
   variant: "front" | "back";
   style: CardColorStyle;
+  name?: string;
+  jobTitle?: string;
 }) {
   if (variant === "front") {
     return (
@@ -27,10 +31,10 @@ function CardFaceContent({
         <div className="card-sheen" />
         <div className="relative flex h-full flex-col justify-end gap-1 p-7">
           <span className={`text-xl font-bold tracking-tight uppercase ${style.textClass}`}>
-            Hernero Cruz
+            {name}
           </span>
           <span className={`text-xs tracking-[0.2em] uppercase ${style.subTextClass}`}>
-            CEO &amp; Founder
+            {jobTitle}
           </span>
         </div>
       </>
@@ -60,11 +64,15 @@ export default function FlippableCard({
   className,
   shadow = true,
   reflection = shadow,
+  name,
+  jobTitle,
 }: {
   color?: string;
   className?: string;
   shadow?: boolean;
   reflection?: boolean;
+  name?: string;
+  jobTitle?: string;
 }) {
   const [flipped, setFlipped] = useState(false);
   const [scale, setScale] = useState(1);
@@ -127,7 +135,7 @@ export default function FlippableCard({
                     className={`h-full w-full overflow-hidden rounded-[18px] ${style.borderClass ?? ""}`}
                     style={{ background: style.cardGradient }}
                   >
-                    <CardFaceContent variant="front" style={style} />
+                    <CardFaceContent variant="front" style={style} name={name} jobTitle={jobTitle} />
                   </div>
                 </div>
 
@@ -164,7 +172,12 @@ export default function FlippableCard({
               className="shrink-0"
               style={{ width: CARD_WIDTH, height: CARD_HEIGHT, background: style.cardGradient }}
             >
-              <CardFaceContent variant={flipped ? "back" : "front"} style={style} />
+              <CardFaceContent
+                variant={flipped ? "back" : "front"}
+                style={style}
+                name={name}
+                jobTitle={jobTitle}
+              />
             </div>
           </div>
         )}

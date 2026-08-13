@@ -40,11 +40,15 @@ export default function CartPage() {
   };
 
   const checkoutBody = [
-    ...items.map(
-      (item) =>
-        `- ${item.title} (${item.color}) x${item.quantity}` +
-        (item.notes ? `\n  Notes: ${item.notes}` : "")
-    ),
+    ...items.map((item) => {
+      const lines = [`- ${item.title} (${item.color}) x${item.quantity}`];
+      if (item.name) lines.push(`  Name: ${item.name}`);
+      if (item.jobTitle) lines.push(`  Title: ${item.jobTitle}`);
+      if (item.destinationLink)
+        lines.push(`  Destination link: ${item.destinationLink}`);
+      if (item.notes) lines.push(`  Notes: ${item.notes}`);
+      return lines.join("\n");
+    }),
     appliedCode ? `\nPromo code: ${appliedCode}` : "",
   ]
     .filter(Boolean)
@@ -75,6 +79,16 @@ export default function CartPage() {
             <div>
               <p className="font-semibold text-black">{item.title}</p>
               <p className="text-sm text-black/50">{item.color}</p>
+              {(item.name || item.jobTitle) && (
+                <p className="mt-1 text-xs text-black/50">
+                  {[item.name, item.jobTitle].filter(Boolean).join(" · ")}
+                </p>
+              )}
+              {item.destinationLink && (
+                <p className="mt-1 max-w-xs truncate text-xs text-black/50">
+                  Links to: {item.destinationLink}
+                </p>
+              )}
               {item.notes && (
                 <p className="mt-1 max-w-xs text-xs text-black/40 italic">
                   “{item.notes}”

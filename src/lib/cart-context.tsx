@@ -17,6 +17,11 @@ export type CartItem = {
   price: number;
   quantity: number;
   notes?: string;
+  /** Business card personalization. */
+  name?: string;
+  jobTitle?: string;
+  /** Review card NFC/QR destination URL. */
+  destinationLink?: string;
 };
 
 type CartContextValue = {
@@ -60,6 +65,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 ...i,
                 quantity: i.quantity + item.quantity,
                 notes: item.notes || i.notes,
+                name: item.name || i.name,
+                jobTitle: item.jobTitle || i.jobTitle,
+                destinationLink: item.destinationLink || i.destinationLink,
               }
             : i
         );

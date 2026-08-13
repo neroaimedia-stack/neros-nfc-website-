@@ -22,8 +22,13 @@ export default function ProductPage() {
   const [hasQR, setHasQR] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
+  const [name, setName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [destinationLink, setDestinationLink] = useState("");
+  const [linkError, setLinkError] = useState("");
   const [added, setAdded] = useState(false);
   const variant = hasQR && isReview ? `${color}${QR_VARIANT_SUFFIX}` : color;
+  const linkRequired = isReview && hasQR;
   const otherProducts = Object.values(products).filter(
     (p) => p.slug !== params.slug
   );
@@ -52,6 +57,11 @@ export default function ProductPage() {
     : undefined;
 
   const handleAddToCart = () => {
+    if (linkRequired && !destinationLink.trim()) {
+      setLinkError("Please provide a destination link for the QR code.");
+      return false;
+    }
+    setLinkError("");
     addItem({
       id: `${product.slug}-${variant}`,
       productSlug: product.slug,
@@ -60,9 +70,13 @@ export default function ProductPage() {
       price: priceUSD,
       quantity,
       notes: notes.trim() || undefined,
+      name: name.trim() || undefined,
+      jobTitle: jobTitle.trim() || undefined,
+      destinationLink: destinationLink.trim() || undefined,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
+    return true;
   };
 
   return (
@@ -78,6 +92,8 @@ export default function ProductPage() {
             className="mx-auto w-[400px] max-w-full"
             color={color}
             reflection={false}
+            name={name.trim() || undefined}
+            jobTitle={jobTitle.trim() || undefined}
           />
         )}
       </div>
@@ -171,9 +187,77 @@ export default function ProductPage() {
                   </button>
                 ))}
               </div>
+
+              <div className="mt-5 border-t border-black/10 pt-4">
+                <label
+                  htmlFor="destination-link"
+                  className="text-xs font-semibold uppercase tracking-wide text-black/60"
+                >
+                  Destination link{" "}
+                  <span className="font-normal normal-case text-black/40">
+                    {linkRequired
+                      ? "(required for QR code)"
+                      : "(optional — leave blank to set up later)"}
+                  </span>
+                </label>
+                <input
+                  id="destination-link"
+                  type="url"
+                  value={destinationLink}
+                  onChange={(e) => {
+                    setDestinationLink(e.target.value);
+                    if (linkError) setLinkError("");
+                  }}
+                  placeholder="https://..."
+                  className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
+                    linkError
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-black/15 focus:border-black"
+                  }`}
+                />
+                {linkError && (
+                  <p className="mt-2 text-xs text-red-600">{linkError}</p>
+                )}
+              </div>
             </>
           )}
         </div>
+
+        {!isReview && (
+          <div className="mt-8 rounded-2xl border border-black/10 p-4">
+            <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
+              Personalize your card
+            </span>
+            <div className="mt-3 flex flex-col gap-3">
+              <div>
+                <label htmlFor="card-name" className="text-xs text-black/50">
+                  Name
+                </label>
+                <input
+                  id="card-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Hernero Cruz"
+                  className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+                />
+              </div>
+              <div>
+                <label htmlFor="card-title" className="text-xs text-black/50">
+                  Title
+                </label>
+                <input
+                  id="card-title"
+                  type="text"
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  placeholder="e.g. CEO & Founder"
+                  className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-8">
           <p className="text-sm font-semibold text-black">Quantity</p>
@@ -228,7 +312,9 @@ export default function ProductPage() {
           </button>
           <Link
             href="/cart"
-            onClick={handleAddToCart}
+            onClick={(e) => {
+              if (!handleAddToCart()) e.preventDefault();
+            }}
             className="rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
           >
             Buy it now

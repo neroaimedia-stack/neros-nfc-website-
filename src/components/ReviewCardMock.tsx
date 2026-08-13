@@ -39,7 +39,7 @@ export default function ReviewCardMock({
 
         <div className="relative flex flex-1 flex-col items-center">
           <svg
-            className="absolute inset-x-0 -top-7 h-8 w-full sm:-top-10 sm:h-10"
+            className="absolute inset-x-0 -top-8 h-10 w-full sm:-top-11 sm:h-12"
             viewBox="0 0 400 40"
             preserveAspectRatio="none"
           >
@@ -58,22 +58,21 @@ export default function ReviewCardMock({
               d="M0,18 C130,36 270,0 400,18"
               fill="none"
               stroke={style.waveAccent}
-              strokeWidth="3.5"
+              strokeWidth="7"
               strokeLinecap="round"
               strokeLinejoin="round"
-              transform="translate(0,1.5)"
             />
             <path
               d="M0,18 C130,36 270,0 400,18"
               fill="none"
               stroke="#ffffff"
-              strokeWidth="3"
+              strokeWidth="3.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
 
-          <div className="absolute -top-[54px] left-1/2 z-10 -translate-x-1/2 sm:-top-[70px]">
+          <div className="absolute -top-[40px] left-1/2 z-10 -translate-x-1/2 sm:-top-[52px]">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_6px_18px_rgba(0,0,0,0.18)] sm:h-24 sm:w-24">
               <PlatformIcon platform={platform} className="h-10 w-10 sm:h-12 sm:w-12" />
             </div>

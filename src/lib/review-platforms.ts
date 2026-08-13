@@ -1,9 +1,7 @@
 export type ReviewPlatformStyle = {
   label: string;
   background: string;
-  labelTextClass: string;
-  badgeIcon?: boolean;
-  waveAccent: string | [string, string];
+  image: string;
 };
 
 export const DEFAULT_REVIEW_PLATFORM = "Facebook";
@@ -17,30 +15,24 @@ export const REVIEW_PLATFORM_ORDER = [
 
 export const REVIEW_PLATFORMS: Record<string, ReviewPlatformStyle> = {
   Facebook: {
-    label: "FOLLOW US ON FACEBOOK",
+    label: "Follow us on Facebook",
     background: "#0866FF",
-    labelTextClass: "text-white",
-    badgeIcon: true,
-    waveAccent: "#a9c8f5",
+    image: "/review-cards/facebook.jpg",
   },
   Instagram: {
-    label: "FOLLOW US ON INSTAGRAM",
+    label: "Follow us on Instagram",
     background:
       "linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)",
-    labelTextClass: "text-white",
-    waveAccent: "#f6b8c9",
+    image: "/review-cards/instagram.jpg",
   },
   TikTok: {
-    label: "FOLLOW US ON TIKTOK",
+    label: "Follow us on TikTok",
     background: "#0a0a0a",
-    labelTextClass: "text-white",
-    waveAccent: ["#25F4EE", "#FE2C55"],
+    image: "/review-cards/tiktok.jpg",
   },
   "Google Review": {
-    label: "LEAVE US A GOOGLE REVIEW",
+    label: "Leave us a Google review",
     background: "linear-gradient(135deg, #1a73e8, #0b57d0)",
-    labelTextClass: "text-white",
-    badgeIcon: true,
-    waveAccent: "#a9c8f5",
+    image: "/review-cards/google-review.jpg",
   },
 };

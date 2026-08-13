@@ -16,6 +16,7 @@ export type CartItem = {
   /** Price in USD, regardless of the product's native currency. */
   price: number;
   quantity: number;
+  notes?: string;
 };
 
 type CartContextValue = {
@@ -55,7 +56,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((i) =>
           i.id === item.id
-            ? { ...i, quantity: i.quantity + item.quantity }
+            ? {
+                ...i,
+                quantity: i.quantity + item.quantity,
+                notes: item.notes || i.notes,
+              }
             : i
         );
       }

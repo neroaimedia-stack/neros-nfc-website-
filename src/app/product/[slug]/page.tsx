@@ -21,8 +21,12 @@ export default function ProductPage() {
   const [color, setColor] = useState(product?.colors[0] ?? "");
   const [hasQR, setHasQR] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [notes, setNotes] = useState("");
   const [added, setAdded] = useState(false);
   const variant = hasQR && isReview ? `${color}${QR_VARIANT_SUFFIX}` : color;
+  const otherProducts = Object.values(products).filter(
+    (p) => p.slug !== params.slug
+  );
 
   if (!product) {
     return (
@@ -55,6 +59,7 @@ export default function ProductPage() {
       color: variant,
       price: priceUSD,
       quantity,
+      notes: notes.trim() || undefined,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -100,6 +105,10 @@ export default function ProductPage() {
 
         <p className="mt-2 text-sm text-black/60 underline decoration-black/30 underline-offset-2">
           Shipping calculated at checkout.
+        </p>
+
+        <p className="mt-5 text-sm leading-relaxed text-black/70">
+          {product.description}
         </p>
 
         <div className="mt-8 rounded-2xl border border-black/10 p-4">
@@ -191,6 +200,24 @@ export default function ProductPage() {
           </div>
         </div>
 
+        <div className="mt-8">
+          <label
+            htmlFor="purchase-notes"
+            className="text-sm font-semibold text-black"
+          >
+            Purchase notes{" "}
+            <span className="font-normal text-black/40">(optional)</span>
+          </label>
+          <textarea
+            id="purchase-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Any special requests? e.g. custom text, rush order, specific link to use..."
+            rows={3}
+            className="mt-2 w-full resize-none rounded-2xl border border-black/15 p-4 text-sm outline-none focus:border-black"
+          />
+        </div>
+
         <div className="mt-8 flex flex-col gap-3">
           <button
             type="button"
@@ -208,6 +235,44 @@ export default function ProductPage() {
           </Link>
         </div>
       </div>
+
+      {otherProducts.length > 0 && (
+        <div className="col-span-full mt-8 border-t border-black/10 pt-12">
+          <h2 className="text-xl font-bold text-black">
+            Check out other products
+          </h2>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            {otherProducts.map((p) => {
+              const otherPriceUSD = toUSD(p.price, p.currency);
+              const otherDisplayPrice = formatCurrency(
+                fromUSD(otherPriceUSD, currency),
+                currency
+              );
+              return (
+                <Link
+                  key={p.slug}
+                  href={`/product/${p.slug}`}
+                  className="flex items-center gap-4 rounded-2xl border border-black/10 p-4 transition-opacity hover:opacity-70"
+                >
+                  <div className="w-20 shrink-0">
+                    {p.slug === "review-card" ? (
+                      <ReviewCardMock shadow={false} />
+                    ) : (
+                      <FlippableCard shadow={false} reflection={false} />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-black">{p.title}</p>
+                    <p className="mt-1 text-sm text-black/60">
+                      {otherDisplayPrice}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

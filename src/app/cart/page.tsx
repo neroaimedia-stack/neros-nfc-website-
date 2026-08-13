@@ -39,9 +39,18 @@ export default function CartPage() {
     setPromoError("");
   };
 
-  const checkoutHref = `mailto:herneros.ph@gmail.com?subject=Order%20Checkout${
-    appliedCode ? `&body=Promo%20code%3A%20${appliedCode}` : ""
-  }`;
+  const checkoutBody = [
+    ...items.map(
+      (item) =>
+        `- ${item.title} (${item.color}) x${item.quantity}` +
+        (item.notes ? `\n  Notes: ${item.notes}` : "")
+    ),
+    appliedCode ? `\nPromo code: ${appliedCode}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const checkoutHref = `mailto:herneros.ph@gmail.com?subject=Order%20Checkout&body=${encodeURIComponent(checkoutBody)}`;
 
   if (items.length === 0) {
     return (
@@ -66,6 +75,11 @@ export default function CartPage() {
             <div>
               <p className="font-semibold text-black">{item.title}</p>
               <p className="text-sm text-black/50">{item.color}</p>
+              {item.notes && (
+                <p className="mt-1 max-w-xs text-xs text-black/40 italic">
+                  “{item.notes}”
+                </p>
+              )}
               <button
                 type="button"
                 onClick={() => removeItem(item.id)}

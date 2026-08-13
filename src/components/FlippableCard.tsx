@@ -52,10 +52,9 @@ export default function FlippableCard({
             className={`backface-hidden absolute inset-0 overflow-hidden rounded-[18px] [transform:rotateY(180deg)] ${style.borderClass ?? ""}`}
             style={{ background: style.cardGradient }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10" />
             <div className="card-edge-shade" />
-            <div className="card-corner-gloss" />
-            <div className="card-sheen" />
+            <div className="card-corner-gloss-dim" />
             <div className="relative flex h-full flex-col p-7">
               <span className={`text-xl font-bold tracking-tight ${style.textClass}`}>
                 HERNEROS

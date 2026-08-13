@@ -70,6 +70,21 @@ html {
   pointer-events: none;
 }
 
+.card-corner-gloss-dim {
+  position: absolute;
+  top: -45%;
+  right: -45%;
+  width: 90%;
+  height: 90%;
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.04) 40%,
+    transparent 68%
+  );
+  pointer-events: none;
+}
+
 .card-reflect {
   -webkit-box-reflect: below 10px
     linear-gradient(

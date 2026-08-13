@@ -70,6 +70,7 @@ export default function ProductPage() {
           <FlippableCard
             className="mx-auto w-[400px] max-w-full"
             color={color}
+            reflection={false}
           />
         )}
       </div>

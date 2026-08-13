@@ -8,6 +8,9 @@ const CARD_WIDTH = 340;
 const CARD_HEIGHT = 214;
 const FLIP_DURATION_MS = 800;
 const REFLECTION_GAP = 10;
+// The reflection fades to fully transparent well before its own full height,
+// so only reserve layout space out to roughly where it disappears.
+const REFLECTION_RESERVE = REFLECTION_GAP + CARD_HEIGHT * 0.6;
 
 function CardFaceContent({
   variant,
@@ -57,21 +60,27 @@ export default function FlippableCard({
   color = DEFAULT_CARD_COLOR,
   className,
   shadow = true,
+  reflection = shadow,
 }: {
   color?: string;
   className?: string;
   shadow?: boolean;
+  reflection?: boolean;
 }) {
   const [flipped, setFlipped] = useState(false);
   const [reflectedFlipped, setReflectedFlipped] = useState(false);
   const [scale, setScale] = useState(1);
+  const [ready, setReady] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const style = CARD_COLORS[color] ?? CARD_COLORS[DEFAULT_CARD_COLOR];
 
   useLayoutEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
-    const update = () => setScale(el.offsetWidth / CARD_WIDTH);
+    const update = () => {
+      setScale(el.offsetWidth / CARD_WIDTH);
+      setReady(true);
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
@@ -90,10 +99,14 @@ export default function FlippableCard({
     <div
       ref={wrapperRef}
       className={`block min-w-0 ${className ?? ""}`}
-      style={{ aspectRatio: `${CARD_WIDTH} / ${CARD_HEIGHT}` }}
+      style={{
+        aspectRatio: `${CARD_WIDTH} / ${
+          reflection ? CARD_HEIGHT + REFLECTION_RESERVE : CARD_HEIGHT
+        }`,
+      }}
     >
       <div
-        className="relative"
+        className={`relative transition-opacity duration-200 ${ready ? "opacity-100" : "opacity-0"}`}
         style={{
           width: CARD_WIDTH,
           height: CARD_HEIGHT,
@@ -139,7 +152,7 @@ export default function FlippableCard({
           </div>
         </button>
 
-        {shadow && (
+        {reflection && (
           <div
             aria-hidden="true"
             className={`pointer-events-none absolute overflow-hidden rounded-[18px] ${style.borderClass ?? ""}`}

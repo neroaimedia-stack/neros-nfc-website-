@@ -73,7 +73,7 @@ export default function ReviewCardMock({
             />
           </svg>
 
-          <div className="absolute -top-[28px] left-1/2 z-10 -translate-x-1/2 sm:-top-[34px]">
+          <div className="absolute -top-[54px] left-1/2 z-10 -translate-x-1/2 sm:-top-[70px]">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-[0_6px_18px_rgba(0,0,0,0.18)] sm:h-24 sm:w-24">
               <PlatformIcon platform={platform} className="h-10 w-10 sm:h-12 sm:w-12" />
             </div>

@@ -86,7 +86,7 @@ export default function ReviewCardMock({
               transformOrigin: "left center",
               transform: "rotateY(-90deg) translateZ(9px)",
               background:
-                "linear-gradient(to bottom, #ffffff 0%, #ffffff 8%, #c4c4c4 50%, #ffffff 92%, #ffffff 100%)",
+                "linear-gradient(to right, #ffffff 0%, #f2f2f2 20%, #d8d8d8 45%, #8a8a8a 75%, #6b6b6b 100%)",
             }}
           />
         </div>

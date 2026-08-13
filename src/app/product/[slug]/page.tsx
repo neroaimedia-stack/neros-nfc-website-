@@ -82,7 +82,7 @@ export default function ProductPage() {
 
   return (
     <main className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-12 px-6 py-16 lg:grid-cols-2 lg:items-start">
-      <div className="rounded-2xl border border-black/10 bg-neutral-50 p-8">
+      <div className="rounded-2xl border border-black/10 bg-neutral-50 p-8 lg:sticky lg:top-24">
         {isReview ? (
           <ReviewCardMock
             className="mx-auto w-[400px] max-w-full"

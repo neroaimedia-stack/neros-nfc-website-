@@ -20,18 +20,13 @@ export default function ReviewCardMock({
   return (
     <div className={`block ${className ?? ""}`}>
       <div
-        className={`relative flex aspect-square flex-col overflow-hidden rounded-[32px] ${shadow ? "review-card-shadow" : ""}`}
-        style={{ background: style.background }}
+        className={`relative flex aspect-square flex-col overflow-hidden rounded-[32px] bg-white ${shadow ? "review-card-shadow" : ""}`}
       >
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 px-5 py-3 sm:gap-3 sm:px-7">
+        <div
+          className="flex flex-col items-center gap-2 px-6 pt-6 pb-7 sm:gap-3 sm:px-8 sm:pt-9 sm:pb-10"
+          style={{ background: style.background }}
+        >
           {style.showStars && <StarRow className="scale-90 sm:scale-100" />}
-          {style.badgeIcon ? (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] sm:h-20 sm:w-20">
-              <PlatformIcon platform={platform} className="h-8 w-8 sm:h-11 sm:w-11" />
-            </div>
-          ) : (
-            <PlatformIcon platform={platform} className="h-11 w-11 sm:h-16 sm:w-16" />
-          )}
           <p
             className={`whitespace-pre-line text-center text-sm leading-tight font-extrabold tracking-tight sm:text-xl ${style.labelTextClass}`}
           >
@@ -39,7 +34,7 @@ export default function ReviewCardMock({
           </p>
         </div>
 
-        <div className="relative bg-white">
+        <div className="relative flex flex-1 flex-col items-center bg-white">
           <svg
             className="absolute inset-x-0 -top-7 h-8 w-full sm:-top-10 sm:h-10"
             viewBox="0 0 400 40"
@@ -75,13 +70,19 @@ export default function ReviewCardMock({
             />
           </svg>
 
-          <div className="flex flex-col items-center gap-1 pt-3 text-black sm:gap-2 sm:pt-5">
+          <div className="absolute -top-8 left-1/2 z-10 -translate-x-1/2 sm:-top-10">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-[0_6px_16px_rgba(0,0,0,0.22)] sm:h-20 sm:w-20">
+              <PlatformIcon platform={platform} className="h-8 w-8 sm:h-10 sm:w-10" />
+            </div>
+          </div>
+
+          <div className="mt-9 flex flex-1 flex-col items-center justify-center gap-2 px-6 sm:mt-11 sm:gap-3">
             <TapPhoneIcon className="h-8 w-16 sm:h-12 sm:w-24" />
             <p className="text-xs font-bold tracking-wide text-black sm:text-base">
               {style.tapLabel ?? "TAP YOUR PHONE"}
             </p>
           </div>
-          <p className="pb-2 pt-2 text-center text-[9px] tracking-wide text-black/40 sm:pb-4 sm:pt-3 sm:text-xs">
+          <p className="pb-3 text-center text-[9px] tracking-wide text-black/40 sm:pb-4 sm:text-xs">
             Powered by <span className="font-semibold text-black/60">HERNEROS</span>
           </p>
         </div>

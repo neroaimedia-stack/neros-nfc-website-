@@ -55,7 +55,7 @@ export default function FlippableCard({
           style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
         >
           <div
-            className={`overflow-hidden rounded-[18px] ${shadow ? "card-reflect card-shadow" : ""}`}
+            className={`overflow-hidden rounded-[18px] ${shadow ? "card-shadow" : ""}`}
             style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
           >
             <div className="perspective-1600" style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}>

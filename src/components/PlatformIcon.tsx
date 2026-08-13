@@ -85,9 +85,14 @@ export function StarRow({ className }: { className?: string }) {
   const star =
     "M12 2.5l2.9 6.02 6.55.77-4.83 4.55 1.28 6.5L12 17.13 6.1 20.34l1.28-6.5-4.83-4.55 6.55-.77Z";
   return (
-    <div className={`flex items-center gap-1 ${className ?? ""}`}>
+    <div className={`flex items-center gap-1 sm:gap-1.5 ${className ?? ""}`}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} viewBox="0 0 24 24" className="h-4 w-4" fill="#FFC107">
+        <svg
+          key={i}
+          viewBox="0 0 24 24"
+          className="h-3.5 w-3.5 sm:h-5 sm:w-5"
+          fill="#FFC107"
+        >
           <path d={star} />
         </svg>
       ))}
@@ -95,20 +100,35 @@ export function StarRow({ className }: { className?: string }) {
   );
 }
 
-export function TapPhoneIcon({ className }: { className?: string }) {
+export function ContactlessIcon({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 120 100"
-      className={className ?? "h-12 w-24"}
+      viewBox="0 0 264 152"
+      className={className ?? "w-52"}
       fill="none"
       stroke="currentColor"
-      strokeWidth="4"
+      strokeWidth="6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
-      <rect x="68" y="16" width="32" height="56" rx="7" />
-      <line x1="84" y1="60" x2="84" y2="60.5" strokeLinecap="round" strokeWidth="6" />
-      <path d="M52 32a24 24 0 0 1 0 36" strokeLinecap="round" />
-      <path d="M40 22a44 44 0 0 1 0 56" strokeLinecap="round" />
-      <path d="M28 12a64 64 0 0 1 0 76" strokeLinecap="round" />
+      <ellipse cx="80" cy="76" rx="74" ry="50" />
+      <path d="M44 58A22 22 0 0 1 44 94" />
+      <path d="M60 48A34 34 0 0 1 60 104" />
+      <path d="M76 38A46 46 0 0 1 76 114" />
+
+      <rect
+        x="182"
+        y="10"
+        width="44"
+        height="62"
+        rx="6"
+        transform="rotate(20 204 41)"
+        fill="#ffffff"
+      />
+      <rect x="188" y="80" width="46" height="72" rx="20" fill="#ffffff" />
+      <path d="M198 84h-26a12 12 0 0 0 0 24h26" fill="#ffffff" />
+      <path d="M202 108h-30a12 12 0 0 0 0 24h30" fill="#ffffff" />
+      <path d="M206 132h-26a10 10 0 0 0 0 20h26" fill="#ffffff" />
     </svg>
   );
 }

@@ -107,25 +107,48 @@ export default function ProductPage() {
             </span>
             <span className="text-sm font-semibold text-black">{color}</span>
           </div>
-          <div className="mt-3 flex items-center gap-3">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             {product.colors.map((c) => {
               const swatch = isReview
                 ? REVIEW_PLATFORMS[c]?.background
                 : (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR]).swatch;
+
+              if (!isReview) {
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    aria-label={c}
+                    aria-pressed={color === c}
+                    className={`h-8 w-8 rounded-full transition-all ${
+                      color === c
+                        ? "ring-2 ring-black ring-offset-2"
+                        : "ring-1 ring-black/10 hover:ring-black/40"
+                    }`}
+                    style={{ background: swatch }}
+                  />
+                );
+              }
+
               return (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  aria-label={c}
                   aria-pressed={color === c}
-                  className={`h-8 w-8 rounded-full transition-all ${
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                     color === c
-                      ? "ring-2 ring-black ring-offset-2"
-                      : "ring-1 ring-black/10 hover:ring-black/40"
+                      ? "border-black bg-black text-white"
+                      : "border-black/15 text-black hover:border-black/40"
                   }`}
-                  style={{ background: swatch }}
-                />
+                >
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ background: swatch }}
+                  />
+                  {c}
+                </button>
               );
             })}
           </div>

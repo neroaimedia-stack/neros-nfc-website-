@@ -6,10 +6,10 @@ import { CARD_COLORS, DEFAULT_CARD_COLOR, type CardColorStyle } from "@/lib/card
 
 const CARD_WIDTH = 340;
 const CARD_HEIGHT = 214;
-const REFLECTION_GAP = 8;
+const REFLECTION_GAP = 6;
 // Kept short on purpose: it needs to fully fade out within the layout's
 // existing spacing below the card, since it doesn't reserve its own space.
-const REFLECTION_HEIGHT = CARD_HEIGHT * 0.22;
+const REFLECTION_HEIGHT = CARD_HEIGHT * 0.24;
 
 function CardFaceContent({
   variant,
@@ -143,19 +143,24 @@ export default function FlippableCard({
         {reflection && (
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute overflow-hidden rounded-b-[18px] ${style.borderClass ?? ""}`}
+            className={`pointer-events-none absolute flex items-end overflow-hidden rounded-b-[18px] ${style.borderClass ?? ""}`}
             style={{
               width: CARD_WIDTH,
               height: REFLECTION_HEIGHT,
               top: CARD_HEIGHT + REFLECTION_GAP,
               left: 0,
-              background: style.cardGradient,
               transform: "scaleY(-1)",
-              WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)",
-              maskImage: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)",
+              filter: "blur(0.5px)",
+              WebkitMaskImage:
+                "linear-gradient(to top, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.16) 40%, rgba(0,0,0,0.04) 75%, rgba(0,0,0,0) 100%)",
+              maskImage:
+                "linear-gradient(to top, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.16) 40%, rgba(0,0,0,0.04) 75%, rgba(0,0,0,0) 100%)",
             }}
           >
-            <div style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}>
+            <div
+              className="shrink-0"
+              style={{ width: CARD_WIDTH, height: CARD_HEIGHT, background: style.cardGradient }}
+            >
               <CardFaceContent variant={flipped ? "back" : "front"} style={style} />
             </div>
           </div>

@@ -73,11 +73,10 @@ export default function Home() {
         <h2 className="text-center text-3xl font-bold text-black">
           Choose your card
         </h2>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          <div className="flex flex-col rounded-3xl border border-black/10 p-8 text-center shadow-sm">
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          <div className="flex flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
             <FlippableCard
-              className="mx-auto mb-6 w-[220px]"
-              shadow={false}
+              className="mx-auto mb-5 w-[240px]"
               reflection={false}
             />
             <h3 className="text-lg font-semibold text-black">
@@ -94,8 +93,8 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="flex flex-col rounded-3xl border border-black/10 p-8 text-center shadow-sm">
-            <ReviewCardMock className="mx-auto mb-6 w-[220px]" shadow={false} />
+          <div className="flex flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
+            <ReviewCardMock className="mx-auto mb-5 w-[150px]" />
             <h3 className="text-lg font-semibold text-black">
               Review Card
             </h3>
@@ -111,8 +110,8 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="flex flex-col rounded-3xl border border-black/10 p-8 text-center shadow-sm">
-            <div className="mx-auto mb-6 flex aspect-[340/214] w-[220px] max-w-full items-center justify-center rounded-[18px] border-2 border-dashed border-black/20 bg-neutral-50">
+          <div className="flex flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
+            <div className="mx-auto mb-5 flex aspect-[340/214] w-[240px] max-w-full items-center justify-center rounded-[18px] border-2 border-dashed border-black/20 bg-neutral-50">
               <span className="text-4xl font-light text-black/25">+</span>
             </div>
             <h3 className="text-lg font-semibold text-black">Custom</h3>

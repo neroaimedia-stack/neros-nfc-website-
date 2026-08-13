@@ -24,11 +24,11 @@ export default function ProductPage() {
   const [notes, setNotes] = useState("");
   const [name, setName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
-  const [destinationLink, setDestinationLink] = useState("");
+  const [qrLink, setQrLink] = useState("");
+  const [nfcLink, setNfcLink] = useState("");
   const [linkError, setLinkError] = useState("");
   const [added, setAdded] = useState(false);
   const variant = hasQR && isReview ? `${color}${QR_VARIANT_SUFFIX}` : color;
-  const linkRequired = isReview && hasQR;
   const otherProducts = Object.values(products).filter(
     (p) => p.slug !== params.slug
   );
@@ -57,7 +57,7 @@ export default function ProductPage() {
     : undefined;
 
   const handleAddToCart = () => {
-    if (linkRequired && !destinationLink.trim()) {
+    if (isReview && hasQR && !qrLink.trim()) {
       setLinkError("Please provide a destination link for the QR code.");
       return false;
     }
@@ -72,7 +72,8 @@ export default function ProductPage() {
       notes: notes.trim() || undefined,
       name: name.trim() || undefined,
       jobTitle: jobTitle.trim() || undefined,
-      destinationLink: destinationLink.trim() || undefined,
+      qrDestinationLink: isReview && hasQR ? qrLink.trim() || undefined : undefined,
+      nfcDestinationLink: isReview ? nfcLink.trim() || undefined : undefined,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -188,36 +189,58 @@ export default function ProductPage() {
                 ))}
               </div>
 
-              <div className="mt-5 border-t border-black/10 pt-4">
+              {hasQR && (
+                <div className="mt-5 border-t border-black/10 pt-4">
+                  <label
+                    htmlFor="qr-link"
+                    className="text-xs font-semibold uppercase tracking-wide text-black/60"
+                  >
+                    QR code destination link{" "}
+                    <span className="font-normal normal-case text-black/40">
+                      (required)
+                    </span>
+                  </label>
+                  <input
+                    id="qr-link"
+                    type="url"
+                    value={qrLink}
+                    onChange={(e) => {
+                      setQrLink(e.target.value);
+                      if (linkError) setLinkError("");
+                    }}
+                    placeholder="https://..."
+                    className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
+                      linkError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-black/15 focus:border-black"
+                    }`}
+                  />
+                  {linkError && (
+                    <p className="mt-2 text-xs text-red-600">{linkError}</p>
+                  )}
+                </div>
+              )}
+
+              <div
+                className={`mt-5 pt-4 ${hasQR ? "" : "border-t border-black/10"}`}
+              >
                 <label
-                  htmlFor="destination-link"
+                  htmlFor="nfc-link"
                   className="text-xs font-semibold uppercase tracking-wide text-black/60"
                 >
-                  Destination link{" "}
+                  NFC destination link{" "}
                   <span className="font-normal normal-case text-black/40">
-                    {linkRequired
-                      ? "(required for QR code)"
-                      : "(optional — leave blank to set up later)"}
+                    (optional — leave blank to set up later)
                   </span>
                 </label>
                 <input
-                  id="destination-link"
+                  id="nfc-link"
                   type="url"
-                  value={destinationLink}
-                  onChange={(e) => {
-                    setDestinationLink(e.target.value);
-                    if (linkError) setLinkError("");
-                  }}
+                  value={nfcLink}
+                  onChange={(e) => setNfcLink(e.target.value)}
                   placeholder="https://..."
-                  className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
-                    linkError
-                      ? "border-red-500 focus:border-red-500"
-                      : "border-black/15 focus:border-black"
-                  }`}
+                  className="mt-2 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
                 />
-                {linkError && (
-                  <p className="mt-2 text-xs text-red-600">{linkError}</p>
-                )}
               </div>
             </>
           )}

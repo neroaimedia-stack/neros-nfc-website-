@@ -20,8 +20,9 @@ export type CartItem = {
   /** Business card personalization. */
   name?: string;
   jobTitle?: string;
-  /** Review card NFC/QR destination URL. */
-  destinationLink?: string;
+  /** Review card destination URLs — QR and NFC can point to different places. */
+  qrDestinationLink?: string;
+  nfcDestinationLink?: string;
 };
 
 type CartContextValue = {
@@ -67,7 +68,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 notes: item.notes || i.notes,
                 name: item.name || i.name,
                 jobTitle: item.jobTitle || i.jobTitle,
-                destinationLink: item.destinationLink || i.destinationLink,
+                qrDestinationLink:
+                  item.qrDestinationLink || i.qrDestinationLink,
+                nfcDestinationLink:
+                  item.nfcDestinationLink || i.nfcDestinationLink,
               }
             : i
         );

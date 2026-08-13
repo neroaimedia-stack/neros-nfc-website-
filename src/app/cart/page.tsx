@@ -46,8 +46,10 @@ export default function CartPage() {
       const lines = [`- ${item.title} (${item.color}) x${item.quantity}`];
       if (item.name) lines.push(`  Name: ${item.name}`);
       if (item.jobTitle) lines.push(`  Title: ${item.jobTitle}`);
-      if (item.destinationLink)
-        lines.push(`  Destination link: ${item.destinationLink}`);
+      if (item.qrDestinationLink)
+        lines.push(`  QR destination link: ${item.qrDestinationLink}`);
+      if (item.nfcDestinationLink)
+        lines.push(`  NFC destination link: ${item.nfcDestinationLink}`);
       if (item.notes) lines.push(`  Notes: ${item.notes}`);
       return lines.join("\n");
     }),
@@ -86,9 +88,14 @@ export default function CartPage() {
                   {[item.name, item.jobTitle].filter(Boolean).join(" · ")}
                 </p>
               )}
-              {item.destinationLink && (
+              {item.qrDestinationLink && (
                 <p className="mt-1 max-w-xs truncate text-xs text-black/50">
-                  Links to: {item.destinationLink}
+                  QR links to: {item.qrDestinationLink}
+                </p>
+              )}
+              {item.nfcDestinationLink && (
+                <p className="mt-1 max-w-xs truncate text-xs text-black/50">
+                  NFC links to: {item.nfcDestinationLink}
                 </p>
               )}
               {item.notes && (

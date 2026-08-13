@@ -20,11 +20,11 @@ export default function ReviewCardMock({
     <div className={`block ${className ?? ""}`} style={{ perspective: "1400px" }}>
       <div
         className="review-tilt relative"
-        style={{ transform: "rotateY(-14deg) rotateX(5deg)" }}
+        style={{ transform: "rotateY(-7deg) rotateX(2deg)" }}
       >
         <div
           className={`relative flex aspect-square flex-col overflow-hidden rounded-[32px] ${shadow ? "review-card-shadow" : ""}`}
-          style={{ background: style.background, transform: "translateZ(10px)" }}
+          style={{ background: style.background, transform: "translateZ(4px)" }}
         >
           <div className="flex flex-1 flex-col items-center justify-center gap-2 px-5 py-3 sm:gap-3 sm:px-7">
             {style.showStars && <StarRow className="scale-90 sm:scale-100" />}
@@ -49,14 +49,21 @@ export default function ReviewCardMock({
               preserveAspectRatio="none"
             >
               <path
-                d="M0,20 C90,44 310,-6 400,22 L400,36 L0,36 Z"
+                d="M0,16 C120,30 280,2 400,16 L400,36 L0,36 Z"
                 fill="#ffffff"
               />
               <path
-                d="M0,20 C90,44 310,-6 400,22"
+                d="M0,16 C120,30 280,2 400,16"
                 fill="none"
-                stroke="rgba(0,0,0,0.06)"
-                strokeWidth="2"
+                stroke="#a9c8f0"
+                strokeWidth="3.5"
+                transform="translate(0,2.5)"
+              />
+              <path
+                d="M0,16 C120,30 280,2 400,16"
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="3"
               />
             </svg>
 
@@ -73,11 +80,11 @@ export default function ReviewCardMock({
         </div>
 
         <div
-          className="review-card-edge absolute inset-y-0 right-0 w-20 overflow-hidden rounded-r-[32px]"
+          className="review-card-edge absolute inset-y-0 right-0 w-16 overflow-hidden rounded-r-[32px]"
           style={{
             transformOrigin: "right center",
-            transform: "rotateY(90deg) translateZ(10px)",
-            background: "linear-gradient(to bottom, #e2e2e2, #9c9c9c)",
+            transform: "rotateY(90deg) translateZ(4px)",
+            background: "linear-gradient(to bottom, #f2f2f2, #d8d8d8 50%, #eeeeee)",
           }}
         />
       </div>

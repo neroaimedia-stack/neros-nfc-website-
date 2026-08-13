@@ -1,4 +1,4 @@
-import PlatformIcon, { TapPhoneIcon } from "@/components/PlatformIcon";
+import PlatformIcon, { StarRow, TapPhoneIcon } from "@/components/PlatformIcon";
 import {
   DEFAULT_REVIEW_PLATFORM,
   REVIEW_PLATFORMS,
@@ -17,47 +17,69 @@ export default function ReviewCardMock({
     REVIEW_PLATFORMS[platform] ?? REVIEW_PLATFORMS[DEFAULT_REVIEW_PLATFORM];
 
   return (
-    <div className={`block ${className ?? ""}`}>
-      <div className={shadow ? "card-reflect" : ""}>
+    <div className={`block ${className ?? ""}`} style={{ perspective: "1400px" }}>
+      <div
+        className="review-tilt relative"
+        style={{ transform: "rotateY(-14deg) rotateX(5deg)" }}
+      >
         <div
-          className={`relative aspect-square overflow-hidden rounded-[32px] ${shadow ? "card-shadow" : ""}`}
-          style={{ background: style.background }}
+          className={`relative flex aspect-square flex-col overflow-hidden rounded-[32px] ${shadow ? "review-card-shadow" : ""}`}
+          style={{ background: style.background, transform: "translateZ(10px)" }}
         >
-          <div className="relative z-10 flex flex-col items-center gap-4 px-6 pt-11">
-            <PlatformIcon platform={platform} />
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 px-5 py-3 sm:gap-3 sm:px-7">
+            {style.showStars && <StarRow className="scale-90 sm:scale-100" />}
+            {style.badgeIcon ? (
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-[0_4px_14px_rgba(0,0,0,0.25)] sm:h-20 sm:w-20">
+                <PlatformIcon platform={platform} className="h-8 w-8 sm:h-11 sm:w-11" />
+              </div>
+            ) : (
+              <PlatformIcon platform={platform} className="h-11 w-11 sm:h-16 sm:w-16" />
+            )}
             <p
-              className={`text-center text-lg font-extrabold tracking-tight ${style.labelTextClass}`}
+              className={`whitespace-pre-line text-center text-sm leading-tight font-extrabold tracking-tight sm:text-xl ${style.labelTextClass}`}
             >
               {style.label}
             </p>
           </div>
 
-          <svg
-            className="absolute inset-x-0"
-            style={{ top: "48%" }}
-            viewBox="0 0 400 32"
-            preserveAspectRatio="none"
-            width="100%"
-            height="32"
-          >
-            <path d="M0,20 C100,36 300,0 400,18 L400,32 L0,32 Z" fill="#ffffff" />
-          </svg>
+          <div className="relative bg-white">
+            <svg
+              className="absolute inset-x-0 -top-6 h-7 w-full sm:-top-9 sm:h-9"
+              viewBox="0 0 400 36"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0,20 C90,44 310,-6 400,22 L400,36 L0,36 Z"
+                fill="#ffffff"
+              />
+              <path
+                d="M0,20 C90,44 310,-6 400,22"
+                fill="none"
+                stroke="rgba(0,0,0,0.06)"
+                strokeWidth="2"
+              />
+            </svg>
 
-          <div
-            className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-between bg-white pb-4"
-            style={{ top: "50%" }}
-          >
-            <div className="flex flex-1 flex-col items-center justify-center gap-2 text-black">
-              <TapPhoneIcon className="h-12 w-24" />
-              <p className="text-sm font-bold tracking-wide text-black">
-                TAP YOUR PHONE
+            <div className="flex flex-col items-center gap-1 pt-3 text-black sm:gap-2 sm:pt-5">
+              <TapPhoneIcon className="h-8 w-16 sm:h-12 sm:w-24" />
+              <p className="text-xs font-bold tracking-wide text-black sm:text-base">
+                {style.tapLabel ?? "TAP YOUR PHONE"}
               </p>
             </div>
-            <p className="text-[10px] text-black/40">
+            <p className="pb-2 pt-2 text-center text-[9px] tracking-wide text-black/40 sm:pb-4 sm:pt-3 sm:text-xs">
               Powered by <span className="font-semibold text-black/60">HERNEROS</span>
             </p>
           </div>
         </div>
+
+        <div
+          className="review-card-edge absolute inset-y-0 right-0 w-20 overflow-hidden rounded-r-[32px]"
+          style={{
+            transformOrigin: "right center",
+            transform: "rotateY(90deg) translateZ(10px)",
+            background: "linear-gradient(to bottom, #e2e2e2, #9c9c9c)",
+          }}
+        />
       </div>
     </div>
   );

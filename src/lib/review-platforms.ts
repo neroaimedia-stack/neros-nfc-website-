@@ -2,6 +2,9 @@ export type ReviewPlatformStyle = {
   label: string;
   background: string;
   labelTextClass: string;
+  tapLabel?: string;
+  showStars?: boolean;
+  badgeIcon?: boolean;
 };
 
 export const DEFAULT_REVIEW_PLATFORM = "Facebook";
@@ -31,8 +34,11 @@ export const REVIEW_PLATFORMS: Record<string, ReviewPlatformStyle> = {
     labelTextClass: "text-white",
   },
   "Google Review": {
-    label: "REVIEW US ON GOOGLE",
-    background: "#ffffff",
-    labelTextClass: "text-black",
+    label: "WE WOULD APPRECIATE\nYOUR GOOGLE REVIEW!",
+    background: "linear-gradient(135deg, #1a73e8, #0b57d0)",
+    labelTextClass: "text-white",
+    tapLabel: "Tap to rate your experience",
+    showStars: true,
+    badgeIcon: true,
   },
 };

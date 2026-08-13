@@ -6,11 +6,10 @@ import { CARD_COLORS, DEFAULT_CARD_COLOR, type CardColorStyle } from "@/lib/card
 
 const CARD_WIDTH = 340;
 const CARD_HEIGHT = 214;
-const FLIP_DURATION_MS = 800;
-const REFLECTION_GAP = 10;
-// The reflection fades to fully transparent well before its own full height,
-// so only reserve layout space out to roughly where it disappears.
-const REFLECTION_RESERVE = REFLECTION_GAP + CARD_HEIGHT * 0.6;
+const REFLECTION_GAP = 8;
+// Kept short on purpose: it needs to fully fade out within the layout's
+// existing spacing below the card, since it doesn't reserve its own space.
+const REFLECTION_HEIGHT = CARD_HEIGHT * 0.22;
 
 function CardFaceContent({
   variant,
@@ -68,7 +67,6 @@ export default function FlippableCard({
   reflection?: boolean;
 }) {
   const [flipped, setFlipped] = useState(false);
-  const [reflectedFlipped, setReflectedFlipped] = useState(false);
   const [scale, setScale] = useState(1);
   const [ready, setReady] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -87,23 +85,13 @@ export default function FlippableCard({
     return () => ro.disconnect();
   }, []);
 
-  const handleFlip = () => {
-    const next = !flipped;
-    setFlipped(next);
-    // Swap the reflected face once the real card visually crosses edge-on,
-    // instead of the moment the click happens.
-    window.setTimeout(() => setReflectedFlipped(next), FLIP_DURATION_MS / 2);
-  };
+  const handleFlip = () => setFlipped((prev) => !prev);
 
   return (
     <div
       ref={wrapperRef}
       className={`block min-w-0 ${className ?? ""}`}
-      style={{
-        aspectRatio: `${CARD_WIDTH} / ${
-          reflection ? CARD_HEIGHT + REFLECTION_RESERVE : CARD_HEIGHT
-        }`,
-      }}
+      style={{ aspectRatio: `${CARD_WIDTH} / ${CARD_HEIGHT}` }}
     >
       <div
         className={`relative transition-opacity duration-200 ${ready ? "opacity-100" : "opacity-0"}`}
@@ -155,20 +143,21 @@ export default function FlippableCard({
         {reflection && (
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute overflow-hidden rounded-[18px] ${style.borderClass ?? ""}`}
+            className={`pointer-events-none absolute overflow-hidden rounded-b-[18px] ${style.borderClass ?? ""}`}
             style={{
               width: CARD_WIDTH,
-              height: CARD_HEIGHT,
+              height: REFLECTION_HEIGHT,
               top: CARD_HEIGHT + REFLECTION_GAP,
               left: 0,
               background: style.cardGradient,
               transform: "scaleY(-1)",
-              WebkitMaskImage:
-                "linear-gradient(to top, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 62%)",
-              maskImage: "linear-gradient(to top, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 62%)",
+              WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)",
+              maskImage: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%)",
             }}
           >
-            <CardFaceContent variant={reflectedFlipped ? "back" : "front"} style={style} />
+            <div style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}>
+              <CardFaceContent variant={flipped ? "back" : "front"} style={style} />
+            </div>
           </div>
         )}
       </div>

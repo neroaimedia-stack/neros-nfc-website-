@@ -73,16 +73,16 @@ export default function Home() {
         <h2 className="text-center text-3xl font-bold text-black">
           Choose your card
         </h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
+        <div className="mt-8 grid items-start gap-6 md:grid-cols-3">
           <div className="flex flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
             <FlippableCard
-              className="mx-auto mb-5 w-[240px]"
+              className="mx-auto mb-5 w-[220px]"
               reflection={false}
             />
             <h3 className="text-lg font-semibold text-black">
               Business Card
             </h3>
-            <p className="mt-2 flex-1 text-sm text-black/60">
+            <p className="mt-2 text-sm text-black/60">
               Share your profile and contact info with one tap.
             </p>
             <Link
@@ -94,11 +94,11 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
-            <ReviewCardMock className="mx-auto mb-5 w-[150px]" />
+            <ReviewCardMock className="mx-auto mb-5 w-[130px]" />
             <h3 className="text-lg font-semibold text-black">
               Review Card
             </h3>
-            <p className="mt-2 flex-1 text-sm text-black/60">
+            <p className="mt-2 text-sm text-black/60">
               Drive customers straight to your review page, or your business
               social media pages.
             </p>
@@ -111,11 +111,11 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
-            <div className="mx-auto mb-5 flex aspect-[340/214] w-[240px] max-w-full items-center justify-center rounded-[18px] border-2 border-dashed border-black/20 bg-neutral-50">
+            <div className="mx-auto mb-5 flex aspect-[340/214] w-[220px] max-w-full items-center justify-center rounded-[18px] border-2 border-dashed border-black/20 bg-neutral-50">
               <span className="text-4xl font-light text-black/25">+</span>
             </div>
             <h3 className="text-lg font-semibold text-black">Custom</h3>
-            <p className="mt-2 flex-1 text-sm text-black/60">
+            <p className="mt-2 text-sm text-black/60">
               Need a custom design, bulk order, or something unique? Let's
               talk.
             </p>

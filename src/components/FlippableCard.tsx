@@ -91,7 +91,7 @@ export default function FlippableCard({
     <div
       ref={wrapperRef}
       className={`block min-w-0 ${className ?? ""}`}
-      style={{ aspectRatio: `${CARD_WIDTH} / ${CARD_HEIGHT}` }}
+      style={{ aspectRatio: `${CARD_WIDTH} / ${CARD_HEIGHT}`, contain: "size" }}
     >
       <div
         className={`relative transition-opacity duration-200 ${ready ? "opacity-100" : "opacity-0"}`}

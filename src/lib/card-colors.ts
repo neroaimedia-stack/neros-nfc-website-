@@ -3,6 +3,7 @@ export type CardColorStyle = {
   cardGradient: string;
   textClass: string;
   subTextClass: string;
+  qrColor: string;
   borderClass?: string;
 };
 
@@ -16,5 +17,6 @@ export const CARD_COLORS: Record<string, CardColorStyle> = {
     cardGradient: "linear-gradient(135deg, #262626, #050505)",
     textClass: "text-white",
     subTextClass: "text-white/85",
+    qrColor: "#ffffff",
   },
 };

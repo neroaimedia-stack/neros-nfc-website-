@@ -22,6 +22,28 @@ html {
   scroll-behavior: smooth;
 }
 
+.perspective-1600 {
+  perspective: 1600px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.card-flip-transition {
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-flip-transition {
+    transition: none;
+  }
+}
+
 .card-edge-shade {
   position: absolute;
   inset: 0;

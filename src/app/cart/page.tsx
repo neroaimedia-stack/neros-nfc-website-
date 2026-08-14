@@ -3,39 +3,53 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
-import { PROMO_CODES } from "@/lib/promo-codes";
+import { supabase } from "@/lib/supabase";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD } from "@/lib/currency";
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, subtotal } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, subtotal } = useCart();
   const currency = useCurrency();
   const [promoInput, setPromoInput] = useState("");
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [discountRate, setDiscountRate] = useState(0);
   const [promoError, setPromoError] = useState("");
   const [showPromoInput, setShowPromoInput] = useState(false);
+  const [checkingPromo, setCheckingPromo] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
 
-  const discountRate = appliedCode ? PROMO_CODES[appliedCode] : 0;
   const discount = subtotal * discountRate;
   const total = subtotal - discount;
 
   const display = (amountUSD: number) =>
     formatCurrency(fromUSD(amountUSD, currency), currency);
 
-  const handleApplyPromo = () => {
+  const handleApplyPromo = async () => {
     const code = promoInput.trim().toUpperCase();
     if (!code) return;
-    if (PROMO_CODES[code]) {
+    setCheckingPromo(true);
+    const { data } = await supabase
+      .from("promo_codes")
+      .select("discount_rate")
+      .eq("code", code)
+      .eq("active", true)
+      .maybeSingle();
+    setCheckingPromo(false);
+    if (data) {
       setAppliedCode(code);
+      setDiscountRate(Number(data.discount_rate));
       setPromoError("");
     } else {
       setAppliedCode(null);
+      setDiscountRate(0);
       setPromoError("Invalid promo code");
     }
   };
 
   const handleRemovePromo = () => {
     setAppliedCode(null);
+    setDiscountRate(0);
     setPromoInput("");
     setPromoError("");
     setShowPromoInput(false);
@@ -59,6 +73,51 @@ export default function CartPage() {
     .join("\n");
 
   const checkoutHref = `mailto:herneros.ph@gmail.com?subject=Order%20Checkout&body=${encodeURIComponent(checkoutBody)}`;
+
+  const handleCheckout = async () => {
+    setCheckingOut(true);
+    setCheckoutError("");
+    try {
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          subtotal,
+          discount,
+          total,
+          promo_code: appliedCode,
+          currency: "USD",
+        })
+        .select("id")
+        .single();
+      if (orderError) throw orderError;
+
+      const { error: itemsError } = await supabase.from("order_items").insert(
+        items.map((item) => ({
+          order_id: order.id,
+          product_slug: item.productSlug,
+          title: item.title,
+          color: item.color,
+          price: item.price,
+          quantity: item.quantity,
+          notes: item.notes ?? null,
+          name: item.name ?? null,
+          job_title: item.jobTitle ?? null,
+          qr_destination_link: item.qrDestinationLink ?? null,
+          nfc_destination_link: item.nfcDestinationLink ?? null,
+        }))
+      );
+      if (itemsError) throw itemsError;
+
+      clearCart();
+      window.location.href = checkoutHref;
+    } catch {
+      setCheckoutError(
+        "Something went wrong placing your order. Please try again."
+      );
+    } finally {
+      setCheckingOut(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -179,9 +238,10 @@ export default function CartPage() {
               <button
                 type="button"
                 onClick={handleApplyPromo}
-                className="shrink-0 rounded-full border border-black px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-60"
+                disabled={checkingPromo}
+                className="shrink-0 rounded-full border border-black px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-60 disabled:opacity-40"
               >
-                Apply
+                {checkingPromo ? "Checking…" : "Apply"}
               </button>
             </div>
             {promoError && (
@@ -222,12 +282,20 @@ export default function CartPage() {
         </div>
       </div>
 
-      <Link
-        href={checkoutHref}
-        className="mt-6 block rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
+      {checkoutError && (
+        <p className="mt-4 text-center text-xs text-red-600">
+          {checkoutError}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleCheckout}
+        disabled={checkingOut}
+        className="mt-6 block w-full rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-50"
       >
-        Checkout
-      </Link>
+        {checkingOut ? "Placing order…" : "Checkout"}
+      </button>
     </main>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
+import WifiCardMock from "@/components/WifiCardMock";
 import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
@@ -22,6 +23,8 @@ export default function ProductPageClient({
   otherProducts: Product[];
 }) {
   const isReview = product?.slug === "review-card";
+  const isWifi = product?.slug === "wifi-card";
+  const isBusinessCard = product?.slug === "business-card";
   const { addItem } = useCart();
   const currency = useCurrency();
   const [color, setColor] = useState(product?.colors[0] ?? "");
@@ -92,6 +95,11 @@ export default function ProductPageClient({
               className="mx-auto w-[400px] max-w-full"
               platform={variant}
             />
+          ) : isWifi ? (
+            <WifiCardMock
+              className="mx-auto w-[400px] max-w-full"
+              format={color}
+            />
           ) : (
             <FlippableCard
               className="mx-auto w-[400px] max-w-full"
@@ -135,32 +143,52 @@ export default function ProductPageClient({
           <div className="mt-8 rounded-2xl border border-black/10 p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-                {isReview ? "Select Platform" : "Select Finish"}
+                {isReview ? "Select Platform" : isWifi ? "Select Format" : "Select Finish"}
               </span>
               <span className="text-sm font-semibold text-black">{color}</span>
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              {product.colors.map((c) => {
-                const swatch = isReview
-                  ? REVIEW_PLATFORMS[c]?.background
-                  : (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR]).swatch;
-                return (
+            {isWifi ? (
+              <div className="mt-3 flex gap-2">
+                {product.colors.map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setColor(c)}
-                    aria-label={c}
                     aria-pressed={color === c}
-                    className={`h-8 w-8 rounded-full transition-all ${
+                    className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition-all ${
                       color === c
-                        ? "ring-2 ring-black ring-offset-2"
-                        : "ring-1 ring-black/10 hover:ring-black/40"
+                        ? "border-black bg-black text-white"
+                        : "border-black/15 text-black hover:border-black/40"
                     }`}
-                    style={{ background: swatch }}
-                  />
-                );
-              })}
-            </div>
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                {product.colors.map((c) => {
+                  const swatch = isReview
+                    ? REVIEW_PLATFORMS[c]?.background
+                    : (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR]).swatch;
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setColor(c)}
+                      aria-label={c}
+                      aria-pressed={color === c}
+                      className={`h-8 w-8 rounded-full transition-all ${
+                        color === c
+                          ? "ring-2 ring-black ring-offset-2"
+                          : "ring-1 ring-black/10 hover:ring-black/40"
+                      }`}
+                      style={{ background: swatch }}
+                    />
+                  );
+                })}
+              </div>
+            )}
 
             {isReview && (
               <>
@@ -250,7 +278,7 @@ export default function ProductPageClient({
             )}
           </div>
 
-          {!isReview && (
+          {isBusinessCard && (
             <div className="mt-8 rounded-2xl border border-black/10 p-4">
               <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Personalize your card
@@ -381,6 +409,8 @@ export default function ProductPageClient({
                   <div className="w-20 shrink-0">
                     {p.slug === "review-card" ? (
                       <ReviewCardMock shadow={false} />
+                    ) : p.slug === "wifi-card" ? (
+                      <WifiCardMock shadow={false} />
                     ) : (
                       <FlippableCard shadow={false} reflection={false} />
                     )}

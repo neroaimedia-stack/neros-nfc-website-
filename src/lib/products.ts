@@ -13,7 +13,8 @@ export type Product = {
 export async function getProducts(): Promise<Record<string, Product>> {
   const { data, error } = await supabase
     .from("products")
-    .select("slug, title, description, price, compare_at_price, currency, colors");
+    .select("slug, title, description, price, compare_at_price, currency, colors")
+    .order("sort_order", { ascending: true });
 
   if (error) throw error;
 

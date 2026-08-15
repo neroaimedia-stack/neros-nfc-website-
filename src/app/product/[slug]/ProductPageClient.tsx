@@ -5,6 +5,7 @@ import Link from "next/link";
 import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
+import OrderCardMock from "@/components/OrderCardMock";
 import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
@@ -24,6 +25,8 @@ export default function ProductPageClient({
 }) {
   const isReview = product?.slug === "review-card";
   const isWifi = product?.slug === "wifi-card";
+  const isOrderCard = product?.slug === "order-card";
+  const isFormatOnly = isWifi || isOrderCard;
   const isBusinessCard = product?.slug === "business-card";
   const { addItem } = useCart();
   const currency = useCurrency();
@@ -100,6 +103,11 @@ export default function ProductPageClient({
               className="mx-auto w-[400px] max-w-full"
               format={color}
             />
+          ) : isOrderCard ? (
+            <OrderCardMock
+              className="mx-auto w-[400px] max-w-full"
+              format={color}
+            />
           ) : (
             <FlippableCard
               className="mx-auto w-[400px] max-w-full"
@@ -143,11 +151,11 @@ export default function ProductPageClient({
           <div className="mt-8 rounded-2xl border border-black/10 p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-                {isReview ? "Select Platform" : isWifi ? "Select Format" : "Select Finish"}
+                {isReview ? "Select Platform" : isFormatOnly ? "Select Format" : "Select Finish"}
               </span>
               <span className="text-sm font-semibold text-black">{color}</span>
             </div>
-            {isWifi ? (
+            {isFormatOnly ? (
               <div className="mt-3 flex gap-2">
                 {product.colors.map((c) => (
                   <button
@@ -411,6 +419,8 @@ export default function ProductPageClient({
                       <ReviewCardMock shadow={false} />
                     ) : p.slug === "wifi-card" ? (
                       <WifiCardMock shadow={false} />
+                    ) : p.slug === "order-card" ? (
+                      <OrderCardMock shadow={false} />
                     ) : (
                       <FlippableCard shadow={false} reflection={false} />
                     )}

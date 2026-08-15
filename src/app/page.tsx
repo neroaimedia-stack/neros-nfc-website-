@@ -3,6 +3,7 @@ import CardMockup from "@/components/CardMockup";
 import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
+import OrderCardMock from "@/components/OrderCardMock";
 
 const steps = [
   {
@@ -74,7 +75,7 @@ export default function Home() {
         <h2 className="text-center text-3xl font-bold text-black">
           Choose your card
         </h2>
-        <div className="mt-8 grid items-start gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid items-start gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <div className="flex flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
             <FlippableCard
               className="mx-auto mb-5 w-[220px] max-w-full"
@@ -118,6 +119,20 @@ export default function Home() {
             </p>
             <Link
               href="/product/wifi-card"
+              className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+            >
+              Buy Now
+            </Link>
+          </div>
+
+          <div className="flex flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
+            <OrderCardMock className="mx-auto mb-5 w-[130px]" />
+            <h3 className="text-lg font-semibold text-black">Order Card</h3>
+            <p className="mt-2 text-sm text-black/60">
+              Let guests browse your menu and order with a single tap.
+            </p>
+            <Link
+              href="/product/order-card"
               className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
             >
               Buy Now

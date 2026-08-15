@@ -29,11 +29,15 @@ function CardFaceContent({
         <div className="card-edge-shade" />
         <div className="card-corner-gloss" />
         <div className="card-sheen" />
-        <div className="relative flex h-full flex-col justify-end gap-1 p-7">
-          <span className={`text-xl font-bold tracking-tight uppercase ${style.textClass}`}>
+        <div className="relative flex h-full min-w-0 flex-col justify-end gap-1 p-7">
+          <span
+            className={`min-w-0 truncate text-xl font-bold tracking-tight uppercase ${style.textClass}`}
+          >
             {name}
           </span>
-          <span className={`text-xs tracking-[0.2em] uppercase ${style.subTextClass}`}>
+          <span
+            className={`min-w-0 truncate text-xs tracking-[0.2em] uppercase ${style.subTextClass}`}
+          >
             {jobTitle}
           </span>
         </div>

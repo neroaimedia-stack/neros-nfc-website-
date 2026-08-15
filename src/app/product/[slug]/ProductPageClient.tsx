@@ -11,6 +11,9 @@ import { REVIEW_PLATFORMS, QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
 
+const NAME_MAX_LENGTH = 24;
+const JOB_TITLE_MAX_LENGTH = 28;
+
 export default function ProductPageClient({
   product,
   otherProducts,
@@ -255,26 +258,36 @@ export default function ProductPageClient({
               <div className="mt-3 flex flex-col gap-3">
                 <div>
                   <label htmlFor="card-name" className="text-xs text-black/50">
-                    Name
+                    Name{" "}
+                    <span className="text-black/30">
+                      ({name.length}/{NAME_MAX_LENGTH})
+                    </span>
                   </label>
                   <input
                     id="card-name"
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value.slice(0, NAME_MAX_LENGTH))}
+                    maxLength={NAME_MAX_LENGTH}
                     placeholder="e.g. Hernero Cruz"
                     className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
                   />
                 </div>
                 <div>
                   <label htmlFor="card-title" className="text-xs text-black/50">
-                    Title
+                    Title{" "}
+                    <span className="text-black/30">
+                      ({jobTitle.length}/{JOB_TITLE_MAX_LENGTH})
+                    </span>
                   </label>
                   <input
                     id="card-title"
                     type="text"
                     value={jobTitle}
-                    onChange={(e) => setJobTitle(e.target.value)}
+                    onChange={(e) =>
+                      setJobTitle(e.target.value.slice(0, JOB_TITLE_MAX_LENGTH))
+                    }
+                    maxLength={JOB_TITLE_MAX_LENGTH}
                     placeholder="e.g. CEO & Founder"
                     className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
                   />

@@ -11,7 +11,7 @@ import { REVIEW_PLATFORMS, QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
 
-const NAME_MAX_LENGTH = 24;
+const NAME_MAX_LENGTH = 26;
 const JOB_TITLE_MAX_LENGTH = 28;
 
 export default function ProductPageClient({

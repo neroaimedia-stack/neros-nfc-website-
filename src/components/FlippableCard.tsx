@@ -11,6 +11,20 @@ const REFLECTION_GAP = 6;
 // existing spacing below the card, since it doesn't reserve its own space.
 const REFLECTION_HEIGHT = CARD_HEIGHT * 0.24;
 
+// Shrinks the font as the text gets longer instead of ever clipping it —
+// tiers are sized with margin so even wide all-caps glyphs stay on the card.
+function nameSizeClass(length: number) {
+  if (length > 22) return "text-sm";
+  if (length > 18) return "text-base";
+  if (length > 14) return "text-lg";
+  return "text-xl";
+}
+
+function jobTitleSizeClass(length: number) {
+  if (length > 24) return "text-[10px] tracking-[0.14em]";
+  return "text-xs tracking-[0.2em]";
+}
+
 function CardFaceContent({
   variant,
   style,
@@ -31,12 +45,12 @@ function CardFaceContent({
         <div className="card-sheen" />
         <div className="relative flex h-full min-w-0 flex-col justify-end gap-1 p-7">
           <span
-            className={`min-w-0 truncate text-xl font-bold tracking-tight uppercase ${style.textClass}`}
+            className={`min-w-0 overflow-hidden whitespace-nowrap ${nameSizeClass(name.length)} font-bold tracking-tight uppercase ${style.textClass}`}
           >
             {name}
           </span>
           <span
-            className={`min-w-0 truncate text-xs tracking-[0.2em] uppercase ${style.subTextClass}`}
+            className={`min-w-0 overflow-hidden whitespace-nowrap ${jobTitleSizeClass(jobTitle.length)} uppercase ${style.subTextClass}`}
           >
             {jobTitle}
           </span>

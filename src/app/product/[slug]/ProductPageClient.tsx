@@ -15,6 +15,7 @@ import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
 
 const NAME_MAX_LENGTH = 18;
 const JOB_TITLE_MAX_LENGTH = 26;
+const WEBSITE_ADDON_SUFFIX = " + Website";
 
 export default function ProductPageClient({
   product,
@@ -40,8 +41,14 @@ export default function ProductPageClient({
   const [nfcLink, setNfcLink] = useState("");
   const [qrLinkError, setQrLinkError] = useState("");
   const [nfcLinkError, setNfcLinkError] = useState("");
+  const [addWebsite, setAddWebsite] = useState(false);
   const [added, setAdded] = useState(false);
-  const variant = hasQR && isReview ? `${color}${QR_VARIANT_SUFFIX}` : color;
+  const variant =
+    hasQR && isReview
+      ? `${color}${QR_VARIANT_SUFFIX}`
+      : isOrderCard && addWebsite
+        ? `${color}${WEBSITE_ADDON_SUFFIX}`
+        : color;
 
   if (!product) {
     return (
@@ -209,8 +216,24 @@ export default function ProductPageClient({
 
             {isOrderCard && (
               <>
-                {color === "Add Website" && (
-                  <div className="mt-5 rounded-xl bg-black/5 p-3 text-xs leading-relaxed text-black/70">
+                <label
+                  htmlFor="add-website"
+                  className="mt-5 flex cursor-pointer items-center gap-2 border-t border-black/10 pt-4"
+                >
+                  <input
+                    id="add-website"
+                    type="checkbox"
+                    checked={addWebsite}
+                    onChange={(e) => setAddWebsite(e.target.checked)}
+                    className="h-4 w-4 rounded border-black/30 accent-black"
+                  />
+                  <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                    Add Website
+                  </span>
+                </label>
+
+                {addWebsite && (
+                  <div className="mt-3 rounded-xl bg-black/5 p-3 text-xs leading-relaxed text-black/70">
                     We&apos;ll build you a free ordering website — customers
                     scan your card, browse your menu with photos, and place
                     their order online. You manage the menu and incoming

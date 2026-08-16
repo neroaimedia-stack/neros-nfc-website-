@@ -27,6 +27,23 @@ type SheetKey =
   | "travel"
   | "links";
 
+function PenIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
 function BackButton({ onClick }: { onClick?: () => void }) {
   return (
     <button
@@ -46,6 +63,27 @@ function BackButton({ onClick }: { onClick?: () => void }) {
       >
         <path d="M15 18l-6-6 6-6" />
       </svg>
+    </button>
+  );
+}
+
+function EditBadge({
+  onClick,
+  className = "",
+  label,
+}: {
+  onClick: () => void;
+  className?: string;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className={`flex items-center justify-center rounded-full text-black/40 transition-colors hover:bg-black/5 hover:text-black ${className}`}
+    >
+      <PenIcon className="h-3.5 w-3.5" />
     </button>
   );
 }
@@ -77,20 +115,21 @@ function SectionRow({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onEdit}
-      className="block w-full border-t border-black/10 py-5 text-left"
-    >
-      <h2
-        className={`text-xs font-bold tracking-wide uppercase ${
-          empty ? "text-black/25" : "text-black/40"
-        }`}
-      >
-        {title}
-      </h2>
-      {!empty && <div className="mt-3">{children}</div>}
-    </button>
+    <div className="border-t border-black/10 py-5">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xs font-bold tracking-wide text-black/40 uppercase">
+          {title}
+        </h2>
+        <EditBadge onClick={onEdit} label={`Edit ${title}`} className="h-7 w-7 shrink-0" />
+      </div>
+      <div className="mt-3">
+        {empty ? (
+          <p className="text-sm text-black/30">Not added yet</p>
+        ) : (
+          children
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -408,13 +447,15 @@ export default function EditableProfileView({
         ) : (
           <div className="h-36 w-full bg-black/5" />
         )}
+        {onBack && <BackButton onClick={onBack} />}
         <button
           type="button"
           onClick={coverUpload.openFilePicker}
           aria-label="Edit cover photo"
-          className="absolute inset-0"
-        />
-        {onBack && <BackButton onClick={onBack} />}
+          className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-opacity hover:opacity-70"
+        >
+          <PenIcon className="h-4 w-4" />
+        </button>
         {coverUpload.hiddenInput}
       </div>
 
@@ -435,41 +476,49 @@ export default function EditableProfileView({
               type="button"
               onClick={avatarUpload.openFilePicker}
               aria-label="Edit profile picture"
-              className="absolute inset-0 rounded-full"
-            />
+              className="absolute right-0 bottom-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-black text-white transition-opacity hover:opacity-80"
+            >
+              <PenIcon className="h-3.5 w-3.5" />
+            </button>
             {avatarUpload.hiddenInput}
           </div>
-          <button
-            type="button"
-            onClick={() => openSheet("name")}
-            className="min-w-0 flex-1 pt-3 pb-1 text-left"
-          >
-            {profile.full_name ? (
-              <h1 className="truncate text-2xl font-bold text-black">
-                {profile.full_name}
-              </h1>
-            ) : (
-              <p className="text-2xl font-bold text-black/25">Add your name</p>
-            )}
-            {profile.job_title ? (
-              <p className="truncate text-sm text-black/60">{profile.job_title}</p>
-            ) : (
-              <p className="text-sm text-black/25">Add a title</p>
-            )}
-          </button>
+          <div className="flex min-w-0 flex-1 items-start justify-between gap-2 pt-3 pb-1">
+            <div className="min-w-0">
+              {profile.full_name ? (
+                <h1 className="truncate text-2xl font-bold text-black">
+                  {profile.full_name}
+                </h1>
+              ) : (
+                <p className="text-2xl font-bold text-black/25">Add your name</p>
+              )}
+              {profile.job_title ? (
+                <p className="truncate text-sm text-black/60">{profile.job_title}</p>
+              ) : (
+                <p className="text-sm text-black/25">Add a title</p>
+              )}
+            </div>
+            <EditBadge
+              onClick={() => openSheet("name")}
+              label="Edit name & title"
+              className="h-7 w-7 shrink-0"
+            />
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => openSheet("bio")}
-          className="mt-4 block w-full text-left"
-        >
-          {profile.bio ? (
-            <p className="text-sm text-black/70">{profile.bio}</p>
-          ) : (
-            <p className="text-sm text-black/25">Add a bio</p>
-          )}
-        </button>
+        <div className="mt-4 flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            {profile.bio ? (
+              <p className="text-sm text-black/70">{profile.bio}</p>
+            ) : (
+              <p className="text-sm text-black/25">Add a bio</p>
+            )}
+          </div>
+          <EditBadge
+            onClick={() => openSheet("bio")}
+            label="Edit bio"
+            className="h-7 w-7 shrink-0"
+          />
+        </div>
 
         {(avatarUpload.error || coverUpload.error || imageError) && (
           <p className="mt-2 text-xs text-red-600">

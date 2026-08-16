@@ -67,8 +67,9 @@ export default function ProductPageClient({
     : undefined;
 
   const handleAddToCart = () => {
-    const needsQrLink = isReview && hasQR && !qrLink.trim();
-    const needsNfcLink = isReview && !nfcLink.trim();
+    const needsQrLink =
+      (isReview && hasQR && !qrLink.trim()) || (isOrderCard && !qrLink.trim());
+    const needsNfcLink = (isReview || isOrderCard) && !nfcLink.trim();
     setQrLinkError(
       needsQrLink ? "Please provide a destination link for the QR code." : ""
     );
@@ -86,8 +87,10 @@ export default function ProductPageClient({
       notes: notes.trim() || undefined,
       name: name.trim() || undefined,
       jobTitle: jobTitle.trim() || undefined,
-      qrDestinationLink: isReview && hasQR ? qrLink.trim() || undefined : undefined,
-      nfcDestinationLink: isReview ? nfcLink.trim() || undefined : undefined,
+      qrDestinationLink:
+        (isReview && hasQR) || isOrderCard ? qrLink.trim() || undefined : undefined,
+      nfcDestinationLink:
+        isReview || isOrderCard ? nfcLink.trim() || undefined : undefined,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -202,6 +205,79 @@ export default function ProductPageClient({
                   );
                 })}
               </div>
+            )}
+
+            {isOrderCard && (
+              <>
+                {color === "Add Website" && (
+                  <div className="mt-5 rounded-xl bg-black/5 p-3 text-xs leading-relaxed text-black/70">
+                    We&apos;ll build you a free ordering website — customers
+                    scan your card, browse your menu with photos, and place
+                    their order online. You manage the menu and incoming
+                    orders from your own dashboard.
+                  </div>
+                )}
+
+                <div className="mt-5 border-t border-black/10 pt-4">
+                  <label
+                    htmlFor="order-qr-link"
+                    className="text-xs font-semibold uppercase tracking-wide text-black/60"
+                  >
+                    QR code destination link{" "}
+                    <span className="font-normal normal-case text-black/40">
+                      (required)
+                    </span>
+                  </label>
+                  <input
+                    id="order-qr-link"
+                    type="url"
+                    value={qrLink}
+                    onChange={(e) => {
+                      setQrLink(e.target.value);
+                      if (qrLinkError) setQrLinkError("");
+                    }}
+                    placeholder="https://..."
+                    className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
+                      qrLinkError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-black/15 focus:border-black"
+                    }`}
+                  />
+                  {qrLinkError && (
+                    <p className="mt-2 text-xs text-red-600">{qrLinkError}</p>
+                  )}
+                </div>
+
+                <div className="mt-5 pt-4">
+                  <label
+                    htmlFor="order-nfc-link"
+                    className="text-xs font-semibold uppercase tracking-wide text-black/60"
+                  >
+                    NFC destination link{" "}
+                    <span className="font-normal normal-case text-black/40">
+                      (required)
+                    </span>
+                  </label>
+                  <input
+                    id="order-nfc-link"
+                    type="url"
+                    value={nfcLink}
+                    onChange={(e) => {
+                      setNfcLink(e.target.value);
+                      if (nfcLinkError) setNfcLinkError("");
+                    }}
+                    placeholder="https://..."
+                    className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
+                      nfcLinkError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-black/15 focus:border-black"
+                    }`}
+                  />
+                  {nfcLinkError && (
+                    <p className="mt-2 text-xs text-red-600">{nfcLinkError}</p>
+                  )}
+                </div>
+              </>
             )}
 
             {isReview && (

@@ -12,6 +12,9 @@ import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
 import { REVIEW_PLATFORMS, QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
+import { useProductReviews } from "@/lib/use-product-reviews";
+import RatingSummary from "@/components/RatingSummary";
+import ReviewsSection from "@/components/ReviewsSection";
 
 const NAME_MAX_LENGTH = 18;
 const JOB_TITLE_MAX_LENGTH = 26;
@@ -131,6 +134,7 @@ export default function ProductPageClient({
     setUnitErrors((prev) =>
       prev.map((e, i) => (i === index ? { ...e, [field]: undefined } : e))
     );
+  const reviewsData = useProductReviews(product?.slug ?? "");
 
   if (!product) {
     return (
@@ -250,6 +254,12 @@ export default function ProductPageClient({
           <h1 className="text-3xl font-bold tracking-tight text-black">
             {product.title}
           </h1>
+
+          <RatingSummary
+            averageRating={reviewsData.averageRating}
+            reviewCount={reviewsData.reviewCount}
+            orderCount={reviewsData.orderCount}
+          />
 
           <div className="mt-4 flex items-center gap-3">
             {displayCompareAtPrice && (
@@ -663,6 +673,16 @@ export default function ProductPageClient({
           </div>
         </div>
       </div>
+
+      <ReviewsSection
+        reviews={reviewsData.reviews}
+        loading={reviewsData.loading}
+        user={reviewsData.user}
+        myRating={reviewsData.myRating}
+        myMessage={reviewsData.myMessage}
+        hasMyReview={reviewsData.hasMyReview}
+        submitReview={reviewsData.submitReview}
+      />
 
       {otherProducts.length > 0 && (
         <div className="mt-16 border-t border-black/10 pt-12">

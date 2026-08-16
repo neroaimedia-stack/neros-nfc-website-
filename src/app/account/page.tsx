@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
+import FlippableCard from "@/components/FlippableCard";
+import ReviewCardMock from "@/components/ReviewCardMock";
+import WifiCardMock from "@/components/WifiCardMock";
+import OrderCardMock from "@/components/OrderCardMock";
 
 type OwnedCard = {
   id: string;
@@ -17,6 +21,21 @@ const PRODUCT_TYPE_LABELS: Record<string, string> = {
   "order-card": "Order Card",
   "wifi-card": "Wifi Card",
 };
+
+function CardThumbnail({ productType }: { productType: string }) {
+  switch (productType) {
+    case "business-card":
+      return <FlippableCard shadow={false} reflection={false} />;
+    case "review-card":
+      return <ReviewCardMock shadow={false} />;
+    case "wifi-card":
+      return <WifiCardMock shadow={false} />;
+    case "order-card":
+      return <OrderCardMock shadow={false} />;
+    default:
+      return null;
+  }
+}
 
 function EyeIcon({ open }: { open: boolean }) {
   if (open) {
@@ -118,15 +137,22 @@ function SignedInAccount({
         ) : (
           <div className="flex flex-col divide-y divide-black/10">
             {cards.map((card) => (
-              <div
+              <Link
                 key={card.id}
-                className="flex items-center justify-between py-4"
+                href={`/account/cards/${card.id}`}
+                className="flex items-center gap-4 py-4 transition-opacity hover:opacity-70"
               >
-                <span className="text-sm font-semibold text-black">
-                  {PRODUCT_TYPE_LABELS[card.product_type] ?? card.product_type}
-                </span>
-                <span className="text-xs text-black/40">Set up</span>
-              </div>
+                <div className="w-16 shrink-0">
+                  <CardThumbnail productType={card.product_type} />
+                </div>
+                <div className="flex flex-1 items-center justify-between">
+                  <span className="text-sm font-semibold text-black">
+                    {PRODUCT_TYPE_LABELS[card.product_type] ??
+                      card.product_type}
+                  </span>
+                  <span className="text-xs text-black/40">Manage ›</span>
+                </div>
+              </Link>
             ))}
           </div>
         )}

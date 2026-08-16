@@ -234,10 +234,10 @@ export default function ProductPageClient({
 
                 {addWebsite && (
                   <div className="mt-3 rounded-xl bg-black/5 p-3 text-xs leading-relaxed text-black/70">
-                    We&apos;ll build you a free ordering website — customers
-                    scan your card, browse your menu with photos, and place
-                    their order online. You manage the menu and incoming
-                    orders from your own dashboard.
+                    Includes an ordering webpage — customers scan your card,
+                    browse your menu with photos, and place their order
+                    online. You manage the menu and incoming orders from
+                    your own dashboard.
                   </div>
                 )}
 

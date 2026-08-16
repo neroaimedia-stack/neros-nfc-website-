@@ -183,7 +183,7 @@ export default function PublicProfileView({
             <img
               src={profile.avatar_url}
               alt={profile.full_name ?? "Profile picture"}
-              className="h-24 w-24 shrink-0 rounded-full border-4 border-white object-cover"
+              className="h-24 w-24 shrink-0 rounded-full border-4 border-white object-cover object-top"
             />
           ) : (
             <div className="h-24 w-24 shrink-0 rounded-full border-4 border-white bg-black/10" />

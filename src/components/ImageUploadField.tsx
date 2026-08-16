@@ -108,7 +108,7 @@ export default function ImageUploadField({
             <img
               src={value}
               alt={label}
-              className="h-24 w-24 shrink-0 rounded-full border border-black/10 object-cover"
+              className="h-24 w-24 shrink-0 rounded-full border border-black/10 object-cover object-top"
             />
           ) : (
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full border border-dashed border-black/20 text-xs text-black/30">

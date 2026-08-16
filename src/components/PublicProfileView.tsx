@@ -11,7 +11,7 @@ import {
   FiStar,
 } from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
-import { DEFAULT_SECTION_ORDER, type SectionKey } from "@/lib/business-profile";
+import type { SectionKey } from "@/lib/business-profile";
 
 type SocialLink = { platform: string; url: string };
 type Entry = Record<string, string>;
@@ -45,7 +45,6 @@ export type BusinessProfileRow = {
   interests: Interests | null;
   travel_places: string[] | null;
   links: Entry[] | null;
-  section_order: SectionKey[] | null;
 };
 
 function ChipRow({ values }: { values: string[] }) {
@@ -363,16 +362,7 @@ export default function PublicProfileView({
     },
   ];
 
-  const filledSections = sections.filter((s) => !s.empty);
-  const order =
-    profile.section_order && profile.section_order.length > 0
-      ? profile.section_order
-      : DEFAULT_SECTION_ORDER;
-  const filledByKey = new Map(filledSections.map((s) => [s.key, s]));
-  const orderedSections = [
-    ...order.map((key) => filledByKey.get(key)).filter((s): s is (typeof sections)[number] => !!s),
-    ...filledSections.filter((s) => !order.includes(s.key)),
-  ];
+  const orderedSections = sections.filter((s) => !s.empty);
 
   return (
     <div className="mx-auto w-full max-w-md pb-16">

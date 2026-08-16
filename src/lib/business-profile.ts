@@ -12,18 +12,6 @@ export type SectionKey =
   | "travel"
   | "links";
 
-export const DEFAULT_SECTION_ORDER: SectionKey[] = [
-  "contact",
-  "social",
-  "about",
-  "hobbies",
-  "interests",
-  "work",
-  "education",
-  "travel",
-  "links",
-];
-
 export type Interests = {
   music: string[];
   movies: string[];
@@ -61,7 +49,6 @@ export type ProfileState = {
   interests: Interests;
   travel_places: string[];
   links: Record<string, string>[];
-  section_order: SectionKey[];
 };
 
 export const emptyProfile: ProfileState = {
@@ -85,7 +72,6 @@ export const emptyProfile: ProfileState = {
   interests: emptyInterests,
   travel_places: [],
   links: [],
-  section_order: [],
 };
 
 export const RELATIONSHIP_OPTIONS = [
@@ -120,7 +106,6 @@ export function profileFromRow(data: Record<string, unknown>): ProfileState {
     interests: { ...emptyInterests, ...((data.interests as Interests) ?? {}) },
     travel_places: (data.travel_places as string[]) ?? [],
     links: (data.links as Record<string, string>[]) ?? [],
-    section_order: (data.section_order as SectionKey[]) ?? [],
   };
 }
 
@@ -150,6 +135,5 @@ export function profileToRow(
     interests: profile.interests,
     travel_places: profile.travel_places,
     links: profile.links,
-    section_order: profile.section_order,
   };
 }

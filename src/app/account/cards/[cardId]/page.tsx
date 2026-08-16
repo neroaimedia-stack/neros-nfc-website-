@@ -100,7 +100,7 @@ export default function CardDetailPage() {
       <button
         type="button"
         onClick={() => setMode(mode === "edit" ? "preview" : "edit")}
-        className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
+        className={`flex-1 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
           mode === "edit"
             ? "bg-black text-white"
             : "border border-black text-black hover:opacity-60"
@@ -111,7 +111,7 @@ export default function CardDetailPage() {
       <button
         type="button"
         onClick={() => setMode("preview")}
-        className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
+        className={`flex-1 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
           mode === "preview"
             ? "bg-black text-white"
             : "border border-black text-black hover:opacity-60"

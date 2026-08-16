@@ -22,6 +22,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* iOS Safari auto-zooms the viewport when focusing a text input/select
+   smaller than 16px. Force 16px on all form fields so tapping into a
+   field never triggers that zoom, regardless of the Tailwind text size
+   applied to it. */
+input,
+select,
+textarea {
+  font-size: 16px !important;
+}
+
 .perspective-1600 {
   perspective: 1600px;
 }

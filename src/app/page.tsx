@@ -108,8 +108,8 @@ export default function Home() {
             </div>
             <h3 className="text-lg font-semibold text-black">Custom</h3>
             <p className="mt-2 text-sm text-black/60">
-              Need a custom design, bulk order, or something unique? Let's
-              talk.
+              Custom design, bulk orders, distributorship, or something
+              unique? Let's talk.
             </p>
             <Link
               href="/custom"

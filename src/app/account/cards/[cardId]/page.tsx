@@ -122,24 +122,24 @@ export default function CardDetailPage() {
     </div>
   );
 
-  // In preview mode, drop the account page's padded/max-width chrome so the
-  // profile renders full-bleed, exactly as it does on the public /c/[id] page.
-  // The back link becomes an overlay on the cover photo, and the mode
-  // buttons move below the bio, matching the live public page's layout.
-  // BusinessProfileEditor must stay mounted across this toggle (same parent
-  // position, not two different top-level returns) or it remounts and its
-  // fetch effect re-decides the initial mode, snapping back to preview.
-  const isFullBleedPreview = isBusinessCard && mode === "preview";
-
+  // Business cards always render full-bleed (no padded/max-width chrome),
+  // in both preview AND edit mode, so the two look structurally identical —
+  // edge-to-edge cover photo, back arrow overlaid on it, mode buttons below
+  // the bio. Only the field content (pencils, unfilled placeholders) should
+  // differ between modes, never the page layout around it.
+  // BusinessProfileEditor must stay mounted across the mode toggle (same
+  // parent position, not two different top-level returns) or it remounts
+  // and its fetch effect re-decides the initial mode, snapping back to
+  // preview.
   return (
     <div
       className={
-        isFullBleedPreview
+        isBusinessCard
           ? "flex-1"
           : "mx-auto w-full max-w-md flex-1 px-6 py-16 sm:max-w-xl md:max-w-2xl"
       }
     >
-      {!isFullBleedPreview && backLink}
+      {!isBusinessCard && backLink}
 
       {!isBusinessCard && (
         <div className="mt-6 rounded-3xl border border-black/10 bg-neutral-50 p-8">
@@ -150,16 +150,13 @@ export default function CardDetailPage() {
       )}
 
       {isBusinessCard ? (
-        <>
-          {!isFullBleedPreview && <div className="mt-6">{buttonRow}</div>}
-          <BusinessProfileEditor
-            cardId={card.id}
-            mode={mode}
-            onModeChange={setMode}
-            onBack={isFullBleedPreview ? () => router.push("/account") : undefined}
-            actionButtons={isFullBleedPreview ? buttonRow : undefined}
-          />
-        </>
+        <BusinessProfileEditor
+          cardId={card.id}
+          mode={mode}
+          onModeChange={setMode}
+          onBack={() => router.push("/account")}
+          actionButtons={buttonRow}
+        />
       ) : (
         <div className="mt-8 rounded-2xl border border-black/10 bg-black/5 p-5 text-sm text-black/60">
           The profile editor for this card is coming soon — you&apos;ll be

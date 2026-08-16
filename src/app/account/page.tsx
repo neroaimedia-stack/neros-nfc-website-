@@ -47,9 +47,14 @@ export default function AccountPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [mode, setMode] = useState<"login" | "signup" | null>(null);
+  const [formMode, setFormMode] = useState<"login" | "signup">("login");
 
-  const handleSubmit = async (nextMode: "login" | "signup") => {
+  const switchMode = (nextMode: "login" | "signup") => {
+    setFormMode(nextMode);
+    setError("");
+  };
+
+  const handleSubmit = async () => {
     // Read straight from the DOM as the source of truth, not just React
     // state — browser/OS autofill (esp. iOS Safari's saved-password
     // suggestions) can fill the inputs without firing a React onChange,
@@ -63,9 +68,8 @@ export default function AccountPage() {
     }
     setSubmitting(true);
     setError("");
-    setMode(nextMode);
     const { error: authError } =
-      nextMode === "login"
+      formMode === "login"
         ? await signIn(emailValue, passwordValue)
         : await signUp(emailValue, passwordValue);
     setSubmitting(false);
@@ -121,7 +125,7 @@ export default function AccountPage() {
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            handleSubmit("login");
+            handleSubmit();
           }}
         >
           <div>
@@ -154,7 +158,9 @@ export default function AccountPage() {
                 id="password"
                 ref={passwordRef}
                 type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
+                autoComplete={
+                  formMode === "login" ? "current-password" : "new-password"
+                }
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -179,7 +185,13 @@ export default function AccountPage() {
             disabled={submitting}
             className="mt-2 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-50"
           >
-            {submitting && mode === "login" ? "Logging in…" : "Log In"}
+            {submitting
+              ? formMode === "login"
+                ? "Logging in…"
+                : "Creating account…"
+              : formMode === "login"
+                ? "Log In"
+                : "Sign Up"}
           </button>
         </form>
 
@@ -187,22 +199,31 @@ export default function AccountPage() {
           <p className="mt-3 text-center text-xs text-red-600">{error}</p>
         )}
 
-        <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wide text-black/40">
-          <div className="h-px flex-1 bg-black/10" />
-          New here
-          <div className="h-px flex-1 bg-black/10" />
-        </div>
-
-        <button
-          type="button"
-          disabled={submitting}
-          onClick={() => handleSubmit("signup")}
-          className="w-full rounded-full border border-black px-6 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-60 disabled:opacity-50"
-        >
-          {submitting && mode === "signup"
-            ? "Creating account…"
-            : "Create Account"}
-        </button>
+        <p className="mt-6 text-center text-sm text-black/60">
+          {formMode === "login" ? (
+            <>
+              New here?{" "}
+              <button
+                type="button"
+                onClick={() => switchMode("signup")}
+                className="font-semibold text-black underline underline-offset-2"
+              >
+                Create an account
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => switchMode("login")}
+                className="font-semibold text-black underline underline-offset-2"
+              >
+                Log in
+              </button>
+            </>
+          )}
+        </p>
       </div>
 
       <p className="mt-6 text-center text-xs text-black/40">

@@ -71,44 +71,37 @@ function formatBirthday(iso: string) {
   return date.toLocaleDateString(undefined, { month: "long", day: "numeric" });
 }
 
-function PenIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.75}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  );
-}
-
-function EditProfileButton({ onClick }: { onClick?: () => void }) {
+function BackButton({ onClick }: { onClick?: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
+      aria-label="Back"
+      className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-opacity hover:opacity-70"
     >
-      <PenIcon className="h-3.5 w-3.5" />
-      Edit profile
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
     </button>
   );
 }
 
 export default function PublicProfileView({
   profile,
-  showEditButton = false,
-  onEditClick,
+  onBack,
+  actionButtons,
 }: {
   profile: BusinessProfileRow;
-  showEditButton?: boolean;
-  onEditClick?: () => void;
+  onBack?: () => void;
+  actionButtons?: React.ReactNode;
 }) {
   const socialLinks = (profile.social_links ?? []).filter((l) => l.url.trim());
   const works = (profile.works ?? []).filter((w) => w.company || w.title);
@@ -152,11 +145,7 @@ export default function PublicProfileView({
         <p className="text-sm text-black/40">
           This profile hasn&apos;t been set up yet.
         </p>
-        {showEditButton && (
-          <div className="mt-4 flex justify-center">
-            <EditProfileButton onClick={onEditClick} />
-          </div>
-        )}
+        {actionButtons && <div className="mt-4">{actionButtons}</div>}
       </div>
     );
   }
@@ -169,11 +158,12 @@ export default function PublicProfileView({
           <img
             src={profile.cover_url}
             alt=""
-            className="h-40 w-full object-cover"
+            className="h-36 w-full object-cover"
           />
         ) : (
-          <div className="h-40 w-full bg-black/5" />
+          <div className="h-36 w-full bg-black/5" />
         )}
+        {onBack && <BackButton onClick={onBack} />}
       </div>
 
       <div className="px-6">
@@ -206,7 +196,7 @@ export default function PublicProfileView({
           <p className="mt-4 text-sm text-black/70">{profile.bio}</p>
         )}
 
-        {showEditButton && <EditProfileButton onClick={onEditClick} />}
+        {actionButtons && <div className="mt-4">{actionButtons}</div>}
 
         {(profile.email || (profile.phone_numbers && profile.phone_numbers.length > 0)) && (
           <div className="mt-5 flex flex-wrap gap-2">

@@ -139,10 +139,14 @@ export default function BusinessProfileEditor({
   cardId,
   mode,
   onModeChange,
+  onBack,
+  actionButtons,
 }: {
   cardId: string;
   mode: "preview" | "edit";
   onModeChange: (mode: "preview" | "edit") => void;
+  onBack?: () => void;
+  actionButtons?: React.ReactNode;
 }) {
   const [profile, setProfile] = useState<ProfileState>(emptyProfile);
   const [loading, setLoading] = useState(true);
@@ -261,9 +265,11 @@ export default function BusinessProfileEditor({
 
   if (mode === "preview") {
     return (
-      <div className="mt-8 border-t border-black/10 pt-8">
-        <PublicProfileView profile={buildRow()} />
-      </div>
+      <PublicProfileView
+        profile={buildRow()}
+        onBack={onBack}
+        actionButtons={actionButtons}
+      />
     );
   }
 

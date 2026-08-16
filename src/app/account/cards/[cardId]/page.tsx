@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
@@ -34,6 +34,7 @@ function CardPreview({ productType }: { productType: string }) {
 
 export default function CardDetailPage() {
   const { cardId } = useParams<{ cardId: string }>();
+  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [card, setCard] = useState<CardRecord | null>(null);
   const [checked, setChecked] = useState(false);
@@ -95,7 +96,7 @@ export default function CardDetailPage() {
   );
 
   const buttonRow = (
-    <div className="mt-6 flex gap-3">
+    <div className="flex gap-3">
       <button
         type="button"
         onClick={() => setMode("edit")}
@@ -123,17 +124,17 @@ export default function CardDetailPage() {
 
   // In preview mode, drop the account page's padded/max-width chrome so the
   // profile renders full-bleed, exactly as it does on the public /c/[id] page.
+  // The back link becomes an overlay on the cover photo, and the mode
+  // buttons move below the bio, matching the live public page's layout.
   if (isBusinessCard && mode === "preview") {
     return (
       <div className="flex-1">
-        <div className="mx-auto w-full max-w-md px-6 pt-16 sm:max-w-xl md:max-w-2xl">
-          {backLink}
-          {buttonRow}
-        </div>
         <BusinessProfileEditor
           cardId={card.id}
           mode={mode}
           onModeChange={setMode}
+          onBack={() => router.push("/account")}
+          actionButtons={buttonRow}
         />
       </div>
     );
@@ -153,7 +154,7 @@ export default function CardDetailPage() {
 
       {isBusinessCard ? (
         <>
-          {buttonRow}
+          <div className="mt-6">{buttonRow}</div>
           <BusinessProfileEditor
             cardId={card.id}
             mode={mode}

@@ -34,7 +34,7 @@ export type ProfileState = {
   bio: string;
   avatar_url: string | null;
   cover_url: string | null;
-  email: string;
+  emails: string[];
   phone_numbers: string[];
   social_links: SocialLink[];
   hobbies: string[];
@@ -57,7 +57,7 @@ export const emptyProfile: ProfileState = {
   bio: "",
   avatar_url: null,
   cover_url: null,
-  email: "",
+  emails: [],
   phone_numbers: [],
   social_links: [],
   hobbies: [],
@@ -91,7 +91,7 @@ export function profileFromRow(data: Record<string, unknown>): ProfileState {
     bio: (data.bio as string) ?? "",
     avatar_url: (data.avatar_url as string) ?? null,
     cover_url: (data.cover_url as string) ?? null,
-    email: (data.email as string) ?? "",
+    emails: (data.emails as string[]) ?? [],
     phone_numbers: (data.phone_numbers as string[]) ?? [],
     social_links: (data.social_links as SocialLink[]) ?? [],
     hobbies: (data.hobbies as string[]) ?? [],
@@ -120,7 +120,7 @@ export function profileToRow(
     bio: profile.bio || null,
     avatar_url: profile.avatar_url,
     cover_url: profile.cover_url,
-    email: profile.email || null,
+    emails: profile.emails,
     phone_numbers: profile.phone_numbers,
     social_links: profile.social_links,
     hobbies: profile.hobbies,

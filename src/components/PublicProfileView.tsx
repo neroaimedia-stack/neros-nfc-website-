@@ -30,7 +30,7 @@ export type BusinessProfileRow = {
   bio: string | null;
   avatar_url: string | null;
   cover_url: string | null;
-  email: string | null;
+  emails: string[] | null;
   phone_numbers: string[] | null;
   social_links: SocialLink[] | null;
   hobbies: string[] | null;
@@ -144,7 +144,7 @@ export default function PublicProfileView({
     profile.full_name ||
     profile.job_title ||
     profile.bio ||
-    profile.email ||
+    (profile.emails && profile.emails.length > 0) ||
     (profile.phone_numbers && profile.phone_numbers.length > 0) ||
     socialLinks.length > 0 ||
     hasDetails ||
@@ -177,17 +177,20 @@ export default function PublicProfileView({
       key: "contact",
       title: "Contact",
       icon: FiPhone,
-      empty: !profile.email && !(profile.phone_numbers && profile.phone_numbers.length > 0),
+      empty:
+        !(profile.emails && profile.emails.length > 0) &&
+        !(profile.phone_numbers && profile.phone_numbers.length > 0),
       content: (
         <div className="flex flex-wrap gap-2">
-          {profile.email && (
+          {(profile.emails ?? []).map((email) => (
             <a
-              href={`mailto:${profile.email}`}
+              key={email}
+              href={`mailto:${email}`}
               className="rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
             >
-              Email
+              {email}
             </a>
-          )}
+          ))}
           {(profile.phone_numbers ?? []).map((phone) => (
             <a
               key={phone}

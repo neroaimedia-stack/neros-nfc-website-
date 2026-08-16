@@ -270,14 +270,17 @@ export default function EditableProfileView({
       key: "contact",
       title: "Contact",
       icon: FiPhone,
-      empty: !profile.email && profile.phone_numbers.length === 0,
+      empty: profile.emails.length === 0 && profile.phone_numbers.length === 0,
       content: (
         <div className="flex flex-wrap gap-2">
-          {profile.email && (
-            <span className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black">
-              {profile.email}
+          {profile.emails.map((email) => (
+            <span
+              key={email}
+              className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black"
+            >
+              {email}
             </span>
-          )}
+          ))}
           {profile.phone_numbers.map((phone) => (
             <span
               key={phone}
@@ -631,11 +634,10 @@ export default function EditableProfileView({
           saving={savingSheet}
           error={sheetError}
         >
-          <TextField
-            label="Email"
-            type="email"
-            value={draft.email}
-            onChange={(v) => updateDraft("email", v)}
+          <TagListInput
+            label="Emails"
+            values={draft.emails}
+            onChange={(v) => updateDraft("emails", v)}
             placeholder="you@example.com"
           />
           <TagListInput

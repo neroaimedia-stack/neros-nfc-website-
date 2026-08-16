@@ -89,8 +89,10 @@ export default function CardDetailPage() {
     );
   }
 
+  const isBusinessCard = card.product_type === "business-card";
+
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-6 py-16">
+    <main className="mx-auto w-full max-w-md flex-1 px-6 py-16 sm:max-w-xl md:max-w-2xl">
       <Link
         href="/account"
         className="text-sm text-black/40 transition-colors hover:text-black"
@@ -98,11 +100,13 @@ export default function CardDetailPage() {
         ‹ Your cards
       </Link>
 
-      <div className="mt-6 rounded-3xl border border-black/10 bg-neutral-50 p-8">
-        <div className="mx-auto w-48 max-w-full">
-          <CardPreview productType={card.product_type} />
+      {!isBusinessCard && (
+        <div className="mt-6 rounded-3xl border border-black/10 bg-neutral-50 p-8">
+          <div className="mx-auto w-48 max-w-full">
+            <CardPreview productType={card.product_type} />
+          </div>
         </div>
-      </div>
+      )}
 
       <h1 className="mt-6 text-2xl font-bold text-black">
         {PRODUCT_TYPE_LABELS[card.product_type] ?? card.product_type}
@@ -121,7 +125,7 @@ export default function CardDetailPage() {
         View public profile ›
       </Link>
 
-      {card.product_type === "business-card" ? (
+      {isBusinessCard ? (
         <BusinessProfileEditor cardId={card.id} />
       ) : (
         <div className="mt-8 rounded-2xl border border-black/10 bg-black/5 p-5 text-sm text-black/60">

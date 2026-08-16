@@ -180,7 +180,7 @@ function SignedInAccount({
                 if (claimError) setClaimError("");
               }}
               placeholder="e.g. DEMO-CARD-01"
-              className="w-full rounded-full border border-black/15 px-4 py-2.5 text-sm uppercase outline-none focus:border-black"
+              className="min-w-0 flex-1 rounded-full border border-black/15 px-4 py-2.5 text-sm uppercase outline-none focus:border-black"
             />
             <button
               type="button"

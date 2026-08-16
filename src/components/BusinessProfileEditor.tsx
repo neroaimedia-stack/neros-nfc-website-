@@ -100,16 +100,21 @@ function TextField({
   onChange,
   placeholder,
   type = "text",
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
+  required?: boolean;
 }) {
   return (
-    <div>
-      <label className="text-sm font-medium text-black">{label}</label>
+    <div className="min-w-0">
+      <label className="text-sm font-medium text-black">
+        {label}
+        {required && <span className="text-red-600"> *</span>}
+      </label>
       <input
         type={type}
         value={value}
@@ -118,6 +123,12 @@ function TextField({
         className="mt-1 w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
       />
     </div>
+  );
+}
+
+function FieldRow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
   );
 }
 
@@ -182,6 +193,16 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
   };
 
   const handleSave = async () => {
+    const missing: string[] = [];
+    if (!profile.avatar_url) missing.push("a profile picture");
+    if (!profile.cover_url) missing.push("a cover photo");
+    if (!profile.full_name.trim()) missing.push("your full name");
+    if (missing.length > 0) {
+      setError(`Please add ${missing.join(", ")} before saving.`);
+      setSaved(false);
+      return;
+    }
+
     setSaving(true);
     setError("");
     const { error: saveError } = await supabase.from("business_profiles").upsert(
@@ -229,37 +250,44 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
   return (
     <div className="mt-8 flex flex-col gap-5">
       <SectionCard title="Photos">
-        <ImageUploadField
-          label="Profile picture"
-          cardId={cardId}
-          folder="avatar"
-          value={profile.avatar_url}
-          onChange={(url) => update("avatar_url", url)}
-          shape="square"
-        />
-        <ImageUploadField
-          label="Cover photo"
-          cardId={cardId}
-          folder="cover"
-          value={profile.cover_url}
-          onChange={(url) => update("cover_url", url)}
-          shape="wide"
-        />
+        <FieldRow>
+          <ImageUploadField
+            label="Profile picture"
+            cardId={cardId}
+            folder="avatar"
+            value={profile.avatar_url}
+            onChange={(url) => update("avatar_url", url)}
+            shape="square"
+            required
+          />
+          <ImageUploadField
+            label="Cover photo"
+            cardId={cardId}
+            folder="cover"
+            value={profile.cover_url}
+            onChange={(url) => update("cover_url", url)}
+            shape="wide"
+            required
+          />
+        </FieldRow>
       </SectionCard>
 
       <SectionCard title="Basics">
-        <TextField
-          label="Full name"
-          value={profile.full_name}
-          onChange={(v) => update("full_name", v)}
-          placeholder="Jane Doe"
-        />
-        <TextField
-          label="Job title"
-          value={profile.job_title}
-          onChange={(v) => update("job_title", v)}
-          placeholder="Founder, HERNEROS"
-        />
+        <FieldRow>
+          <TextField
+            label="Full name"
+            value={profile.full_name}
+            onChange={(v) => update("full_name", v)}
+            placeholder="Jane Doe"
+            required
+          />
+          <TextField
+            label="Job title"
+            value={profile.job_title}
+            onChange={(v) => update("job_title", v)}
+            placeholder="Founder, HERNEROS"
+          />
+        </FieldRow>
         <div>
           <label className="text-sm font-medium text-black">Bio</label>
           <textarea
@@ -293,29 +321,33 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
       </SectionCard>
 
       <SectionCard title="About you">
-        <TextField
-          label="Current city"
-          value={profile.current_city}
-          onChange={(v) => update("current_city", v)}
-        />
-        <TextField
-          label="Hometown"
-          value={profile.hometown}
-          onChange={(v) => update("hometown", v)}
-        />
-        <TextField
-          label="Birthday"
-          type="date"
-          value={profile.birthday}
-          onChange={(v) => update("birthday", v)}
-        />
-        <TextField
-          label="Gender"
-          value={profile.gender}
-          onChange={(v) => update("gender", v)}
-          placeholder="e.g. Woman, Man, Non-binary"
-        />
-        <div>
+        <FieldRow>
+          <TextField
+            label="Current city"
+            value={profile.current_city}
+            onChange={(v) => update("current_city", v)}
+          />
+          <TextField
+            label="Hometown"
+            value={profile.hometown}
+            onChange={(v) => update("hometown", v)}
+          />
+        </FieldRow>
+        <FieldRow>
+          <TextField
+            label="Birthday"
+            type="date"
+            value={profile.birthday}
+            onChange={(v) => update("birthday", v)}
+          />
+          <TextField
+            label="Gender"
+            value={profile.gender}
+            onChange={(v) => update("gender", v)}
+            placeholder="e.g. Woman, Man, Non-binary"
+          />
+        </FieldRow>
+        <div className="min-w-0">
           <label className="text-sm font-medium text-black" htmlFor="relationship">
             Relationship status
           </label>
@@ -350,30 +382,34 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
       </SectionCard>
 
       <SectionCard title="Interests">
-        <TagListInput
-          label="Music"
-          values={profile.interests.music}
-          onChange={(v) => updateInterest("music", v)}
-          placeholder="Jazz"
-        />
-        <TagListInput
-          label="Movies"
-          values={profile.interests.movies}
-          onChange={(v) => updateInterest("movies", v)}
-          placeholder="Sci-fi"
-        />
-        <TagListInput
-          label="Games"
-          values={profile.interests.games}
-          onChange={(v) => updateInterest("games", v)}
-          placeholder="Chess"
-        />
-        <TagListInput
-          label="TV shows"
-          values={profile.interests.tvShows}
-          onChange={(v) => updateInterest("tvShows", v)}
-          placeholder="Documentaries"
-        />
+        <FieldRow>
+          <TagListInput
+            label="Music"
+            values={profile.interests.music}
+            onChange={(v) => updateInterest("music", v)}
+            placeholder="Jazz"
+          />
+          <TagListInput
+            label="Movies"
+            values={profile.interests.movies}
+            onChange={(v) => updateInterest("movies", v)}
+            placeholder="Sci-fi"
+          />
+        </FieldRow>
+        <FieldRow>
+          <TagListInput
+            label="Games"
+            values={profile.interests.games}
+            onChange={(v) => updateInterest("games", v)}
+            placeholder="Chess"
+          />
+          <TagListInput
+            label="TV shows"
+            values={profile.interests.tvShows}
+            onChange={(v) => updateInterest("tvShows", v)}
+            placeholder="Documentaries"
+          />
+        </FieldRow>
         <TagListInput
           label="Sports & athletes"
           values={profile.interests.sports}

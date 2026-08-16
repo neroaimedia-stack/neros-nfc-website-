@@ -50,7 +50,7 @@ export default function SocialLinksEditor({
                   value={link.url}
                   onChange={(e) => updateUrl(link.platform, e.target.value)}
                   placeholder={platform.placeholder}
-                  className="w-full rounded-full border border-black/15 px-4 py-2 text-sm outline-none focus:border-black"
+                  className="min-w-0 flex-1 rounded-full border border-black/15 px-4 py-2 text-sm outline-none focus:border-black"
                 />
                 <button
                   type="button"
@@ -68,7 +68,7 @@ export default function SocialLinksEditor({
 
       {picking ? (
         <div className="mt-3 rounded-2xl border border-black/10 p-3">
-          <div className="grid grid-cols-5 gap-2 sm:grid-cols-6">
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
             {available.map((platform) => {
               const Icon = platform.Icon;
               return (

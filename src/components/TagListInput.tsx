@@ -64,7 +64,7 @@ export default function TagListInput({
             }
           }}
           placeholder={placeholder}
-          className="w-full rounded-full border border-black/15 px-4 py-2 text-sm outline-none focus:border-black"
+          className="min-w-0 flex-1 rounded-full border border-black/15 px-4 py-2 text-sm outline-none focus:border-black"
         />
         <button
           type="button"

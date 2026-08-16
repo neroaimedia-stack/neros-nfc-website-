@@ -58,16 +58,18 @@ export default function MultiEntryEditor({
                   Remove
                 </button>
               </div>
-              {fields.map((field) => (
-                <input
-                  key={field.key}
-                  type="text"
-                  value={entry[field.key] ?? ""}
-                  onChange={(e) => updateEntry(index, field.key, e.target.value)}
-                  placeholder={field.placeholder ?? field.label}
-                  className="w-full rounded-xl border border-black/15 px-3 py-2 text-sm outline-none focus:border-black"
-                />
-              ))}
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {fields.map((field) => (
+                  <input
+                    key={field.key}
+                    type="text"
+                    value={entry[field.key] ?? ""}
+                    onChange={(e) => updateEntry(index, field.key, e.target.value)}
+                    placeholder={field.placeholder ?? field.label}
+                    className="min-w-0 w-full rounded-xl border border-black/15 px-3 py-2 text-sm outline-none focus:border-black"
+                  />
+                ))}
+              </div>
             </div>
           ))}
         </div>

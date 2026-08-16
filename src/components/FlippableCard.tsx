@@ -16,13 +16,33 @@ function CardFaceContent({
   style,
   name = "Hernero Cruz",
   jobTitle = "CEO & Founder",
+  personalized = true,
 }: {
   variant: "front" | "back";
   style: CardColorStyle;
   name?: string;
   jobTitle?: string;
+  personalized?: boolean;
 }) {
   if (variant === "front") {
+    if (!personalized) {
+      return (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10" />
+          <div className="card-edge-shade" />
+          <div className="card-corner-gloss" />
+          <div className="card-sheen" />
+          <div className="relative flex h-full items-center justify-center p-7">
+            <span
+              className={`text-2xl font-bold tracking-tight uppercase ${style.textClass}`}
+            >
+              HERNEROS
+            </span>
+          </div>
+        </>
+      );
+    }
+
     return (
       <>
         <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10" />
@@ -70,6 +90,7 @@ export default function FlippableCard({
   reflection = shadow,
   name,
   jobTitle,
+  personalized = true,
 }: {
   color?: string;
   className?: string;
@@ -77,6 +98,7 @@ export default function FlippableCard({
   reflection?: boolean;
   name?: string;
   jobTitle?: string;
+  personalized?: boolean;
 }) {
   const [flipped, setFlipped] = useState(false);
   const [scale, setScale] = useState(1);
@@ -139,7 +161,13 @@ export default function FlippableCard({
                     className={`h-full w-full overflow-hidden rounded-[18px] ${style.borderClass ?? ""}`}
                     style={{ background: style.cardGradient }}
                   >
-                    <CardFaceContent variant="front" style={style} name={name} jobTitle={jobTitle} />
+                    <CardFaceContent
+                      variant="front"
+                      style={style}
+                      name={name}
+                      jobTitle={jobTitle}
+                      personalized={personalized}
+                    />
                   </div>
                 </div>
 
@@ -181,6 +209,7 @@ export default function FlippableCard({
                 style={style}
                 name={name}
                 jobTitle={jobTitle}
+                personalized={personalized}
               />
             </div>
           </div>

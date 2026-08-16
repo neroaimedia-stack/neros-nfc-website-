@@ -46,11 +46,12 @@ export default function ProductPageClient({
   const isReview = product?.slug === "review-card";
   const isWifi = product?.slug === "wifi-card";
   const isOrderCard = product?.slug === "order-card";
-  const isFormatOnly = isWifi || isOrderCard;
   const isBusinessCard = product?.slug === "business-card";
+  const useToggleSelector = isWifi || isOrderCard || isBusinessCard;
   const { addItem } = useCart();
   const currency = useCurrency();
   const [color, setColor] = useState(product?.colors[0] ?? "");
+  const isStandardBusinessCard = isBusinessCard && color === "Standard";
   const [hasQR, setHasQR] = useState(false);
   const [units, setUnits] = useState<UnitDetails[]>([{ ...emptyUnit }]);
   const [unitErrors, setUnitErrors] = useState<UnitErrors[]>([]);
@@ -175,6 +176,7 @@ export default function ProductPageClient({
               reflection={false}
               name={units[0].name.trim() || undefined}
               jobTitle={units[0].jobTitle.trim() || undefined}
+              personalized={!isStandardBusinessCard}
             />
           )}
         </div>
@@ -214,15 +216,17 @@ export default function ProductPageClient({
                 <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
                   {isReview
                     ? "Select Platform"
-                    : isFormatOnly
-                      ? "Select Format"
-                      : "Select Finish"}
+                    : isBusinessCard
+                      ? "Select Type"
+                      : useToggleSelector
+                        ? "Select Format"
+                        : "Select Finish"}
                 </span>
                 <span className="text-sm font-semibold text-black">
                   {color}
                 </span>
               </div>
-              {isFormatOnly ? (
+              {useToggleSelector ? (
                 <div className="mt-3 flex gap-2">
                   {product.colors.map((c) => (
                     <button
@@ -432,7 +436,7 @@ export default function ProductPageClient({
             </div>
           )}
 
-          {isBusinessCard && (
+          {isBusinessCard && !isStandardBusinessCard && (
             <div className="mt-8 rounded-2xl border border-black/10 p-4">
               <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Personalize your card{units.length > 1 ? "s" : ""}
@@ -535,7 +539,9 @@ export default function ProductPageClient({
               </button>
             </div>
             {units.length > 1 &&
-              (isBusinessCard || isReview || isOrderCard) && (
+              ((isBusinessCard && !isStandardBusinessCard) ||
+                isReview ||
+                isOrderCard) && (
                 <p className="mt-2 text-xs text-black/40">
                   Each card can have its own details below.
                 </p>

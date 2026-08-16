@@ -88,15 +88,9 @@ function SignedInAccount({
     }
     setClaiming(true);
     setClaimError("");
-    const { data, error } = await supabase
-      .from("cards")
-      .update({ owner_user_id: userId, claimed_at: new Date().toISOString() })
-      .eq("code", trimmed.toUpperCase())
-      .is("owner_user_id", null)
-      .select("id")
-      .maybeSingle();
+    const { error } = await supabase.rpc("claim_card", { p_code: trimmed });
     setClaiming(false);
-    if (error || !data) {
+    if (error) {
       setClaimError(
         "That code doesn't match an unclaimed card. Double-check it and try again."
       );

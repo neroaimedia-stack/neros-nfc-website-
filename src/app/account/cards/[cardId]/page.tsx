@@ -9,6 +9,7 @@ import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
 import OrderCardMock from "@/components/OrderCardMock";
+import BusinessProfileEditor from "@/components/BusinessProfileEditor";
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   "business-card": "Business Card",
@@ -112,10 +113,14 @@ export default function CardDetailPage() {
         </p>
       )}
 
-      <div className="mt-8 rounded-2xl border border-black/10 bg-black/5 p-5 text-sm text-black/60">
-        The profile editor for this card is coming soon — you&apos;ll be
-        able to update what it opens right from here.
-      </div>
+      {card.product_type === "business-card" ? (
+        <BusinessProfileEditor cardId={card.id} />
+      ) : (
+        <div className="mt-8 rounded-2xl border border-black/10 bg-black/5 p-5 text-sm text-black/60">
+          The profile editor for this card is coming soon — you&apos;ll be
+          able to update what it opens right from here.
+        </div>
+      )}
     </main>
   );
 }

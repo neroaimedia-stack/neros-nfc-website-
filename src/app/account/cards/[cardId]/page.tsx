@@ -126,23 +126,20 @@ export default function CardDetailPage() {
   // profile renders full-bleed, exactly as it does on the public /c/[id] page.
   // The back link becomes an overlay on the cover photo, and the mode
   // buttons move below the bio, matching the live public page's layout.
-  if (isBusinessCard && mode === "preview") {
-    return (
-      <div className="flex-1">
-        <BusinessProfileEditor
-          cardId={card.id}
-          mode={mode}
-          onModeChange={setMode}
-          onBack={() => router.push("/account")}
-          actionButtons={buttonRow}
-        />
-      </div>
-    );
-  }
+  // BusinessProfileEditor must stay mounted across this toggle (same parent
+  // position, not two different top-level returns) or it remounts and its
+  // fetch effect re-decides the initial mode, snapping back to preview.
+  const isFullBleedPreview = isBusinessCard && mode === "preview";
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-6 py-16 sm:max-w-xl md:max-w-2xl">
-      {backLink}
+    <div
+      className={
+        isFullBleedPreview
+          ? "flex-1"
+          : "mx-auto w-full max-w-md flex-1 px-6 py-16 sm:max-w-xl md:max-w-2xl"
+      }
+    >
+      {!isFullBleedPreview && backLink}
 
       {!isBusinessCard && (
         <div className="mt-6 rounded-3xl border border-black/10 bg-neutral-50 p-8">
@@ -154,11 +151,13 @@ export default function CardDetailPage() {
 
       {isBusinessCard ? (
         <>
-          <div className="mt-6">{buttonRow}</div>
+          {!isFullBleedPreview && <div className="mt-6">{buttonRow}</div>}
           <BusinessProfileEditor
             cardId={card.id}
             mode={mode}
             onModeChange={setMode}
+            onBack={isFullBleedPreview ? () => router.push("/account") : undefined}
+            actionButtons={isFullBleedPreview ? buttonRow : undefined}
           />
         </>
       ) : (
@@ -167,6 +166,6 @@ export default function CardDetailPage() {
           able to update what it opens right from here.
         </div>
       )}
-    </main>
+    </div>
   );
 }

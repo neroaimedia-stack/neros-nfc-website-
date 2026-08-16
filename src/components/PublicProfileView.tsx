@@ -180,7 +180,7 @@ export default function PublicProfileView({
               <div className="h-24 w-24 rounded-full border-4 border-white bg-black/10" />
             )}
           </div>
-          <div className="min-w-0 pb-1">
+          <div className="min-w-0 pt-3 pb-1">
             {profile.full_name && (
               <h1 className="truncate text-2xl font-bold text-black">
                 {profile.full_name}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { findSocialPlatform, SOCIAL_PLATFORMS } from "@/lib/social-platforms";
 
 export type SocialLink = { platform: string; url: string };
@@ -12,14 +11,11 @@ export default function SocialLinksEditor({
   value: SocialLink[];
   onChange: (links: SocialLink[]) => void;
 }) {
-  const [picking, setPicking] = useState(false);
-
   const usedSlugs = new Set(value.map((link) => link.platform));
   const available = SOCIAL_PLATFORMS.filter((p) => !usedSlugs.has(p.slug));
 
   const addPlatform = (slug: string) => {
     onChange([...value, { platform: slug, url: "" }]);
-    setPicking(false);
   };
 
   const updateUrl = (slug: string, url: string) => {
@@ -64,19 +60,8 @@ export default function SocialLinksEditor({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => setPicking((p) => !p)}
-        disabled={!picking && available.length === 0}
-        className={`mt-3 rounded-full px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-60 disabled:opacity-40 ${
-          picking ? "border border-black/15 text-black/50" : "border border-black text-black"
-        }`}
-      >
-        {picking ? "Cancel" : "+ Add platform"}
-      </button>
-
-      {picking && (
-        <div className="mt-2 flex flex-col">
+      {available.length > 0 && (
+        <div className={`flex flex-col ${value.length > 0 ? "mt-3" : ""}`}>
           {available.map((platform) => {
             const Icon = platform.Icon;
             return (

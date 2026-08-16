@@ -1,19 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 
+function EyeIcon({ open }: { open: boolean }) {
+  if (open) {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12s-4 7.5-10.5 7.5S1.5 12 1.5 12Z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+    >
+      <path d="M3 3l18 18" />
+      <path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c6.5 0 10.5 7 10.5 7a13.4 13.4 0 0 1-3.6 4.1M6.7 6.7C3.9 8.5 1.5 12 1.5 12s4 7 10.5 7a10.6 10.6 0 0 0 4.3-.9" />
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+    </svg>
+  );
+}
+
 export default function AccountPage() {
   const { user, loading, signIn, signUp, signOut } = useAuth();
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [mode, setMode] = useState<"login" | "signup" | null>(null);
 
   const handleSubmit = async (nextMode: "login" | "signup") => {
-    if (!email.trim() || !password.trim()) {
+    // Read straight from the DOM as the source of truth, not just React
+    // state — browser/OS autofill (esp. iOS Safari's saved-password
+    // suggestions) can fill the inputs without firing a React onChange,
+    // leaving state stale even though the fields visibly have values.
+    const emailValue = (emailRef.current?.value ?? email).trim();
+    const passwordValue = passwordRef.current?.value ?? password;
+
+    if (!emailValue || !passwordValue) {
       setError("Please enter your email and password.");
       return;
     }
@@ -22,8 +66,8 @@ export default function AccountPage() {
     setMode(nextMode);
     const { error: authError } =
       nextMode === "login"
-        ? await signIn(email.trim(), password)
-        : await signUp(email.trim(), password);
+        ? await signIn(emailValue, passwordValue)
+        : await signUp(emailValue, passwordValue);
     setSubmitting(false);
     if (authError) setError(authError);
   };
@@ -86,7 +130,9 @@ export default function AccountPage() {
             </label>
             <input
               id="email"
+              ref={emailRef}
               type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -103,17 +149,30 @@ export default function AccountPage() {
             >
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (error) setError("");
-              }}
-              placeholder="••••••••"
-              className="mt-1 w-full rounded-xl border border-black/15 px-4 py-3 text-sm outline-none focus:border-black"
-            />
+            <div className="relative mt-1">
+              <input
+                id="password"
+                ref={passwordRef}
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="••••••••"
+                className="w-full rounded-xl border border-black/15 py-3 pr-11 pl-4 text-sm outline-none focus:border-black"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-black/40 hover:text-black"
+              >
+                <EyeIcon open={showPassword} />
+              </button>
+            </div>
           </div>
           <button
             type="submit"

@@ -21,6 +21,7 @@ export default function CartPage() {
 
   const discount = subtotal * discountRate;
   const total = subtotal - discount;
+  const monthlyTotal = items.reduce((sum, i) => sum + (i.monthlyFee || 0), 0);
 
   const display = (amountUSD: number) =>
     formatCurrency(fromUSD(amountUSD, currency), currency);
@@ -64,10 +65,15 @@ export default function CartPage() {
         lines.push(`  QR destination link: ${item.qrDestinationLink}`);
       if (item.nfcDestinationLink)
         lines.push(`  NFC destination link: ${item.nfcDestinationLink}`);
+      if (item.monthlyFee)
+        lines.push(`  Recurring: ${display(item.monthlyFee)}/month`);
       if (item.notes) lines.push(`  Notes: ${item.notes}`);
       return lines.join("\n");
     }),
     appliedCode ? `\nPromo code: ${appliedCode}` : "",
+    monthlyTotal
+      ? `\nRecurring total: ${display(monthlyTotal)}/month (billed separately)`
+      : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -104,6 +110,7 @@ export default function CartPage() {
           job_title: item.jobTitle ?? null,
           qr_destination_link: item.qrDestinationLink ?? null,
           nfc_destination_link: item.nfcDestinationLink ?? null,
+          monthly_fee: item.monthlyFee ?? null,
         }))
       );
       if (itemsError) throw itemsError;
@@ -155,6 +162,11 @@ export default function CartPage() {
               {item.nfcDestinationLink && (
                 <p className="mt-1 max-w-xs truncate text-xs text-black/50">
                   NFC links to: {item.nfcDestinationLink}
+                </p>
+              )}
+              {item.monthlyFee && (
+                <p className="mt-1 text-xs text-black/50">
+                  + {display(item.monthlyFee)}/month (billed separately)
                 </p>
               )}
               {item.notes && (
@@ -280,6 +292,16 @@ export default function CartPage() {
             {display(total)}
           </span>
         </div>
+        {monthlyTotal > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-black/60">
+              + Recurring (billed separately)
+            </span>
+            <span className="text-sm font-semibold text-black">
+              {display(monthlyTotal)}/month
+            </span>
+          </div>
+        )}
       </div>
 
       {checkoutError && (

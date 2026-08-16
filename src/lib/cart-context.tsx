@@ -23,6 +23,8 @@ export type CartItem = {
   /** Review card destination URLs — QR and NFC can point to different places. */
   qrDestinationLink?: string;
   nfcDestinationLink?: string;
+  /** Recurring add-on (e.g. Order Card's website), in USD. Billed separately, not part of the one-time subtotal/total. */
+  monthlyFee?: number;
 };
 
 type CartContextValue = {
@@ -73,6 +75,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                   item.qrDestinationLink || i.qrDestinationLink,
                 nfcDestinationLink:
                   item.nfcDestinationLink || i.nfcDestinationLink,
+                monthlyFee: item.monthlyFee ?? i.monthlyFee,
               }
             : i
         );

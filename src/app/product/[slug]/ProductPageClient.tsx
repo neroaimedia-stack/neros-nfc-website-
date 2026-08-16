@@ -16,6 +16,7 @@ import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
 const NAME_MAX_LENGTH = 18;
 const JOB_TITLE_MAX_LENGTH = 26;
 const WEBSITE_ADDON_SUFFIX = " + Website";
+const WEBSITE_MONTHLY_FEE_USD = 20;
 
 export default function ProductPageClient({
   product,
@@ -72,6 +73,10 @@ export default function ProductPageClient({
   const displayCompareAtPrice = compareAtPriceUSD
     ? formatCurrency(fromUSD(compareAtPriceUSD, currency), currency)
     : undefined;
+  const displayMonthlyFee = formatCurrency(
+    fromUSD(WEBSITE_MONTHLY_FEE_USD, currency),
+    currency
+  );
 
   const handleAddToCart = () => {
     const needsQrLink =
@@ -98,6 +103,8 @@ export default function ProductPageClient({
         (isReview && hasQR) || isOrderCard ? qrLink.trim() || undefined : undefined,
       nfcDestinationLink:
         isReview || isOrderCard ? nfcLink.trim() || undefined : undefined,
+      monthlyFee:
+        isOrderCard && addWebsite ? WEBSITE_MONTHLY_FEE_USD : undefined,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -228,7 +235,10 @@ export default function ProductPageClient({
                     className="h-4 w-4 rounded border-black/30 accent-black"
                   />
                   <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-                    Add Website
+                    Add Website{" "}
+                    <span className="font-normal normal-case text-black/40">
+                      ({displayMonthlyFee}/month)
+                    </span>
                   </span>
                 </label>
 
@@ -237,7 +247,9 @@ export default function ProductPageClient({
                     Includes an ordering webpage — customers scan your card,
                     browse your menu with photos, and place their order
                     online. You manage the menu and incoming orders from
-                    your own dashboard.
+                    your own dashboard. Billed separately at{" "}
+                    {displayMonthlyFee}/month, starting once your website is
+                    set up.
                   </div>
                 )}
 

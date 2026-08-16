@@ -6,6 +6,9 @@ import TagListInput from "@/components/TagListInput";
 import SocialLinksEditor, { type SocialLink } from "@/components/SocialLinksEditor";
 import MultiEntryEditor from "@/components/MultiEntryEditor";
 import ImageUploadField from "@/components/ImageUploadField";
+import PublicProfileView, {
+  type BusinessProfileRow,
+} from "@/components/PublicProfileView";
 
 type Interests = {
   music: string[];
@@ -136,8 +139,8 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
   const [profile, setProfile] = useState<ProfileState>(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [mode, setMode] = useState<"preview" | "edit">("edit");
 
   useEffect(() => {
     let active = true;
@@ -171,6 +174,7 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
             travel_places: data.travel_places ?? [],
             links: data.links ?? [],
           });
+          if (data.full_name) setMode("preview");
         }
         setLoading(false);
       });
@@ -179,9 +183,32 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
     };
   }, [cardId]);
 
+  const buildRow = (): BusinessProfileRow => ({
+    card_id: cardId,
+    full_name: profile.full_name || null,
+    job_title: profile.job_title || null,
+    bio: profile.bio || null,
+    avatar_url: profile.avatar_url,
+    cover_url: profile.cover_url,
+    email: profile.email || null,
+    phone_numbers: profile.phone_numbers,
+    social_links: profile.social_links,
+    hobbies: profile.hobbies,
+    relationship_status: profile.relationship_status || null,
+    current_city: profile.current_city || null,
+    hometown: profile.hometown || null,
+    birthday: profile.birthday || null,
+    gender: profile.gender || null,
+    languages: profile.languages,
+    works: profile.works,
+    education: profile.education,
+    interests: profile.interests,
+    travel_places: profile.travel_places,
+    links: profile.links,
+  });
+
   const update = <K extends keyof ProfileState>(key: K, value: ProfileState[K]) => {
     setProfile((prev) => ({ ...prev, [key]: value }));
-    setSaved(false);
   };
 
   const updateInterest = (key: keyof Interests, value: string[]) => {
@@ -189,7 +216,6 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
       ...prev,
       interests: { ...prev.interests, [key]: value },
     }));
-    setSaved(false);
   };
 
   const handleSave = async () => {
@@ -199,44 +225,20 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
     if (!profile.full_name.trim()) missing.push("your full name");
     if (missing.length > 0) {
       setError(`Please add ${missing.join(", ")} before saving.`);
-      setSaved(false);
       return;
     }
 
     setSaving(true);
     setError("");
-    const { error: saveError } = await supabase.from("business_profiles").upsert(
-      {
-        card_id: cardId,
-        full_name: profile.full_name || null,
-        job_title: profile.job_title || null,
-        bio: profile.bio || null,
-        avatar_url: profile.avatar_url,
-        cover_url: profile.cover_url,
-        email: profile.email || null,
-        phone_numbers: profile.phone_numbers,
-        social_links: profile.social_links,
-        hobbies: profile.hobbies,
-        relationship_status: profile.relationship_status || null,
-        current_city: profile.current_city || null,
-        hometown: profile.hometown || null,
-        birthday: profile.birthday || null,
-        gender: profile.gender || null,
-        languages: profile.languages,
-        works: profile.works,
-        education: profile.education,
-        interests: profile.interests,
-        travel_places: profile.travel_places,
-        links: profile.links,
-      },
-      { onConflict: "card_id" }
-    );
+    const { error: saveError } = await supabase
+      .from("business_profiles")
+      .upsert(buildRow(), { onConflict: "card_id" });
     setSaving(false);
     if (saveError) {
       setError("Something went wrong saving your profile. Please try again.");
       return;
     }
-    setSaved(true);
+    setMode("preview");
   };
 
   if (loading) {
@@ -247,8 +249,31 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
     );
   }
 
+  if (mode === "preview") {
+    return (
+      <div className="mt-8 border-t border-black/10 pt-8">
+        <PublicProfileView
+          profile={buildRow()}
+          showEditButton
+          onEditClick={() => setMode("edit")}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="mt-8 flex flex-col gap-5">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-black">Edit profile</h2>
+        <button
+          type="button"
+          onClick={() => setMode("preview")}
+          className="text-sm font-semibold text-black underline underline-offset-2 hover:opacity-60"
+        >
+          Preview
+        </button>
+      </div>
+
       <SectionCard title="Photos">
         <FieldRow>
           <ImageUploadField
@@ -476,7 +501,7 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
         disabled={saving}
         className="sticky bottom-4 rounded-full bg-black px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-opacity hover:opacity-80 disabled:opacity-50"
       >
-        {saving ? "Saving…" : saved ? "Saved ✓" : "Save profile"}
+        {saving ? "Saving…" : "Save profile"}
       </button>
     </div>
   );

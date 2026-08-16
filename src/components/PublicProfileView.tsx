@@ -71,10 +71,44 @@ function formatBirthday(iso: string) {
   return date.toLocaleDateString(undefined, { month: "long", day: "numeric" });
 }
 
+function PenIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function EditProfileButton({ onClick }: { onClick?: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
+    >
+      <PenIcon className="h-3.5 w-3.5" />
+      Edit profile
+    </button>
+  );
+}
+
 export default function PublicProfileView({
   profile,
+  showEditButton = false,
+  onEditClick,
 }: {
   profile: BusinessProfileRow;
+  showEditButton?: boolean;
+  onEditClick?: () => void;
 }) {
   const socialLinks = (profile.social_links ?? []).filter((l) => l.url.trim());
   const works = (profile.works ?? []).filter((w) => w.company || w.title);
@@ -118,6 +152,11 @@ export default function PublicProfileView({
         <p className="text-sm text-black/40">
           This profile hasn&apos;t been set up yet.
         </p>
+        {showEditButton && (
+          <div className="mt-4 flex justify-center">
+            <EditProfileButton onClick={onEditClick} />
+          </div>
+        )}
       </div>
     );
   }
@@ -135,33 +174,40 @@ export default function PublicProfileView({
         ) : (
           <div className="h-40 w-full bg-black/5" />
         )}
-        {profile.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profile.avatar_url}
-            alt={profile.full_name ?? "Profile picture"}
-            className="absolute -bottom-12 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full border-4 border-white object-cover"
-          />
-        ) : (
-          <div className="absolute -bottom-12 left-1/2 h-24 w-24 -translate-x-1/2 rounded-full border-4 border-white bg-black/10" />
-        )}
       </div>
 
-      <div className="mt-16 px-6 text-center">
-        {profile.full_name && (
-          <h1 className="text-2xl font-bold text-black">{profile.full_name}</h1>
-        )}
-        {profile.job_title && (
-          <p className="mt-1 text-sm text-black/60">{profile.job_title}</p>
-        )}
+      <div className="px-6">
+        <div className="-mt-12 flex items-end gap-4">
+          {profile.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt={profile.full_name ?? "Profile picture"}
+              className="h-24 w-24 shrink-0 rounded-full border-4 border-white object-cover"
+            />
+          ) : (
+            <div className="h-24 w-24 shrink-0 rounded-full border-4 border-white bg-black/10" />
+          )}
+          <div className="min-w-0 pb-1">
+            {profile.full_name && (
+              <h1 className="truncate text-2xl font-bold text-black">
+                {profile.full_name}
+              </h1>
+            )}
+            {profile.job_title && (
+              <p className="truncate text-sm text-black/60">{profile.job_title}</p>
+            )}
+          </div>
+        </div>
+
         {profile.bio && (
-          <p className="mx-auto mt-4 max-w-sm text-sm text-black/70">
-            {profile.bio}
-          </p>
+          <p className="mt-4 text-sm text-black/70">{profile.bio}</p>
         )}
 
+        {showEditButton && <EditProfileButton onClick={onEditClick} />}
+
         {(profile.email || (profile.phone_numbers && profile.phone_numbers.length > 0)) && (
-          <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <div className="mt-5 flex flex-wrap gap-2">
             {profile.email && (
               <a
                 href={`mailto:${profile.email}`}
@@ -183,7 +229,7 @@ export default function PublicProfileView({
         )}
 
         {socialLinks.length > 0 && (
-          <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <div className="mt-5 flex flex-wrap gap-3">
             {socialLinks.map((link) => {
               const platform = findSocialPlatform(link.platform);
               if (!platform) return null;

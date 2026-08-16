@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import CartLink from "@/components/CartLink";
 
 const links = [
@@ -7,6 +10,9 @@ const links = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/c/")) return null;
+
   return (
     <header className="sticky top-0 z-50 border-b border-black/10 bg-white/90 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">

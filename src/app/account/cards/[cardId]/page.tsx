@@ -11,13 +11,6 @@ import WifiCardMock from "@/components/WifiCardMock";
 import OrderCardMock from "@/components/OrderCardMock";
 import BusinessProfileEditor from "@/components/BusinessProfileEditor";
 
-const PRODUCT_TYPE_LABELS: Record<string, string> = {
-  "business-card": "Business Card",
-  "review-card": "Review Card",
-  "order-card": "Order Card",
-  "wifi-card": "Wifi Card",
-};
-
 type CardRecord = {
   id: string;
   product_type: string;
@@ -44,6 +37,7 @@ export default function CardDetailPage() {
   const { user, loading: authLoading } = useAuth();
   const [card, setCard] = useState<CardRecord | null>(null);
   const [checked, setChecked] = useState(false);
+  const [mode, setMode] = useState<"preview" | "edit">("edit");
 
   useEffect(() => {
     if (authLoading) return;
@@ -108,25 +102,38 @@ export default function CardDetailPage() {
         </div>
       )}
 
-      <h1 className="mt-6 text-2xl font-bold text-black">
-        {PRODUCT_TYPE_LABELS[card.product_type] ?? card.product_type}
-      </h1>
-      {card.claimed_at && (
-        <p className="mt-1 text-sm text-black/40">
-          Claimed {new Date(card.claimed_at).toLocaleDateString()}
-        </p>
-      )}
-
-      <Link
-        href={`/c/${card.id}`}
-        target="_blank"
-        className="mt-2 inline-block text-sm font-semibold text-black underline underline-offset-2 hover:opacity-60"
-      >
-        View public profile ›
-      </Link>
-
       {isBusinessCard ? (
-        <BusinessProfileEditor cardId={card.id} />
+        <>
+          <div className="mt-6 flex gap-3">
+            <button
+              type="button"
+              onClick={() => setMode("edit")}
+              className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
+                mode === "edit"
+                  ? "bg-black text-white"
+                  : "border border-black text-black hover:opacity-60"
+              }`}
+            >
+              Edit profile
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("preview")}
+              className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
+                mode === "preview"
+                  ? "bg-black text-white"
+                  : "border border-black text-black hover:opacity-60"
+              }`}
+            >
+              View public profile
+            </button>
+          </div>
+          <BusinessProfileEditor
+            cardId={card.id}
+            mode={mode}
+            onModeChange={setMode}
+          />
+        </>
       ) : (
         <div className="mt-8 rounded-2xl border border-black/10 bg-black/5 p-5 text-sm text-black/60">
           The profile editor for this card is coming soon — you&apos;ll be

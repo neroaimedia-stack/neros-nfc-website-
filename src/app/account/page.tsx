@@ -146,10 +146,17 @@ function SignedInAccount({
                   <CardThumbnail productType={card.product_type} />
                 </div>
                 <div className="flex flex-1 items-center justify-between">
-                  <span className="text-sm font-semibold text-black">
-                    {PRODUCT_TYPE_LABELS[card.product_type] ??
-                      card.product_type}
-                  </span>
+                  <div>
+                    <span className="text-sm font-semibold text-black">
+                      {PRODUCT_TYPE_LABELS[card.product_type] ??
+                        card.product_type}
+                    </span>
+                    {card.claimed_at && (
+                      <p className="text-xs text-black/40">
+                        Claimed {new Date(card.claimed_at).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
                   <span className="text-xs text-black/40">Manage ›</span>
                 </div>
               </Link>

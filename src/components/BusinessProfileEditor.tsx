@@ -135,12 +135,19 @@ function FieldRow({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
+export default function BusinessProfileEditor({
+  cardId,
+  mode,
+  onModeChange,
+}: {
+  cardId: string;
+  mode: "preview" | "edit";
+  onModeChange: (mode: "preview" | "edit") => void;
+}) {
   const [profile, setProfile] = useState<ProfileState>(emptyProfile);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [mode, setMode] = useState<"preview" | "edit">("edit");
 
   useEffect(() => {
     let active = true;
@@ -174,13 +181,16 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
             travel_places: data.travel_places ?? [],
             links: data.links ?? [],
           });
-          if (data.full_name) setMode("preview");
+          if (data.full_name) onModeChange("preview");
         }
         setLoading(false);
       });
     return () => {
       active = false;
     };
+    // Runs once on mount to decide the initial preview/edit mode from
+    // freshly-loaded data; onModeChange is stable enough not to need tracking.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardId]);
 
   const buildRow = (): BusinessProfileRow => ({
@@ -238,7 +248,7 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
       setError("Something went wrong saving your profile. Please try again.");
       return;
     }
-    setMode("preview");
+    onModeChange("preview");
   };
 
   if (loading) {
@@ -252,28 +262,13 @@ export default function BusinessProfileEditor({ cardId }: { cardId: string }) {
   if (mode === "preview") {
     return (
       <div className="mt-8 border-t border-black/10 pt-8">
-        <PublicProfileView
-          profile={buildRow()}
-          showEditButton
-          onEditClick={() => setMode("edit")}
-        />
+        <PublicProfileView profile={buildRow()} />
       </div>
     );
   }
 
   return (
     <div className="mt-8 flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-black">Edit profile</h2>
-        <button
-          type="button"
-          onClick={() => setMode("preview")}
-          className="text-sm font-semibold text-black underline underline-offset-2 hover:opacity-60"
-        >
-          Preview
-        </button>
-      </div>
-
       <SectionCard title="Photos">
         <FieldRow>
           <ImageUploadField

@@ -177,17 +177,19 @@ export default function PublicProfileView({
       </div>
 
       <div className="px-6">
-        <div className="-mt-12 flex items-end gap-4">
-          {profile.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatar_url}
-              alt={profile.full_name ?? "Profile picture"}
-              className="h-24 w-24 shrink-0 rounded-full border-4 border-white object-cover object-top"
-            />
-          ) : (
-            <div className="h-24 w-24 shrink-0 rounded-full border-4 border-white bg-black/10" />
-          )}
+        <div className="flex items-end gap-4">
+          <div className="relative z-10 -mt-12 shrink-0">
+            {profile.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name ?? "Profile picture"}
+                className="h-24 w-24 rounded-full border-4 border-white object-cover object-top"
+              />
+            ) : (
+              <div className="h-24 w-24 rounded-full border-4 border-white bg-black/10" />
+            )}
+          </div>
           <div className="min-w-0 pb-1">
             {profile.full_name && (
               <h1 className="truncate text-2xl font-bold text-black">

@@ -18,6 +18,24 @@ const JOB_TITLE_MAX_LENGTH = 26;
 const WEBSITE_ADDON_SUFFIX = " + Website";
 const WEBSITE_MONTHLY_FEE_USD = 20;
 
+type UnitDetails = {
+  name: string;
+  jobTitle: string;
+  qrLink: string;
+  nfcLink: string;
+};
+
+type UnitErrors = {
+  qr?: string;
+  nfc?: string;
+};
+
+const emptyUnit: UnitDetails = { name: "", jobTitle: "", qrLink: "", nfcLink: "" };
+
+function makeUnitId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export default function ProductPageClient({
   product,
   otherProducts,
@@ -34,14 +52,9 @@ export default function ProductPageClient({
   const currency = useCurrency();
   const [color, setColor] = useState(product?.colors[0] ?? "");
   const [hasQR, setHasQR] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const [units, setUnits] = useState<UnitDetails[]>([{ ...emptyUnit }]);
+  const [unitErrors, setUnitErrors] = useState<UnitErrors[]>([]);
   const [notes, setNotes] = useState("");
-  const [name, setName] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [qrLink, setQrLink] = useState("");
-  const [nfcLink, setNfcLink] = useState("");
-  const [qrLinkError, setQrLinkError] = useState("");
-  const [nfcLinkError, setNfcLinkError] = useState("");
   const [addWebsite, setAddWebsite] = useState(false);
   const [added, setAdded] = useState(false);
   const variant =
@@ -50,6 +63,18 @@ export default function ProductPageClient({
       : isOrderCard && addWebsite
         ? `${color}${WEBSITE_ADDON_SUFFIX}`
         : color;
+
+  const addUnit = () => setUnits((prev) => [...prev, { ...emptyUnit }]);
+  const removeUnit = () =>
+    setUnits((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  const updateUnit = (index: number, patch: Partial<UnitDetails>) =>
+    setUnits((prev) =>
+      prev.map((u, i) => (i === index ? { ...u, ...patch } : u))
+    );
+  const clearUnitError = (index: number, field: keyof UnitErrors) =>
+    setUnitErrors((prev) =>
+      prev.map((e, i) => (i === index ? { ...e, [field]: undefined } : e))
+    );
 
   if (!product) {
     return (
@@ -79,32 +104,45 @@ export default function ProductPageClient({
   );
 
   const handleAddToCart = () => {
-    const needsQrLink =
-      (isReview && hasQR && !qrLink.trim()) || (isOrderCard && !qrLink.trim());
-    const needsNfcLink = (isReview || isOrderCard) && !nfcLink.trim();
-    setQrLinkError(
-      needsQrLink ? "Please provide a destination link for the QR code." : ""
-    );
-    setNfcLinkError(
-      needsNfcLink ? "Please provide a destination link for the NFC tap." : ""
-    );
-    if (needsQrLink || needsNfcLink) return false;
-    addItem({
-      id: `${product.slug}-${variant}`,
-      productSlug: product.slug,
-      title: product.title,
-      color: variant,
-      price: priceUSD,
-      quantity,
-      notes: notes.trim() || undefined,
-      name: name.trim() || undefined,
-      jobTitle: jobTitle.trim() || undefined,
-      qrDestinationLink:
-        (isReview && hasQR) || isOrderCard ? qrLink.trim() || undefined : undefined,
-      nfcDestinationLink:
-        isReview || isOrderCard ? nfcLink.trim() || undefined : undefined,
-      monthlyFee:
-        isOrderCard && addWebsite ? WEBSITE_MONTHLY_FEE_USD : undefined,
+    const errors: UnitErrors[] = units.map((u) => {
+      const needsQr =
+        (isReview && hasQR && !u.qrLink.trim()) ||
+        (isOrderCard && !u.qrLink.trim());
+      const needsNfc = (isReview || isOrderCard) && !u.nfcLink.trim();
+      return {
+        qr: needsQr
+          ? "Please provide a destination link for the QR code."
+          : undefined,
+        nfc: needsNfc
+          ? "Please provide a destination link for the NFC tap."
+          : undefined,
+      };
+    });
+    setUnitErrors(errors);
+    if (errors.some((e) => e.qr || e.nfc)) return false;
+
+    units.forEach((u, i) => {
+      addItem({
+        id: `${product.slug}-${variant}-${makeUnitId()}`,
+        productSlug: product.slug,
+        title: product.title,
+        color: variant,
+        price: priceUSD,
+        quantity: 1,
+        notes: notes.trim() || undefined,
+        name: u.name.trim() || undefined,
+        jobTitle: u.jobTitle.trim() || undefined,
+        qrDestinationLink:
+          (isReview && hasQR) || isOrderCard
+            ? u.qrLink.trim() || undefined
+            : undefined,
+        nfcDestinationLink:
+          isReview || isOrderCard ? u.nfcLink.trim() || undefined : undefined,
+        monthlyFee:
+          isOrderCard && addWebsite && i === 0
+            ? WEBSITE_MONTHLY_FEE_USD
+            : undefined,
+      });
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -135,8 +173,8 @@ export default function ProductPageClient({
               className="mx-auto w-[400px] max-w-full"
               color={color}
               reflection={false}
-              name={name.trim() || undefined}
-              jobTitle={jobTitle.trim() || undefined}
+              name={units[0].name.trim() || undefined}
+              jobTitle={units[0].jobTitle.trim() || undefined}
             />
           )}
         </div>
@@ -171,291 +209,304 @@ export default function ProductPageClient({
           </p>
 
           {product.colors.length > 1 && (
-          <div className="mt-8 rounded-2xl border border-black/10 p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-                {isReview ? "Select Platform" : isFormatOnly ? "Select Format" : "Select Finish"}
-              </span>
-              <span className="text-sm font-semibold text-black">{color}</span>
-            </div>
-            {isFormatOnly ? (
-              <div className="mt-3 flex gap-2">
-                {product.colors.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    aria-pressed={color === c}
-                    className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition-all ${
-                      color === c
-                        ? "border-black bg-black text-white"
-                        : "border-black/15 text-black hover:border-black/40"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
+            <div className="mt-8 rounded-2xl border border-black/10 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                  {isReview
+                    ? "Select Platform"
+                    : isFormatOnly
+                      ? "Select Format"
+                      : "Select Finish"}
+                </span>
+                <span className="text-sm font-semibold text-black">
+                  {color}
+                </span>
               </div>
-            ) : (
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                {product.colors.map((c) => {
-                  const swatch = isReview
-                    ? REVIEW_PLATFORMS[c]?.background
-                    : (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR]).swatch;
-                  return (
+              {isFormatOnly ? (
+                <div className="mt-3 flex gap-2">
+                  {product.colors.map((c) => (
                     <button
                       key={c}
                       type="button"
                       onClick={() => setColor(c)}
-                      aria-label={c}
                       aria-pressed={color === c}
-                      className={`h-8 w-8 rounded-full transition-all ${
-                        color === c
-                          ? "ring-2 ring-black ring-offset-2"
-                          : "ring-1 ring-black/10 hover:ring-black/40"
-                      }`}
-                      style={{ background: swatch }}
-                    />
-                  );
-                })}
-              </div>
-            )}
-
-            {isOrderCard && (
-              <>
-                <label
-                  htmlFor="add-website"
-                  className="mt-5 flex cursor-pointer items-center gap-2 border-t border-black/10 pt-4"
-                >
-                  <input
-                    id="add-website"
-                    type="checkbox"
-                    checked={addWebsite}
-                    onChange={(e) => setAddWebsite(e.target.checked)}
-                    className="h-4 w-4 rounded border-black/30 accent-black"
-                  />
-                  <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-                    Add Website{" "}
-                    <span className="font-normal normal-case text-black/40">
-                      ({displayMonthlyFee}/month)
-                    </span>
-                  </span>
-                </label>
-
-                {addWebsite && (
-                  <div className="mt-3 rounded-xl bg-black/5 p-3 text-xs leading-relaxed text-black/70">
-                    Includes an ordering webpage — customers scan your card,
-                    browse your menu with photos, and place their order
-                    online. You manage the menu and incoming orders from
-                    your own dashboard. Billed separately at{" "}
-                    {displayMonthlyFee}/month, starting once your website is
-                    set up.
-                  </div>
-                )}
-
-                <div className="mt-5 border-t border-black/10 pt-4">
-                  <label
-                    htmlFor="order-qr-link"
-                    className="text-xs font-semibold uppercase tracking-wide text-black/60"
-                  >
-                    QR code destination link{" "}
-                    <span className="font-normal normal-case text-black/40">
-                      (required)
-                    </span>
-                  </label>
-                  <input
-                    id="order-qr-link"
-                    type="url"
-                    value={qrLink}
-                    onChange={(e) => {
-                      setQrLink(e.target.value);
-                      if (qrLinkError) setQrLinkError("");
-                    }}
-                    placeholder="https://..."
-                    className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
-                      qrLinkError
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-black/15 focus:border-black"
-                    }`}
-                  />
-                  {qrLinkError && (
-                    <p className="mt-2 text-xs text-red-600">{qrLinkError}</p>
-                  )}
-                </div>
-
-                <div className="mt-5 pt-4">
-                  <label
-                    htmlFor="order-nfc-link"
-                    className="text-xs font-semibold uppercase tracking-wide text-black/60"
-                  >
-                    NFC destination link{" "}
-                    <span className="font-normal normal-case text-black/40">
-                      (required)
-                    </span>
-                  </label>
-                  <input
-                    id="order-nfc-link"
-                    type="url"
-                    value={nfcLink}
-                    onChange={(e) => {
-                      setNfcLink(e.target.value);
-                      if (nfcLinkError) setNfcLinkError("");
-                    }}
-                    placeholder="https://..."
-                    className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
-                      nfcLinkError
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-black/15 focus:border-black"
-                    }`}
-                  />
-                  {nfcLinkError && (
-                    <p className="mt-2 text-xs text-red-600">{nfcLinkError}</p>
-                  )}
-                </div>
-              </>
-            )}
-
-            {isReview && (
-              <>
-                <div className="mt-5 flex items-center justify-between border-t border-black/10 pt-4">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-                    Format
-                  </span>
-                  <span className="text-sm font-semibold text-black">
-                    {hasQR ? "NFC + QR Code" : "NFC Only"}
-                  </span>
-                </div>
-                <div className="mt-3 flex gap-2">
-                  {[
-                    { label: "NFC Only", value: false },
-                    { label: "NFC + QR Code", value: true },
-                  ].map((option) => (
-                    <button
-                      key={option.label}
-                      type="button"
-                      onClick={() => setHasQR(option.value)}
-                      aria-pressed={hasQR === option.value}
                       className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition-all ${
-                        hasQR === option.value
+                        color === c
                           ? "border-black bg-black text-white"
                           : "border-black/15 text-black hover:border-black/40"
                       }`}
                     >
-                      {option.label}
+                      {c}
                     </button>
                   ))}
                 </div>
+              ) : (
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {product.colors.map((c) => {
+                    const swatch = isReview
+                      ? REVIEW_PLATFORMS[c]?.background
+                      : (CARD_COLORS[c] ?? CARD_COLORS[DEFAULT_CARD_COLOR])
+                          .swatch;
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setColor(c)}
+                        aria-label={c}
+                        aria-pressed={color === c}
+                        className={`h-8 w-8 rounded-full transition-all ${
+                          color === c
+                            ? "ring-2 ring-black ring-offset-2"
+                            : "ring-1 ring-black/10 hover:ring-black/40"
+                        }`}
+                        style={{ background: swatch }}
+                      />
+                    );
+                  })}
+                </div>
+              )}
 
-                {hasQR && (
-                  <div className="mt-5 border-t border-black/10 pt-4">
-                    <label
-                      htmlFor="qr-link"
-                      className="text-xs font-semibold uppercase tracking-wide text-black/60"
-                    >
-                      QR code destination link{" "}
-                      <span className="font-normal normal-case text-black/40">
-                        (required)
-                      </span>
-                    </label>
-                    <input
-                      id="qr-link"
-                      type="url"
-                      value={qrLink}
-                      onChange={(e) => {
-                        setQrLink(e.target.value);
-                        if (qrLinkError) setQrLinkError("");
-                      }}
-                      placeholder="https://..."
-                      className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
-                        qrLinkError
-                          ? "border-red-500 focus:border-red-500"
-                          : "border-black/15 focus:border-black"
-                      }`}
-                    />
-                    {qrLinkError && (
-                      <p className="mt-2 text-xs text-red-600">{qrLinkError}</p>
-                    )}
-                  </div>
-                )}
-
-                <div
-                  className={`mt-5 pt-4 ${hasQR ? "" : "border-t border-black/10"}`}
-                >
+              {isOrderCard && (
+                <>
                   <label
-                    htmlFor="nfc-link"
-                    className="text-xs font-semibold uppercase tracking-wide text-black/60"
+                    htmlFor="add-website"
+                    className="mt-5 flex cursor-pointer items-center gap-2 border-t border-black/10 pt-4"
                   >
-                    NFC destination link{" "}
-                    <span className="font-normal normal-case text-black/40">
-                      (required)
+                    <input
+                      id="add-website"
+                      type="checkbox"
+                      checked={addWebsite}
+                      onChange={(e) => setAddWebsite(e.target.checked)}
+                      className="h-4 w-4 rounded border-black/30 accent-black"
+                    />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                      Add Website{" "}
+                      <span className="font-normal normal-case text-black/40">
+                        ({displayMonthlyFee}/month)
+                      </span>
                     </span>
                   </label>
-                  <input
-                    id="nfc-link"
-                    type="url"
-                    value={nfcLink}
-                    onChange={(e) => {
-                      setNfcLink(e.target.value);
-                      if (nfcLinkError) setNfcLinkError("");
-                    }}
-                    placeholder="https://..."
-                    className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
-                      nfcLinkError
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-black/15 focus:border-black"
-                    }`}
-                  />
-                  {nfcLinkError && (
-                    <p className="mt-2 text-xs text-red-600">{nfcLinkError}</p>
+
+                  {addWebsite && (
+                    <div className="mt-3 rounded-xl bg-black/5 p-3 text-xs leading-relaxed text-black/70">
+                      Includes an ordering webpage — customers scan your
+                      card, browse your menu with photos, and place their
+                      order online. You manage the menu and incoming orders
+                      from your own dashboard. Billed separately at{" "}
+                      {displayMonthlyFee}/month, starting once your website
+                      is set up.
+                    </div>
                   )}
+                </>
+              )}
+
+              {isReview && (
+                <>
+                  <div className="mt-5 flex items-center justify-between border-t border-black/10 pt-4">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                      Format
+                    </span>
+                    <span className="text-sm font-semibold text-black">
+                      {hasQR ? "NFC + QR Code" : "NFC Only"}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    {[
+                      { label: "NFC Only", value: false },
+                      { label: "NFC + QR Code", value: true },
+                    ].map((option) => (
+                      <button
+                        key={option.label}
+                        type="button"
+                        onClick={() => setHasQR(option.value)}
+                        aria-pressed={hasQR === option.value}
+                        className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition-all ${
+                          hasQR === option.value
+                            ? "border-black bg-black text-white"
+                            : "border-black/15 text-black hover:border-black/40"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {(isReview || isOrderCard) && (
+                <div className="mt-5 border-t border-black/10 pt-4">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                    Destination links
+                    {units.length > 1 ? ` (${units.length} cards)` : ""}
+                  </span>
+                  <div className="mt-3 flex flex-col gap-4">
+                    {(() => {
+                      const showQrField = isOrderCard || (isReview && hasQR);
+                      return units.map((unit, i) => (
+                        <div
+                          key={i}
+                          className={
+                            units.length > 1
+                              ? "rounded-xl border border-black/10 p-3"
+                              : ""
+                          }
+                        >
+                          {units.length > 1 && (
+                            <p className="mb-2 text-xs font-semibold text-black/50">
+                              Card {i + 1} of {units.length}
+                            </p>
+                          )}
+                          <div className="flex flex-col gap-3">
+                            {showQrField && (
+                              <div>
+                                <label
+                                  htmlFor={`qr-link-${i}`}
+                                  className="text-xs font-semibold uppercase tracking-wide text-black/60"
+                                >
+                                  QR code destination link{" "}
+                                  <span className="font-normal normal-case text-black/40">
+                                    (required)
+                                  </span>
+                                </label>
+                                <input
+                                  id={`qr-link-${i}`}
+                                  type="url"
+                                  value={unit.qrLink}
+                                  onChange={(e) => {
+                                    updateUnit(i, { qrLink: e.target.value });
+                                    clearUnitError(i, "qr");
+                                  }}
+                                  placeholder="https://..."
+                                  className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
+                                    unitErrors[i]?.qr
+                                      ? "border-red-500 focus:border-red-500"
+                                      : "border-black/15 focus:border-black"
+                                  }`}
+                                />
+                                {unitErrors[i]?.qr && (
+                                  <p className="mt-2 text-xs text-red-600">
+                                    {unitErrors[i]?.qr}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            <div>
+                              <label
+                                htmlFor={`nfc-link-${i}`}
+                                className="text-xs font-semibold uppercase tracking-wide text-black/60"
+                              >
+                                NFC destination link{" "}
+                                <span className="font-normal normal-case text-black/40">
+                                  (required)
+                                </span>
+                              </label>
+                              <input
+                                id={`nfc-link-${i}`}
+                                type="url"
+                                value={unit.nfcLink}
+                                onChange={(e) => {
+                                  updateUnit(i, { nfcLink: e.target.value });
+                                  clearUnitError(i, "nfc");
+                                }}
+                                placeholder="https://..."
+                                className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
+                                  unitErrors[i]?.nfc
+                                    ? "border-red-500 focus:border-red-500"
+                                    : "border-black/15 focus:border-black"
+                                }`}
+                              />
+                              {unitErrors[i]?.nfc && (
+                                <p className="mt-2 text-xs text-red-600">
+                                  {unitErrors[i]?.nfc}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
                 </div>
-              </>
-            )}
-          </div>
+              )}
+            </div>
           )}
 
           {isBusinessCard && (
             <div className="mt-8 rounded-2xl border border-black/10 p-4">
               <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-                Personalize your card
+                Personalize your card{units.length > 1 ? "s" : ""}
               </span>
-              <div className="mt-3 flex flex-col gap-3">
-                <div>
-                  <label htmlFor="card-name" className="text-xs text-black/50">
-                    Name{" "}
-                    <span className="text-black/30">
-                      ({name.length}/{NAME_MAX_LENGTH})
-                    </span>
-                  </label>
-                  <input
-                    id="card-name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value.slice(0, NAME_MAX_LENGTH))}
-                    maxLength={NAME_MAX_LENGTH}
-                    placeholder="e.g. Hernero Cruz"
-                    className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="card-title" className="text-xs text-black/50">
-                    Title{" "}
-                    <span className="text-black/30">
-                      ({jobTitle.length}/{JOB_TITLE_MAX_LENGTH})
-                    </span>
-                  </label>
-                  <input
-                    id="card-title"
-                    type="text"
-                    value={jobTitle}
-                    onChange={(e) =>
-                      setJobTitle(e.target.value.slice(0, JOB_TITLE_MAX_LENGTH))
+              <div className="mt-3 flex flex-col gap-4">
+                {units.map((unit, i) => (
+                  <div
+                    key={i}
+                    className={
+                      units.length > 1
+                        ? "rounded-xl border border-black/10 p-3"
+                        : ""
                     }
-                    maxLength={JOB_TITLE_MAX_LENGTH}
-                    placeholder="e.g. CEO & Founder"
-                    className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
-                  />
-                </div>
+                  >
+                    {units.length > 1 && (
+                      <p className="mb-2 text-xs font-semibold text-black/50">
+                        Card {i + 1} of {units.length}
+                      </p>
+                    )}
+                    <div className="flex flex-col gap-3">
+                      <div>
+                        <label
+                          htmlFor={`card-name-${i}`}
+                          className="text-xs text-black/50"
+                        >
+                          Name{" "}
+                          <span className="text-black/30">
+                            ({unit.name.length}/{NAME_MAX_LENGTH})
+                          </span>
+                        </label>
+                        <input
+                          id={`card-name-${i}`}
+                          type="text"
+                          value={unit.name}
+                          onChange={(e) =>
+                            updateUnit(i, {
+                              name: e.target.value.slice(0, NAME_MAX_LENGTH),
+                            })
+                          }
+                          maxLength={NAME_MAX_LENGTH}
+                          placeholder="e.g. Hernero Cruz"
+                          className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor={`card-title-${i}`}
+                          className="text-xs text-black/50"
+                        >
+                          Title{" "}
+                          <span className="text-black/30">
+                            ({unit.jobTitle.length}/{JOB_TITLE_MAX_LENGTH})
+                          </span>
+                        </label>
+                        <input
+                          id={`card-title-${i}`}
+                          type="text"
+                          value={unit.jobTitle}
+                          onChange={(e) =>
+                            updateUnit(i, {
+                              jobTitle: e.target.value.slice(
+                                0,
+                                JOB_TITLE_MAX_LENGTH
+                              ),
+                            })
+                          }
+                          maxLength={JOB_TITLE_MAX_LENGTH}
+                          placeholder="e.g. CEO & Founder"
+                          className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -465,24 +516,30 @@ export default function ProductPageClient({
             <div className="mt-3 inline-flex items-center rounded-full border border-black/20">
               <button
                 type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                onClick={removeUnit}
                 className="px-4 py-2 text-lg text-black"
                 aria-label="Decrease quantity"
               >
                 −
               </button>
               <span className="w-8 text-center text-sm font-semibold text-black">
-                {quantity}
+                {units.length}
               </span>
               <button
                 type="button"
-                onClick={() => setQuantity((q) => q + 1)}
+                onClick={addUnit}
                 className="px-4 py-2 text-lg text-black"
                 aria-label="Increase quantity"
               >
                 +
               </button>
             </div>
+            {units.length > 1 &&
+              (isBusinessCard || isReview || isOrderCard) && (
+                <p className="mt-2 text-xs text-black/40">
+                  Each card can have its own details below.
+                </p>
+              )}
           </div>
 
           <div className="mt-8">

@@ -148,6 +148,7 @@ export default function ProductPageClient({
             {product.description}
           </p>
 
+          {product.colors.length > 1 && (
           <div className="mt-8 rounded-2xl border border-black/10 p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
@@ -285,6 +286,7 @@ export default function ProductPageClient({
               </>
             )}
           </div>
+          )}
 
           {isBusinessCard && (
             <div className="mt-8 rounded-2xl border border-black/10 p-4">

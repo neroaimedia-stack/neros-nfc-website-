@@ -1,17 +1,16 @@
 import type { IconType } from "react-icons";
 import { FaLinkedin, FaSlack } from "react-icons/fa6";
+import { BsMedium } from "react-icons/bs";
 import {
   SiBluesky,
   SiDeviantart,
   SiDribbble,
   SiFacebook,
-  SiFlickr,
   SiGithub,
   SiIcq,
   SiInstagram,
   SiLine,
   SiMastodon,
-  SiMedium,
   SiPinterest,
   SiReddit,
   SiSnapchat,
@@ -28,6 +27,32 @@ import {
   SiX,
   SiYoutube,
 } from "react-icons/si";
+
+// No bundled icon set ships Flickr's classic wordmark, so it's hand-drawn
+// to match rather than using the modern two-dot mark.
+const FlickrWordmark: IconType = ({ size, title, ...svgProps }) => (
+  <svg
+    viewBox="0 0 200 60"
+    fill="currentColor"
+    width={size || "1em"}
+    height={size || "1em"}
+    xmlns="http://www.w3.org/2000/svg"
+    {...svgProps}
+  >
+    {title && <title>{title}</title>}
+    <text
+      x="100"
+      y="45"
+      textAnchor="middle"
+      fontFamily="system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+      fontWeight="700"
+      fontSize="54"
+      letterSpacing="-2"
+    >
+      flickr
+    </text>
+  </svg>
+);
 
 export type SocialPlatform = {
   slug: string;
@@ -52,10 +77,10 @@ export const SOCIAL_PLATFORMS: SocialPlatform[] = [
   { slug: "reddit", label: "Reddit", Icon: SiReddit, placeholder: "https://reddit.com/user/username" },
   { slug: "github", label: "GitHub", Icon: SiGithub, placeholder: "https://github.com/username" },
   { slug: "mastodon", label: "Mastodon", Icon: SiMastodon, placeholder: "https://mastodon.social/@username" },
-  { slug: "medium", label: "Medium", Icon: SiMedium, placeholder: "https://medium.com/@username" },
+  { slug: "medium", label: "Medium", Icon: BsMedium, placeholder: "https://medium.com/@username" },
   { slug: "twitch", label: "Twitch", Icon: SiTwitch, placeholder: "https://twitch.tv/username" },
   { slug: "dribbble", label: "Dribbble", Icon: SiDribbble, placeholder: "https://dribbble.com/username" },
-  { slug: "flickr", label: "Flickr", Icon: SiFlickr, placeholder: "https://flickr.com/people/username" },
+  { slug: "flickr", label: "Flickr", Icon: FlickrWordmark, placeholder: "https://flickr.com/people/username" },
   { slug: "deviantart", label: "DeviantArt", Icon: SiDeviantart, placeholder: "https://deviantart.com/username" },
   { slug: "tumblr", label: "Tumblr", Icon: SiTumblr, placeholder: "https://username.tumblr.com" },
   { slug: "soundcloud", label: "SoundCloud", Icon: SiSoundcloud, placeholder: "https://soundcloud.com/username" },

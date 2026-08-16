@@ -322,11 +322,11 @@ export default function EditableProfileView({
       icon: FiInfo,
       empty: !hasAbout,
       content: (
-        <dl className="flex flex-col gap-2 text-sm text-black/70">
+        <dl className="flex flex-col gap-2 text-sm text-black">
           {(profile.current_city || profile.hometown) && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/40">Location</dt>
-              <dd className="text-right">
+              <dt className="text-black/50">Location</dt>
+              <dd className="text-right font-medium">
                 {[profile.current_city, profile.hometown && `from ${profile.hometown}`]
                   .filter(Boolean)
                   .join(" · ")}
@@ -335,8 +335,8 @@ export default function EditableProfileView({
           )}
           {profile.birthday && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/40">Birthday</dt>
-              <dd>
+              <dt className="text-black/50">Birthday</dt>
+              <dd className="font-medium">
                 {new Date(`${profile.birthday}T00:00:00`).toLocaleDateString(
                   undefined,
                   { month: "long", day: "numeric" }
@@ -346,20 +346,20 @@ export default function EditableProfileView({
           )}
           {profile.gender && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/40">Gender</dt>
-              <dd>{profile.gender}</dd>
+              <dt className="text-black/50">Gender</dt>
+              <dd className="font-medium">{profile.gender}</dd>
             </div>
           )}
           {profile.relationship_status && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/40">Relationship</dt>
-              <dd>{profile.relationship_status}</dd>
+              <dt className="text-black/50">Relationship</dt>
+              <dd className="font-medium">{profile.relationship_status}</dd>
             </div>
           )}
           {profile.languages.length > 0 && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/40">Languages</dt>
-              <dd className="text-right">{profile.languages.join(", ")}</dd>
+              <dt className="text-black/50">Languages</dt>
+              <dd className="text-right font-medium">{profile.languages.join(", ")}</dd>
             </div>
           )}
         </dl>
@@ -515,7 +515,7 @@ export default function EditableProfileView({
                 <p className="text-3xl font-bold text-black/25">Add your name</p>
               )}
               {profile.job_title ? (
-                <p className="truncate text-base font-medium text-black/60">{profile.job_title}</p>
+                <p className="truncate text-base font-medium text-black/80">{profile.job_title}</p>
               ) : (
                 <p className="text-base font-medium text-black/25">Add a title</p>
               )}
@@ -531,7 +531,7 @@ export default function EditableProfileView({
         <div className="mt-3 flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             {profile.bio ? (
-              <p className="text-sm text-black/70">{profile.bio}</p>
+              <p className="text-sm text-black/80">{profile.bio}</p>
             ) : (
               <p className="text-sm text-black/25">Add a bio</p>
             )}

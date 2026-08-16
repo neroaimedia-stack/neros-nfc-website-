@@ -36,6 +36,52 @@ function makeUnitId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function CardPager({
+  index,
+  total,
+  onSelect,
+}: {
+  index: number;
+  total: number;
+  onSelect: (i: number) => void;
+}) {
+  if (total <= 1) return null;
+  return (
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <button
+        type="button"
+        onClick={() => onSelect(index - 1)}
+        disabled={index === 0}
+        className="shrink-0 rounded-full border border-black/15 px-3 py-1.5 text-xs font-medium text-black transition-opacity hover:opacity-60 disabled:opacity-25"
+      >
+        ‹ Prev
+      </button>
+      <div className="flex items-center gap-1.5">
+        {Array.from({ length: total }, (_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onSelect(i)}
+            aria-label={`Go to card ${i + 1}`}
+            aria-current={i === index}
+            className={`h-2 rounded-full transition-all ${
+              i === index ? "w-5 bg-black" : "w-2 bg-black/20 hover:bg-black/40"
+            }`}
+          />
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onSelect(index + 1)}
+        disabled={index === total - 1}
+        className="shrink-0 rounded-full border border-black/15 px-3 py-1.5 text-xs font-medium text-black transition-opacity hover:opacity-60 disabled:opacity-25"
+      >
+        Next ›
+      </button>
+    </div>
+  );
+}
+
 export default function ProductPageClient({
   product,
   otherProducts,
@@ -55,6 +101,7 @@ export default function ProductPageClient({
   const [hasQR, setHasQR] = useState(false);
   const [units, setUnits] = useState<UnitDetails[]>([{ ...emptyUnit }]);
   const [unitErrors, setUnitErrors] = useState<UnitErrors[]>([]);
+  const [activeUnit, setActiveUnit] = useState(0);
   const [notes, setNotes] = useState("");
   const [addWebsite, setAddWebsite] = useState(false);
   const [added, setAdded] = useState(false);
@@ -65,9 +112,17 @@ export default function ProductPageClient({
         ? `${color}${WEBSITE_ADDON_SUFFIX}`
         : color;
 
-  const addUnit = () => setUnits((prev) => [...prev, { ...emptyUnit }]);
-  const removeUnit = () =>
-    setUnits((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  const goToUnit = (index: number) =>
+    setActiveUnit(Math.max(0, Math.min(units.length - 1, index)));
+  const addUnit = () => {
+    setUnits((prev) => [...prev, { ...emptyUnit }]);
+    setActiveUnit(units.length);
+  };
+  const removeUnit = () => {
+    if (units.length <= 1) return;
+    setUnits((prev) => prev.slice(0, -1));
+    setActiveUnit((prev) => Math.min(prev, units.length - 2));
+  };
   const updateUnit = (index: number, patch: Partial<UnitDetails>) =>
     setUnits((prev) =>
       prev.map((u, i) => (i === index ? { ...u, ...patch } : u))
@@ -103,6 +158,7 @@ export default function ProductPageClient({
     fromUSD(WEBSITE_MONTHLY_FEE_USD, currency),
     currency
   );
+  const activeUnitData = units[activeUnit] ?? units[0];
 
   const handleAddToCart = () => {
     const errors: UnitErrors[] = units.map((u) => {
@@ -120,7 +176,11 @@ export default function ProductPageClient({
       };
     });
     setUnitErrors(errors);
-    if (errors.some((e) => e.qr || e.nfc)) return false;
+    const firstErrorIndex = errors.findIndex((e) => e.qr || e.nfc);
+    if (firstErrorIndex !== -1) {
+      setActiveUnit(firstErrorIndex);
+      return false;
+    }
 
     units.forEach((u, i) => {
       addItem({
@@ -174,10 +234,15 @@ export default function ProductPageClient({
               className="mx-auto w-[400px] max-w-full"
               color={color}
               reflection={false}
-              name={units[0].name.trim() || undefined}
-              jobTitle={units[0].jobTitle.trim() || undefined}
+              name={activeUnitData.name.trim() || undefined}
+              jobTitle={activeUnitData.jobTitle.trim() || undefined}
               personalized={!isStandardBusinessCard}
             />
+          )}
+          {isBusinessCard && !isStandardBusinessCard && units.length > 1 && (
+            <p className="mt-4 text-center text-xs text-black/40">
+              Previewing card {activeUnit + 1} of {units.length}
+            </p>
           )}
         </div>
 
@@ -337,102 +402,109 @@ export default function ProductPageClient({
                 </>
               )}
 
-              {(isReview || isOrderCard) && (
-                <div className="mt-5 border-t border-black/10 pt-4">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
-                    Destination links
-                    {units.length > 1 ? ` (${units.length} cards)` : ""}
-                  </span>
-                  <div className="mt-3 flex flex-col gap-4">
-                    {(() => {
-                      const showQrField = isOrderCard || (isReview && hasQR);
-                      return units.map((unit, i) => (
-                        <div
-                          key={i}
-                          className={
-                            units.length > 1
-                              ? "rounded-xl border border-black/10 p-3"
-                              : ""
-                          }
-                        >
-                          {units.length > 1 && (
-                            <p className="mb-2 text-xs font-semibold text-black/50">
-                              Card {i + 1} of {units.length}
-                            </p>
-                          )}
-                          <div className="flex flex-col gap-3">
-                            {showQrField && (
-                              <div>
-                                <label
-                                  htmlFor={`qr-link-${i}`}
-                                  className="text-xs font-semibold uppercase tracking-wide text-black/60"
-                                >
-                                  QR code destination link{" "}
-                                  <span className="font-normal normal-case text-black/40">
-                                    (required)
-                                  </span>
-                                </label>
-                                <input
-                                  id={`qr-link-${i}`}
-                                  type="url"
-                                  value={unit.qrLink}
-                                  onChange={(e) => {
-                                    updateUnit(i, { qrLink: e.target.value });
-                                    clearUnitError(i, "qr");
-                                  }}
-                                  placeholder="https://..."
-                                  className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
-                                    unitErrors[i]?.qr
-                                      ? "border-red-500 focus:border-red-500"
-                                      : "border-black/15 focus:border-black"
-                                  }`}
-                                />
-                                {unitErrors[i]?.qr && (
-                                  <p className="mt-2 text-xs text-red-600">
-                                    {unitErrors[i]?.qr}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-
+              {(isReview || isOrderCard) &&
+                (() => {
+                  const showQrField = isOrderCard || (isReview && hasQR);
+                  const unit = activeUnitData;
+                  const i = activeUnit;
+                  return (
+                    <div className="mt-5 border-t border-black/10 pt-4">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                        Destination links
+                        {units.length > 1 ? ` (${units.length} cards)` : ""}
+                      </span>
+                      <div className="mt-3">
+                        <CardPager
+                          index={activeUnit}
+                          total={units.length}
+                          onSelect={goToUnit}
+                        />
+                        {units.length > 1 && (
+                          <p className="mb-2 text-xs font-semibold text-black/50">
+                            Card {activeUnit + 1} of {units.length}
+                          </p>
+                        )}
+                        <div className="flex flex-col gap-3">
+                          {showQrField && (
                             <div>
                               <label
-                                htmlFor={`nfc-link-${i}`}
+                                htmlFor={`qr-link-${i}`}
                                 className="text-xs font-semibold uppercase tracking-wide text-black/60"
                               >
-                                NFC destination link{" "}
+                                QR code destination link{" "}
                                 <span className="font-normal normal-case text-black/40">
                                   (required)
                                 </span>
                               </label>
                               <input
-                                id={`nfc-link-${i}`}
+                                id={`qr-link-${i}`}
                                 type="url"
-                                value={unit.nfcLink}
+                                value={unit.qrLink}
                                 onChange={(e) => {
-                                  updateUnit(i, { nfcLink: e.target.value });
-                                  clearUnitError(i, "nfc");
+                                  updateUnit(i, { qrLink: e.target.value });
+                                  clearUnitError(i, "qr");
                                 }}
                                 placeholder="https://..."
                                 className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
-                                  unitErrors[i]?.nfc
+                                  unitErrors[i]?.qr
                                     ? "border-red-500 focus:border-red-500"
                                     : "border-black/15 focus:border-black"
                                 }`}
                               />
-                              {unitErrors[i]?.nfc && (
+                              {unitErrors[i]?.qr && (
                                 <p className="mt-2 text-xs text-red-600">
-                                  {unitErrors[i]?.nfc}
+                                  {unitErrors[i]?.qr}
                                 </p>
                               )}
                             </div>
+                          )}
+
+                          <div>
+                            <label
+                              htmlFor={`nfc-link-${i}`}
+                              className="text-xs font-semibold uppercase tracking-wide text-black/60"
+                            >
+                              NFC destination link{" "}
+                              <span className="font-normal normal-case text-black/40">
+                                (required)
+                              </span>
+                            </label>
+                            <input
+                              id={`nfc-link-${i}`}
+                              type="url"
+                              value={unit.nfcLink}
+                              onChange={(e) => {
+                                updateUnit(i, { nfcLink: e.target.value });
+                                clearUnitError(i, "nfc");
+                              }}
+                              placeholder="https://..."
+                              className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
+                                unitErrors[i]?.nfc
+                                  ? "border-red-500 focus:border-red-500"
+                                  : "border-black/15 focus:border-black"
+                              }`}
+                            />
+                            {unitErrors[i]?.nfc && (
+                              <p className="mt-2 text-xs text-red-600">
+                                {unitErrors[i]?.nfc}
+                              </p>
+                            )}
                           </div>
                         </div>
-                      ));
-                    })()}
-                  </div>
-                </div>
-              )}
+
+                        {activeUnit < units.length - 1 && (
+                          <button
+                            type="button"
+                            onClick={() => goToUnit(activeUnit + 1)}
+                            className="mt-4 w-full rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
+                          >
+                            Save &amp; next card ›
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
             </div>
           )}
 
@@ -441,76 +513,81 @@ export default function ProductPageClient({
               <span className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Personalize your card{units.length > 1 ? "s" : ""}
               </span>
-              <div className="mt-3 flex flex-col gap-4">
-                {units.map((unit, i) => (
-                  <div
-                    key={i}
-                    className={
-                      units.length > 1
-                        ? "rounded-xl border border-black/10 p-3"
-                        : ""
-                    }
-                  >
-                    {units.length > 1 && (
-                      <p className="mb-2 text-xs font-semibold text-black/50">
-                        Card {i + 1} of {units.length}
-                      </p>
-                    )}
-                    <div className="flex flex-col gap-3">
-                      <div>
-                        <label
-                          htmlFor={`card-name-${i}`}
-                          className="text-xs text-black/50"
-                        >
-                          Name{" "}
-                          <span className="text-black/30">
-                            ({unit.name.length}/{NAME_MAX_LENGTH})
-                          </span>
-                        </label>
-                        <input
-                          id={`card-name-${i}`}
-                          type="text"
-                          value={unit.name}
-                          onChange={(e) =>
-                            updateUnit(i, {
-                              name: e.target.value.slice(0, NAME_MAX_LENGTH),
-                            })
-                          }
-                          maxLength={NAME_MAX_LENGTH}
-                          placeholder="e.g. Hernero Cruz"
-                          className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor={`card-title-${i}`}
-                          className="text-xs text-black/50"
-                        >
-                          Title{" "}
-                          <span className="text-black/30">
-                            ({unit.jobTitle.length}/{JOB_TITLE_MAX_LENGTH})
-                          </span>
-                        </label>
-                        <input
-                          id={`card-title-${i}`}
-                          type="text"
-                          value={unit.jobTitle}
-                          onChange={(e) =>
-                            updateUnit(i, {
-                              jobTitle: e.target.value.slice(
-                                0,
-                                JOB_TITLE_MAX_LENGTH
-                              ),
-                            })
-                          }
-                          maxLength={JOB_TITLE_MAX_LENGTH}
-                          placeholder="e.g. CEO & Founder"
-                          className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
-                        />
-                      </div>
-                    </div>
+              <div className="mt-3">
+                <CardPager
+                  index={activeUnit}
+                  total={units.length}
+                  onSelect={goToUnit}
+                />
+                {units.length > 1 && (
+                  <p className="mb-2 text-xs font-semibold text-black/50">
+                    Card {activeUnit + 1} of {units.length}
+                  </p>
+                )}
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label
+                      htmlFor="card-name"
+                      className="text-xs text-black/50"
+                    >
+                      Name{" "}
+                      <span className="text-black/30">
+                        ({activeUnitData.name.length}/{NAME_MAX_LENGTH})
+                      </span>
+                    </label>
+                    <input
+                      id="card-name"
+                      type="text"
+                      value={activeUnitData.name}
+                      onChange={(e) =>
+                        updateUnit(activeUnit, {
+                          name: e.target.value.slice(0, NAME_MAX_LENGTH),
+                        })
+                      }
+                      maxLength={NAME_MAX_LENGTH}
+                      placeholder="e.g. Hernero Cruz"
+                      className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+                    />
                   </div>
-                ))}
+                  <div>
+                    <label
+                      htmlFor="card-title"
+                      className="text-xs text-black/50"
+                    >
+                      Title{" "}
+                      <span className="text-black/30">
+                        ({activeUnitData.jobTitle.length}/
+                        {JOB_TITLE_MAX_LENGTH})
+                      </span>
+                    </label>
+                    <input
+                      id="card-title"
+                      type="text"
+                      value={activeUnitData.jobTitle}
+                      onChange={(e) =>
+                        updateUnit(activeUnit, {
+                          jobTitle: e.target.value.slice(
+                            0,
+                            JOB_TITLE_MAX_LENGTH
+                          ),
+                        })
+                      }
+                      maxLength={JOB_TITLE_MAX_LENGTH}
+                      placeholder="e.g. CEO & Founder"
+                      className="mt-1 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+                    />
+                  </div>
+                </div>
+
+                {activeUnit < units.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={() => goToUnit(activeUnit + 1)}
+                    className="mt-4 w-full rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
+                  >
+                    Save &amp; next card ›
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -543,7 +620,7 @@ export default function ProductPageClient({
                 isReview ||
                 isOrderCard) && (
                 <p className="mt-2 text-xs text-black/40">
-                  Each card can have its own details below.
+                  Each card can have its own details above.
                 </p>
               )}
           </div>

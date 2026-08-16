@@ -1,18 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { IconType } from "react-icons";
-import {
-  FiBriefcase,
-  FiBookOpen,
-  FiGlobe,
-  FiHeart,
-  FiInfo,
-  FiLink,
-  FiMapPin,
-  FiPhone,
-  FiStar,
-} from "react-icons/fi";
+import { FiCalendar, FiGlobe, FiHeart, FiMapPin, FiUser } from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
 import { useImageUpload } from "@/lib/use-image-upload";
 import {
@@ -107,13 +96,11 @@ function ChipRow({ values }: { values: string[] }) {
 
 function SectionRow({
   title,
-  icon: Icon,
   onEdit,
   empty,
   children,
 }: {
   title: string;
-  icon: IconType;
   onEdit: () => void;
   empty: boolean;
   children: React.ReactNode;
@@ -121,10 +108,7 @@ function SectionRow({
   return (
     <div className="border-b border-black/10 py-3">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-bold tracking-wide text-black uppercase">
-          <Icon className="h-4 w-4 shrink-0" />
-          {title}
-        </h2>
+        <h2 className="text-sm font-bold tracking-wide text-black uppercase">{title}</h2>
         <EditBadge onClick={onEdit} label={`Edit ${title}`} className="h-7 w-7 shrink-0" />
       </div>
       <div className="mt-2">
@@ -262,14 +246,12 @@ export default function EditableProfileView({
   const sections: {
     key: SectionKey;
     title: string;
-    icon: IconType;
     empty: boolean;
     content: React.ReactNode;
   }[] = [
     {
       key: "contact",
       title: "Contact",
-      icon: FiPhone,
       empty: profile.emails.length === 0 && profile.phone_numbers.length === 0,
       content: (
         <div className="flex flex-wrap gap-2">
@@ -295,22 +277,20 @@ export default function EditableProfileView({
     {
       key: "social",
       title: "Social networks",
-      icon: FiGlobe,
       empty: socialLinks.length === 0,
       content: (
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3">
           {socialLinks.map((link) => {
             const platform = findSocialPlatform(link.platform);
             if (!platform) return null;
             const Icon = platform.Icon;
             return (
-              <span
-                key={link.platform}
-                title={platform.label}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-black"
-              >
-                <Icon className="h-4 w-4" />
-              </span>
+              <div key={link.platform} className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/5 text-black">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-medium text-black">{platform.label}</span>
+              </div>
             );
           })}
         </div>
@@ -319,13 +299,15 @@ export default function EditableProfileView({
     {
       key: "about",
       title: "About",
-      icon: FiInfo,
       empty: !hasAbout,
       content: (
         <dl className="flex flex-col gap-2 text-sm text-black">
           {(profile.current_city || profile.hometown) && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/50">Location</dt>
+              <dt className="flex items-center gap-1.5 text-black/50">
+                <FiMapPin className="h-4 w-4 shrink-0" />
+                Location
+              </dt>
               <dd className="text-right font-medium">
                 {[profile.current_city, profile.hometown && `from ${profile.hometown}`]
                   .filter(Boolean)
@@ -335,7 +317,10 @@ export default function EditableProfileView({
           )}
           {profile.birthday && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/50">Birthday</dt>
+              <dt className="flex items-center gap-1.5 text-black/50">
+                <FiCalendar className="h-4 w-4 shrink-0" />
+                Birthday
+              </dt>
               <dd className="font-medium">
                 {new Date(`${profile.birthday}T00:00:00`).toLocaleDateString(
                   undefined,
@@ -346,19 +331,28 @@ export default function EditableProfileView({
           )}
           {profile.gender && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/50">Gender</dt>
+              <dt className="flex items-center gap-1.5 text-black/50">
+                <FiUser className="h-4 w-4 shrink-0" />
+                Gender
+              </dt>
               <dd className="font-medium">{profile.gender}</dd>
             </div>
           )}
           {profile.relationship_status && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/50">Relationship</dt>
+              <dt className="flex items-center gap-1.5 text-black/50">
+                <FiHeart className="h-4 w-4 shrink-0" />
+                Relationship
+              </dt>
               <dd className="font-medium">{profile.relationship_status}</dd>
             </div>
           )}
           {profile.languages.length > 0 && (
             <div className="flex justify-between gap-4">
-              <dt className="text-black/50">Languages</dt>
+              <dt className="flex items-center gap-1.5 text-black/50">
+                <FiGlobe className="h-4 w-4 shrink-0" />
+                Languages
+              </dt>
               <dd className="text-right font-medium">{profile.languages.join(", ")}</dd>
             </div>
           )}
@@ -368,14 +362,12 @@ export default function EditableProfileView({
     {
       key: "hobbies",
       title: "Hobbies",
-      icon: FiHeart,
       empty: profile.hobbies.length === 0,
       content: <ChipRow values={profile.hobbies} />,
     },
     {
       key: "interests",
       title: "Interests",
-      icon: FiStar,
       empty: interestGroups.length === 0,
       content: (
         <div className="flex flex-col gap-3">
@@ -393,7 +385,6 @@ export default function EditableProfileView({
     {
       key: "work",
       title: "Work",
-      icon: FiBriefcase,
       empty: works.length === 0,
       content: (
         <div className="flex flex-col gap-3">
@@ -411,7 +402,6 @@ export default function EditableProfileView({
     {
       key: "education",
       title: "Education",
-      icon: FiBookOpen,
       empty: education.length === 0,
       content: (
         <div className="flex flex-col gap-3">
@@ -429,14 +419,12 @@ export default function EditableProfileView({
     {
       key: "travel",
       title: "Places been to",
-      icon: FiMapPin,
       empty: profile.travel_places.length === 0,
       content: <ChipRow values={profile.travel_places} />,
     },
     {
       key: "links",
       title: "Links",
-      icon: FiLink,
       empty: links.length === 0,
       content: (
         <div className="flex flex-col gap-2">
@@ -556,7 +544,6 @@ export default function EditableProfileView({
             <SectionRow
               key={section.key}
               title={section.title}
-              icon={section.icon}
               onEdit={() => openSheet(section.key)}
               empty={section.empty}
             >

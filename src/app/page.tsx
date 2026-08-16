@@ -29,11 +29,11 @@ export default function Home() {
       <section className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pb-20 pt-16 lg:flex-row lg:justify-between lg:pt-24">
         <div className="max-w-lg text-center lg:text-left">
           <h1 className="text-4xl font-bold tracking-tight text-black md:text-5xl">
-            Your digital identity, one tap away.
+            Every connection, one tap away.
           </h1>
           <p className="mt-5 text-lg text-black/60">
-            HERNEROS cards let you share your profile, links, and contact info
-            instantly — just tap or scan.
+            Share your profile, collect reviews, hand out Wi-Fi, or take
+            orders — every HERNEROS card works with a single tap or scan.
           </p>
           <Link
             href="#buy"

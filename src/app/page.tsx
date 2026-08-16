@@ -4,24 +4,7 @@ import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
 import OrderCardMock from "@/components/OrderCardMock";
-
-const steps = [
-  {
-    title: "Tap or scan",
-    description:
-      "Hold your HERNEROS card up to any phone, or scan the QR code on the back — no app required.",
-  },
-  {
-    title: "Create your profile",
-    description:
-      "First tap takes you to a quick sign-up. Add your name, photo, links, and contact details.",
-  },
-  {
-    title: "Share instantly",
-    description:
-      "Every future tap or scan shares your live profile. Update it anytime — the card never needs to be reprogrammed.",
-  },
-];
+import HowItWorks from "@/components/HowItWorks";
 
 export default function Home() {
   return (
@@ -47,27 +30,7 @@ export default function Home() {
 
       <section className="bg-black py-20">
         <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-center text-3xl font-bold text-white">
-            How it works
-          </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {steps.map((step, index) => (
-              <div
-                key={step.title}
-                className="rounded-3xl bg-white p-8 text-center shadow-lg"
-              >
-                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-black text-sm font-semibold text-white">
-                  {index + 1}
-                </div>
-                <h3 className="mt-5 text-lg font-semibold text-black">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-sm text-black/60">
-                  {step.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <HowItWorks />
         </div>
       </section>
 

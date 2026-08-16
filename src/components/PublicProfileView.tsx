@@ -2,13 +2,16 @@ import type { IconType } from "react-icons";
 import {
   FiBriefcase,
   FiBookOpen,
+  FiGlobe,
   FiHeart,
   FiInfo,
   FiLink,
   FiMapPin,
+  FiPhone,
   FiStar,
 } from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
+import { DEFAULT_SECTION_ORDER, type SectionKey } from "@/lib/business-profile";
 
 type SocialLink = { platform: string; url: string };
 type Entry = Record<string, string>;
@@ -42,6 +45,7 @@ export type BusinessProfileRow = {
   interests: Interests | null;
   travel_places: string[] | null;
   links: Entry[] | null;
+  section_order: SectionKey[] | null;
 };
 
 function ChipRow({ values }: { values: string[] }) {
@@ -163,6 +167,213 @@ export default function PublicProfileView({
     );
   }
 
+  const sections: {
+    key: SectionKey;
+    title: string;
+    icon: IconType;
+    empty: boolean;
+    content: React.ReactNode;
+  }[] = [
+    {
+      key: "contact",
+      title: "Contact",
+      icon: FiPhone,
+      empty: !profile.email && !(profile.phone_numbers && profile.phone_numbers.length > 0),
+      content: (
+        <div className="flex flex-wrap gap-2">
+          {profile.email && (
+            <a
+              href={`mailto:${profile.email}`}
+              className="rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
+            >
+              Email
+            </a>
+          )}
+          {(profile.phone_numbers ?? []).map((phone) => (
+            <a
+              key={phone}
+              href={`tel:${phone}`}
+              className="rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
+            >
+              {phone}
+            </a>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "social",
+      title: "Social networks",
+      icon: FiGlobe,
+      empty: socialLinks.length === 0,
+      content: (
+        <div className="flex flex-wrap gap-3">
+          {socialLinks.map((link) => {
+            const platform = findSocialPlatform(link.platform);
+            if (!platform) return null;
+            const Icon = platform.Icon;
+            return (
+              <a
+                key={link.platform}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={platform.label}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-black transition-opacity hover:opacity-60"
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            );
+          })}
+        </div>
+      ),
+    },
+    {
+      key: "about",
+      title: "About",
+      icon: FiInfo,
+      empty: !hasDetails,
+      content: (
+        <dl className="flex flex-col gap-2 text-sm text-black/70">
+          {(profile.current_city || profile.hometown) && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Location</dt>
+              <dd className="text-right">
+                {[profile.current_city, profile.hometown && `from ${profile.hometown}`]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </dd>
+            </div>
+          )}
+          {profile.birthday && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Birthday</dt>
+              <dd>{formatBirthday(profile.birthday)}</dd>
+            </div>
+          )}
+          {profile.gender && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Gender</dt>
+              <dd>{profile.gender}</dd>
+            </div>
+          )}
+          {profile.relationship_status && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Relationship</dt>
+              <dd>{profile.relationship_status}</dd>
+            </div>
+          )}
+          {profile.languages && profile.languages.length > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Languages</dt>
+              <dd className="text-right">{profile.languages.join(", ")}</dd>
+            </div>
+          )}
+        </dl>
+      ),
+    },
+    {
+      key: "hobbies",
+      title: "Hobbies",
+      icon: FiHeart,
+      empty: !profile.hobbies || profile.hobbies.length === 0,
+      content: <ChipRow values={profile.hobbies ?? []} />,
+    },
+    {
+      key: "interests",
+      title: "Interests",
+      icon: FiStar,
+      empty: interestGroups.length === 0,
+      content: (
+        <div className="flex flex-col gap-3">
+          {interestGroups.map((group) => (
+            <div key={group.label}>
+              <p className="text-xs font-medium text-black/50">{group.label}</p>
+              <div className="mt-1.5">
+                <ChipRow values={group.values} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "work",
+      title: "Work",
+      icon: FiBriefcase,
+      empty: works.length === 0,
+      content: (
+        <div className="flex flex-col gap-3">
+          {works.map((entry, i) => (
+            <div key={i} className="text-sm">
+              <p className="font-semibold text-black">
+                {[entry.title, entry.company].filter(Boolean).join(" at ")}
+              </p>
+              {entry.years && <p className="text-black/40">{entry.years}</p>}
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "education",
+      title: "Education",
+      icon: FiBookOpen,
+      empty: education.length === 0,
+      content: (
+        <div className="flex flex-col gap-3">
+          {education.map((entry, i) => (
+            <div key={i} className="text-sm">
+              <p className="font-semibold text-black">
+                {[entry.degree, entry.school].filter(Boolean).join(" · ")}
+              </p>
+              {entry.years && <p className="text-black/40">{entry.years}</p>}
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "travel",
+      title: "Places been to",
+      icon: FiMapPin,
+      empty: !profile.travel_places || profile.travel_places.length === 0,
+      content: <ChipRow values={profile.travel_places ?? []} />,
+    },
+    {
+      key: "links",
+      title: "Links",
+      icon: FiLink,
+      empty: links.length === 0,
+      content: (
+        <div className="flex flex-col gap-2">
+          {links.map((link, i) => (
+            <a
+              key={i}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-black underline underline-offset-2 hover:opacity-60"
+            >
+              {link.label || link.url}
+            </a>
+          ))}
+        </div>
+      ),
+    },
+  ];
+
+  const filledSections = sections.filter((s) => !s.empty);
+  const order =
+    profile.section_order && profile.section_order.length > 0
+      ? profile.section_order
+      : DEFAULT_SECTION_ORDER;
+  const filledByKey = new Map(filledSections.map((s) => [s.key, s]));
+  const orderedSections = [
+    ...order.map((key) => filledByKey.get(key)).filter((s): s is (typeof sections)[number] => !!s),
+    ...filledSections.filter((s) => !order.includes(s.key)),
+  ];
+
   return (
     <div className="mx-auto w-full max-w-md pb-16">
       <div className="relative">
@@ -210,168 +421,14 @@ export default function PublicProfileView({
         )}
 
         {actionButtons && <div className="mt-3">{actionButtons}</div>}
-
-        {(profile.email || (profile.phone_numbers && profile.phone_numbers.length > 0)) && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {profile.email && (
-              <a
-                href={`mailto:${profile.email}`}
-                className="rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
-              >
-                Email
-              </a>
-            )}
-            {(profile.phone_numbers ?? []).map((phone) => (
-              <a
-                key={phone}
-                href={`tel:${phone}`}
-                className="rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-opacity hover:opacity-60"
-              >
-                {phone}
-              </a>
-            ))}
-          </div>
-        )}
-
-        {socialLinks.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-3">
-            {socialLinks.map((link) => {
-              const platform = findSocialPlatform(link.platform);
-              if (!platform) return null;
-              const Icon = platform.Icon;
-              return (
-                <a
-                  key={link.platform}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={platform.label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-black transition-opacity hover:opacity-60"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       <div className="mt-3 flex flex-col px-6">
-        {hasDetails && (
-          <Section title="About" icon={FiInfo}>
-            <dl className="flex flex-col gap-2 text-sm text-black/70">
-              {(profile.current_city || profile.hometown) && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-black/40">Location</dt>
-                  <dd className="text-right">
-                    {[profile.current_city, profile.hometown && `from ${profile.hometown}`]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </dd>
-                </div>
-              )}
-              {profile.birthday && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-black/40">Birthday</dt>
-                  <dd>{formatBirthday(profile.birthday)}</dd>
-                </div>
-              )}
-              {profile.gender && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-black/40">Gender</dt>
-                  <dd>{profile.gender}</dd>
-                </div>
-              )}
-              {profile.relationship_status && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-black/40">Relationship</dt>
-                  <dd>{profile.relationship_status}</dd>
-                </div>
-              )}
-              {profile.languages && profile.languages.length > 0 && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-black/40">Languages</dt>
-                  <dd className="text-right">{profile.languages.join(", ")}</dd>
-                </div>
-              )}
-            </dl>
+        {orderedSections.map((section) => (
+          <Section key={section.key} title={section.title} icon={section.icon}>
+            {section.content}
           </Section>
-        )}
-
-        {profile.hobbies && profile.hobbies.length > 0 && (
-          <Section title="Hobbies" icon={FiHeart}>
-            <ChipRow values={profile.hobbies} />
-          </Section>
-        )}
-
-        {interestGroups.length > 0 && (
-          <Section title="Interests" icon={FiStar}>
-            <div className="flex flex-col gap-3">
-              {interestGroups.map((group) => (
-                <div key={group.label}>
-                  <p className="text-xs font-medium text-black/50">{group.label}</p>
-                  <div className="mt-1.5">
-                    <ChipRow values={group.values} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        {works.length > 0 && (
-          <Section title="Work" icon={FiBriefcase}>
-            <div className="flex flex-col gap-3">
-              {works.map((entry, i) => (
-                <div key={i} className="text-sm">
-                  <p className="font-semibold text-black">
-                    {[entry.title, entry.company].filter(Boolean).join(" at ")}
-                  </p>
-                  {entry.years && <p className="text-black/40">{entry.years}</p>}
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        {education.length > 0 && (
-          <Section title="Education" icon={FiBookOpen}>
-            <div className="flex flex-col gap-3">
-              {education.map((entry, i) => (
-                <div key={i} className="text-sm">
-                  <p className="font-semibold text-black">
-                    {[entry.degree, entry.school].filter(Boolean).join(" · ")}
-                  </p>
-                  {entry.years && <p className="text-black/40">{entry.years}</p>}
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        {profile.travel_places && profile.travel_places.length > 0 && (
-          <Section title="Places been to" icon={FiMapPin}>
-            <ChipRow values={profile.travel_places} />
-          </Section>
-        )}
-
-        {links.length > 0 && (
-          <Section title="Links" icon={FiLink}>
-            <div className="flex flex-col gap-2">
-              {links.map((link, i) => (
-                <a
-                  key={i}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-semibold text-black underline underline-offset-2 hover:opacity-60"
-                >
-                  {link.label || link.url}
-                </a>
-              ))}
-            </div>
-          </Section>
-        )}
+        ))}
       </div>
     </div>
   );

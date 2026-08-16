@@ -5,6 +5,8 @@ import type { IconType } from "react-icons";
 import {
   FiBriefcase,
   FiBookOpen,
+  FiChevronDown,
+  FiChevronUp,
   FiGlobe,
   FiHeart,
   FiInfo,
@@ -18,6 +20,7 @@ import { useImageUpload } from "@/lib/use-image-upload";
 import {
   type Interests,
   type ProfileState,
+  type SectionKey,
   RELATIONSHIP_OPTIONS,
 } from "@/lib/business-profile";
 import TagListInput from "@/components/TagListInput";
@@ -26,18 +29,7 @@ import MultiEntryEditor from "@/components/MultiEntryEditor";
 import FieldEditSheet from "@/components/FieldEditSheet";
 import ImageCropModal from "@/components/ImageCropModal";
 
-type SheetKey =
-  | "name"
-  | "bio"
-  | "contact"
-  | "social"
-  | "about"
-  | "hobbies"
-  | "interests"
-  | "work"
-  | "education"
-  | "travel"
-  | "links";
+type SheetKey = SectionKey | "name" | "bio";
 
 function PenIcon({ className }: { className?: string }) {
   return (
@@ -115,27 +107,81 @@ function ChipRow({ values }: { values: string[] }) {
   );
 }
 
+function MoveButtons({
+  title,
+  onMoveUp,
+  onMoveDown,
+  disableUp,
+  disableDown,
+}: {
+  title: string;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  disableUp: boolean;
+  disableDown: boolean;
+}) {
+  return (
+    <div className="flex shrink-0 flex-col">
+      <button
+        type="button"
+        onClick={onMoveUp}
+        disabled={disableUp}
+        aria-label={`Move ${title} up`}
+        className="flex h-4 w-6 items-center justify-center text-black/30 hover:text-black disabled:opacity-20"
+      >
+        <FiChevronUp className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={onMoveDown}
+        disabled={disableDown}
+        aria-label={`Move ${title} down`}
+        className="flex h-4 w-6 items-center justify-center text-black/30 hover:text-black disabled:opacity-20"
+      >
+        <FiChevronDown className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
 function SectionRow({
   title,
   icon: Icon,
   onEdit,
   empty,
+  onMoveUp,
+  onMoveDown,
+  disableUp,
+  disableDown,
   children,
 }: {
   title: string;
   icon: IconType;
   onEdit: () => void;
   empty: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  disableUp: boolean;
+  disableDown: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="border-b border-black/10 py-3">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-1.5 text-sm font-bold tracking-wide text-black uppercase">
           <Icon className="h-4 w-4 shrink-0" />
           {title}
         </h2>
-        <EditBadge onClick={onEdit} label={`Edit ${title}`} className="h-7 w-7 shrink-0" />
+        <div className="flex shrink-0 items-center gap-1">
+          <MoveButtons
+            title={title}
+            onMoveUp={onMoveUp}
+            onMoveDown={onMoveDown}
+            disableUp={disableUp}
+            disableDown={disableDown}
+          />
+          <EditBadge onClick={onEdit} label={`Edit ${title}`} className="h-7 w-7 shrink-0" />
+        </div>
       </div>
       <div className="mt-2">
         {empty ? (
@@ -270,7 +316,7 @@ export default function EditableProfileView({
     profile.languages.length > 0;
 
   const sections: {
-    key: SheetKey;
+    key: SectionKey;
     title: string;
     icon: IconType;
     empty: boolean;
@@ -457,12 +503,31 @@ export default function EditableProfileView({
     },
   ];
 
-  // Filled sections first (in their normal order), empty ones sink to the
-  // bottom so the profile reads cleanly without needing to fill everything.
-  const orderedSections = [
-    ...sections.filter((s) => !s.empty),
-    ...sections.filter((s) => s.empty),
-  ];
+  // Once the owner has customized the order, respect it exactly (they get
+  // full control over sequencing). Until then, default to filled sections
+  // first, with empty ones sinking to the bottom.
+  const sectionsByKey = new Map(sections.map((s) => [s.key, s]));
+  const orderedSections =
+    profile.section_order.length > 0
+      ? [
+          ...profile.section_order
+            .map((key) => sectionsByKey.get(key))
+            .filter((s): s is (typeof sections)[number] => !!s),
+          ...sections.filter((s) => !profile.section_order.includes(s.key)),
+        ]
+      : [...sections.filter((s) => !s.empty), ...sections.filter((s) => s.empty)];
+
+  const moveSection = (key: SectionKey, direction: "up" | "down") => {
+    const currentOrder = orderedSections.map((s) => s.key);
+    const index = currentOrder.indexOf(key);
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= currentOrder.length) return;
+    const newOrder = [...currentOrder];
+    [newOrder[index], newOrder[targetIndex]] = [newOrder[targetIndex], newOrder[index]];
+    onSaveField({ ...profile, section_order: newOrder }).catch(() => {
+      setImageError("Couldn't reorder sections. Please try again.");
+    });
+  };
 
   return (
     <div className="mx-auto w-full max-w-md pb-16">
@@ -559,13 +624,17 @@ export default function EditableProfileView({
         {actionButtons && <div className="mt-3">{actionButtons}</div>}
 
         <div className="mt-3">
-          {orderedSections.map((section) => (
+          {orderedSections.map((section, index) => (
             <SectionRow
               key={section.key}
               title={section.title}
               icon={section.icon}
               onEdit={() => openSheet(section.key)}
               empty={section.empty}
+              onMoveUp={() => moveSection(section.key, "up")}
+              onMoveDown={() => moveSection(section.key, "down")}
+              disableUp={index === 0}
+              disableDown={index === orderedSections.length - 1}
             >
               {section.content}
             </SectionRow>

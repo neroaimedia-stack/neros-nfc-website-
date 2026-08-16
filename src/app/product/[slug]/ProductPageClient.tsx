@@ -38,7 +38,8 @@ export default function ProductPageClient({
   const [jobTitle, setJobTitle] = useState("");
   const [qrLink, setQrLink] = useState("");
   const [nfcLink, setNfcLink] = useState("");
-  const [linkError, setLinkError] = useState("");
+  const [qrLinkError, setQrLinkError] = useState("");
+  const [nfcLinkError, setNfcLinkError] = useState("");
   const [added, setAdded] = useState(false);
   const variant = hasQR && isReview ? `${color}${QR_VARIANT_SUFFIX}` : color;
 
@@ -66,11 +67,15 @@ export default function ProductPageClient({
     : undefined;
 
   const handleAddToCart = () => {
-    if (isReview && hasQR && !qrLink.trim()) {
-      setLinkError("Please provide a destination link for the QR code.");
-      return false;
-    }
-    setLinkError("");
+    const needsQrLink = isReview && hasQR && !qrLink.trim();
+    const needsNfcLink = isReview && !nfcLink.trim();
+    setQrLinkError(
+      needsQrLink ? "Please provide a destination link for the QR code." : ""
+    );
+    setNfcLinkError(
+      needsNfcLink ? "Please provide a destination link for the NFC tap." : ""
+    );
+    if (needsQrLink || needsNfcLink) return false;
     addItem({
       id: `${product.slug}-${variant}`,
       productSlug: product.slug,
@@ -247,17 +252,17 @@ export default function ProductPageClient({
                       value={qrLink}
                       onChange={(e) => {
                         setQrLink(e.target.value);
-                        if (linkError) setLinkError("");
+                        if (qrLinkError) setQrLinkError("");
                       }}
                       placeholder="https://..."
                       className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
-                        linkError
+                        qrLinkError
                           ? "border-red-500 focus:border-red-500"
                           : "border-black/15 focus:border-black"
                       }`}
                     />
-                    {linkError && (
-                      <p className="mt-2 text-xs text-red-600">{linkError}</p>
+                    {qrLinkError && (
+                      <p className="mt-2 text-xs text-red-600">{qrLinkError}</p>
                     )}
                   </div>
                 )}
@@ -271,17 +276,27 @@ export default function ProductPageClient({
                   >
                     NFC destination link{" "}
                     <span className="font-normal normal-case text-black/40">
-                      (optional — leave blank to set up later)
+                      (required)
                     </span>
                   </label>
                   <input
                     id="nfc-link"
                     type="url"
                     value={nfcLink}
-                    onChange={(e) => setNfcLink(e.target.value)}
+                    onChange={(e) => {
+                      setNfcLink(e.target.value);
+                      if (nfcLinkError) setNfcLinkError("");
+                    }}
                     placeholder="https://..."
-                    className="mt-2 w-full rounded-full border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+                    className={`mt-2 w-full rounded-full border px-4 py-2.5 text-sm outline-none ${
+                      nfcLinkError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-black/15 focus:border-black"
+                    }`}
                   />
+                  {nfcLinkError && (
+                    <p className="mt-2 text-xs text-red-600">{nfcLinkError}</p>
+                  )}
                 </div>
               </>
             )}

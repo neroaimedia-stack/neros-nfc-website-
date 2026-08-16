@@ -85,14 +85,63 @@ export default function CardDetailPage() {
 
   const isBusinessCard = card.product_type === "business-card";
 
+  const backLink = (
+    <Link
+      href="/account"
+      className="text-sm text-black/40 transition-colors hover:text-black"
+    >
+      ‹ Your cards
+    </Link>
+  );
+
+  const buttonRow = (
+    <div className="mt-6 flex gap-3">
+      <button
+        type="button"
+        onClick={() => setMode("edit")}
+        className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
+          mode === "edit"
+            ? "bg-black text-white"
+            : "border border-black text-black hover:opacity-60"
+        }`}
+      >
+        Edit profile
+      </button>
+      <button
+        type="button"
+        onClick={() => setMode("preview")}
+        className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
+          mode === "preview"
+            ? "bg-black text-white"
+            : "border border-black text-black hover:opacity-60"
+        }`}
+      >
+        View public profile
+      </button>
+    </div>
+  );
+
+  // In preview mode, drop the account page's padded/max-width chrome so the
+  // profile renders full-bleed, exactly as it does on the public /c/[id] page.
+  if (isBusinessCard && mode === "preview") {
+    return (
+      <div className="flex-1">
+        <div className="mx-auto w-full max-w-md px-6 pt-16 sm:max-w-xl md:max-w-2xl">
+          {backLink}
+          {buttonRow}
+        </div>
+        <BusinessProfileEditor
+          cardId={card.id}
+          mode={mode}
+          onModeChange={setMode}
+        />
+      </div>
+    );
+  }
+
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-6 py-16 sm:max-w-xl md:max-w-2xl">
-      <Link
-        href="/account"
-        className="text-sm text-black/40 transition-colors hover:text-black"
-      >
-        ‹ Your cards
-      </Link>
+      {backLink}
 
       {!isBusinessCard && (
         <div className="mt-6 rounded-3xl border border-black/10 bg-neutral-50 p-8">
@@ -104,30 +153,7 @@ export default function CardDetailPage() {
 
       {isBusinessCard ? (
         <>
-          <div className="mt-6 flex gap-3">
-            <button
-              type="button"
-              onClick={() => setMode("edit")}
-              className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
-                mode === "edit"
-                  ? "bg-black text-white"
-                  : "border border-black text-black hover:opacity-60"
-              }`}
-            >
-              Edit profile
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("preview")}
-              className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
-                mode === "preview"
-                  ? "bg-black text-white"
-                  : "border border-black text-black hover:opacity-60"
-              }`}
-            >
-              View public profile
-            </button>
-          </div>
+          {buttonRow}
           <BusinessProfileEditor
             cardId={card.id}
             mode={mode}

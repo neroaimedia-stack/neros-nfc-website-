@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import ImageCropModal from "@/components/ImageCropModal";
 
 export default function ImageUploadField({
   label,
@@ -23,19 +24,30 @@ export default function ImageUploadField({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [pendingImageSrc, setPendingImageSrc] = useState<string | null>(null);
 
-  const handleFile = async (file: File) => {
+  const closeCropper = () => {
+    if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
+    setPendingImageSrc(null);
+  };
+
+  const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
       setError("Please choose an image file.");
       return;
     }
+    setError("");
+    setPendingImageSrc(URL.createObjectURL(file));
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    closeCropper();
     setUploading(true);
     setError("");
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${cardId}/${folder}.${ext}`;
+    const path = `${cardId}/${folder}.jpg`;
     const { error: uploadError } = await supabase.storage
       .from("profile-media")
-      .upload(path, file, { upsert: true });
+      .upload(path, blob, { upsert: true, contentType: "image/jpeg" });
     setUploading(false);
     if (uploadError) {
       setError("Upload failed. Try a different image.");
@@ -119,6 +131,16 @@ export default function ImageUploadField({
         </div>
       )}
       {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
+
+      {pendingImageSrc && (
+        <ImageCropModal
+          imageSrc={pendingImageSrc}
+          aspect={shape === "square" ? 1 : 3}
+          cropShape={shape === "square" ? "round" : "rect"}
+          onCancel={closeCropper}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </div>
   );
 }

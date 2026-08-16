@@ -131,11 +131,7 @@ function SectionRow({
   return (
     <div className="border-b border-black/10 py-3">
       <div className="flex items-center justify-between gap-3">
-        <h2
-          className={`flex items-center gap-1.5 text-sm font-bold tracking-wide uppercase ${
-            empty ? "text-black/30" : "text-black"
-          }`}
-        >
+        <h2 className="flex items-center gap-1.5 text-sm font-bold tracking-wide text-black uppercase">
           <Icon className="h-4 w-4 shrink-0" />
           {title}
         </h2>

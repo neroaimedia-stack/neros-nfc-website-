@@ -1,3 +1,13 @@
+import type { IconType } from "react-icons";
+import {
+  FiBriefcase,
+  FiBookOpen,
+  FiHeart,
+  FiInfo,
+  FiLink,
+  FiMapPin,
+  FiStar,
+} from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
 
 type SocialLink = { platform: string; url: string };
@@ -51,17 +61,20 @@ function ChipRow({ values }: { values: string[] }) {
 
 function Section({
   title,
+  icon: Icon,
   children,
 }: {
   title: string;
+  icon: IconType;
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-t border-black/10 pt-6">
-      <h2 className="text-xs font-bold tracking-wide text-black/40 uppercase">
+    <div className="border-b border-black/10 py-3">
+      <h2 className="flex items-center gap-1.5 text-sm font-bold tracking-wide text-black uppercase">
+        <Icon className="h-4 w-4 shrink-0" />
         {title}
       </h2>
-      <div className="mt-3">{children}</div>
+      <div className="mt-2">{children}</div>
     </div>
   );
 }
@@ -167,7 +180,7 @@ export default function PublicProfileView({
       </div>
 
       <div className="px-6">
-        <div className="flex items-end gap-4">
+        <div className="flex items-end gap-3">
           <div className="relative z-10 -mt-12 shrink-0">
             {profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -182,24 +195,24 @@ export default function PublicProfileView({
           </div>
           <div className="min-w-0 pt-3 pb-1">
             {profile.full_name && (
-              <h1 className="truncate text-2xl font-bold text-black">
+              <h1 className="truncate text-3xl font-bold text-black">
                 {profile.full_name}
               </h1>
             )}
             {profile.job_title && (
-              <p className="truncate text-sm text-black/60">{profile.job_title}</p>
+              <p className="truncate text-base font-medium text-black/60">{profile.job_title}</p>
             )}
           </div>
         </div>
 
         {profile.bio && (
-          <p className="mt-4 text-sm text-black/70">{profile.bio}</p>
+          <p className="mt-3 text-sm text-black/70">{profile.bio}</p>
         )}
 
-        {actionButtons && <div className="mt-4">{actionButtons}</div>}
+        {actionButtons && <div className="mt-3">{actionButtons}</div>}
 
         {(profile.email || (profile.phone_numbers && profile.phone_numbers.length > 0)) && (
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             {profile.email && (
               <a
                 href={`mailto:${profile.email}`}
@@ -221,7 +234,7 @@ export default function PublicProfileView({
         )}
 
         {socialLinks.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-3 flex flex-wrap gap-3">
             {socialLinks.map((link) => {
               const platform = findSocialPlatform(link.platform);
               if (!platform) return null;
@@ -243,9 +256,9 @@ export default function PublicProfileView({
         )}
       </div>
 
-      <div className="mt-8 flex flex-col gap-6 px-6">
+      <div className="mt-3 flex flex-col px-6">
         {hasDetails && (
-          <Section title="About">
+          <Section title="About" icon={FiInfo}>
             <dl className="flex flex-col gap-2 text-sm text-black/70">
               {(profile.current_city || profile.hometown) && (
                 <div className="flex justify-between gap-4">
@@ -286,13 +299,13 @@ export default function PublicProfileView({
         )}
 
         {profile.hobbies && profile.hobbies.length > 0 && (
-          <Section title="Hobbies">
+          <Section title="Hobbies" icon={FiHeart}>
             <ChipRow values={profile.hobbies} />
           </Section>
         )}
 
         {interestGroups.length > 0 && (
-          <Section title="Interests">
+          <Section title="Interests" icon={FiStar}>
             <div className="flex flex-col gap-3">
               {interestGroups.map((group) => (
                 <div key={group.label}>
@@ -307,7 +320,7 @@ export default function PublicProfileView({
         )}
 
         {works.length > 0 && (
-          <Section title="Work">
+          <Section title="Work" icon={FiBriefcase}>
             <div className="flex flex-col gap-3">
               {works.map((entry, i) => (
                 <div key={i} className="text-sm">
@@ -322,7 +335,7 @@ export default function PublicProfileView({
         )}
 
         {education.length > 0 && (
-          <Section title="Education">
+          <Section title="Education" icon={FiBookOpen}>
             <div className="flex flex-col gap-3">
               {education.map((entry, i) => (
                 <div key={i} className="text-sm">
@@ -337,13 +350,13 @@ export default function PublicProfileView({
         )}
 
         {profile.travel_places && profile.travel_places.length > 0 && (
-          <Section title="Places been to">
+          <Section title="Places been to" icon={FiMapPin}>
             <ChipRow values={profile.travel_places} />
           </Section>
         )}
 
         {links.length > 0 && (
-          <Section title="Links">
+          <Section title="Links" icon={FiLink}>
             <div className="flex flex-col gap-2">
               {links.map((link, i) => (
                 <a

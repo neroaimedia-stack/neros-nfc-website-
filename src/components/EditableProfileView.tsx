@@ -1,6 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import type { IconType } from "react-icons";
+import {
+  FiBriefcase,
+  FiBookOpen,
+  FiGlobe,
+  FiHeart,
+  FiInfo,
+  FiLink,
+  FiMapPin,
+  FiPhone,
+  FiStar,
+} from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
 import { useImageUpload } from "@/lib/use-image-upload";
 import {
@@ -105,24 +117,31 @@ function ChipRow({ values }: { values: string[] }) {
 
 function SectionRow({
   title,
+  icon: Icon,
   onEdit,
   empty,
   children,
 }: {
   title: string;
+  icon: IconType;
   onEdit: () => void;
   empty: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-t border-black/10 py-5">
+    <div className="border-b border-black/10 py-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xs font-bold tracking-wide text-black/40 uppercase">
+        <h2
+          className={`flex items-center gap-1.5 text-sm font-bold tracking-wide uppercase ${
+            empty ? "text-black/30" : "text-black"
+          }`}
+        >
+          <Icon className="h-4 w-4 shrink-0" />
           {title}
         </h2>
         <EditBadge onClick={onEdit} label={`Edit ${title}`} className="h-7 w-7 shrink-0" />
       </div>
-      <div className="mt-3">
+      <div className="mt-2">
         {empty ? (
           <p className="text-sm text-black/30">Not added yet</p>
         ) : (
@@ -254,10 +273,17 @@ export default function EditableProfileView({
     !!profile.relationship_status ||
     profile.languages.length > 0;
 
-  const sections: { key: SheetKey; title: string; empty: boolean; content: React.ReactNode }[] = [
+  const sections: {
+    key: SheetKey;
+    title: string;
+    icon: IconType;
+    empty: boolean;
+    content: React.ReactNode;
+  }[] = [
     {
       key: "contact",
       title: "Contact",
+      icon: FiPhone,
       empty: !profile.email && profile.phone_numbers.length === 0,
       content: (
         <div className="flex flex-wrap gap-2">
@@ -280,6 +306,7 @@ export default function EditableProfileView({
     {
       key: "social",
       title: "Social networks",
+      icon: FiGlobe,
       empty: socialLinks.length === 0,
       content: (
         <div className="flex flex-wrap gap-3">
@@ -303,6 +330,7 @@ export default function EditableProfileView({
     {
       key: "about",
       title: "About",
+      icon: FiInfo,
       empty: !hasAbout,
       content: (
         <dl className="flex flex-col gap-2 text-sm text-black/70">
@@ -351,12 +379,14 @@ export default function EditableProfileView({
     {
       key: "hobbies",
       title: "Hobbies",
+      icon: FiHeart,
       empty: profile.hobbies.length === 0,
       content: <ChipRow values={profile.hobbies} />,
     },
     {
       key: "interests",
       title: "Interests",
+      icon: FiStar,
       empty: interestGroups.length === 0,
       content: (
         <div className="flex flex-col gap-3">
@@ -374,6 +404,7 @@ export default function EditableProfileView({
     {
       key: "work",
       title: "Work",
+      icon: FiBriefcase,
       empty: works.length === 0,
       content: (
         <div className="flex flex-col gap-3">
@@ -391,6 +422,7 @@ export default function EditableProfileView({
     {
       key: "education",
       title: "Education",
+      icon: FiBookOpen,
       empty: education.length === 0,
       content: (
         <div className="flex flex-col gap-3">
@@ -408,12 +440,14 @@ export default function EditableProfileView({
     {
       key: "travel",
       title: "Places been to",
+      icon: FiMapPin,
       empty: profile.travel_places.length === 0,
       content: <ChipRow values={profile.travel_places} />,
     },
     {
       key: "links",
       title: "Links",
+      icon: FiLink,
       empty: links.length === 0,
       content: (
         <div className="flex flex-col gap-2">
@@ -460,7 +494,7 @@ export default function EditableProfileView({
       </div>
 
       <div className="px-6">
-        <div className="flex items-end gap-4">
+        <div className="flex items-end gap-3">
           <div className="relative z-10 -mt-12 shrink-0">
             {profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -485,16 +519,16 @@ export default function EditableProfileView({
           <div className="flex min-w-0 flex-1 items-start justify-between gap-2 pt-3 pb-1">
             <div className="min-w-0">
               {profile.full_name ? (
-                <h1 className="truncate text-2xl font-bold text-black">
+                <h1 className="truncate text-3xl font-bold text-black">
                   {profile.full_name}
                 </h1>
               ) : (
-                <p className="text-2xl font-bold text-black/25">Add your name</p>
+                <p className="text-3xl font-bold text-black/25">Add your name</p>
               )}
               {profile.job_title ? (
-                <p className="truncate text-sm text-black/60">{profile.job_title}</p>
+                <p className="truncate text-base font-medium text-black/60">{profile.job_title}</p>
               ) : (
-                <p className="text-sm text-black/25">Add a title</p>
+                <p className="text-base font-medium text-black/25">Add a title</p>
               )}
             </div>
             <EditBadge
@@ -505,7 +539,7 @@ export default function EditableProfileView({
           </div>
         </div>
 
-        <div className="mt-4 flex items-start justify-between gap-2">
+        <div className="mt-3 flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             {profile.bio ? (
               <p className="text-sm text-black/70">{profile.bio}</p>
@@ -526,18 +560,21 @@ export default function EditableProfileView({
           </p>
         )}
 
-        {actionButtons && <div className="mt-4">{actionButtons}</div>}
+        {actionButtons && <div className="mt-3">{actionButtons}</div>}
 
-        {orderedSections.map((section) => (
-          <SectionRow
-            key={section.key}
-            title={section.title}
-            onEdit={() => openSheet(section.key)}
-            empty={section.empty}
-          >
-            {section.content}
-          </SectionRow>
-        ))}
+        <div className="mt-3">
+          {orderedSections.map((section) => (
+            <SectionRow
+              key={section.key}
+              title={section.title}
+              icon={section.icon}
+              onEdit={() => openSheet(section.key)}
+              empty={section.empty}
+            >
+              {section.content}
+            </SectionRow>
+          ))}
+        </div>
       </div>
 
       {avatarUpload.pendingImageSrc && (

@@ -144,7 +144,7 @@ export default function ProductPageClient({
             Shipping calculated at checkout.
           </p>
 
-          <p className="mt-5 text-sm leading-relaxed text-black/70">
+          <p className="mt-5 whitespace-pre-line text-sm leading-relaxed text-black/70">
             {product.description}
           </p>
 

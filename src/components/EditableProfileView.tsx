@@ -254,6 +254,186 @@ export default function EditableProfileView({
     !!profile.relationship_status ||
     profile.languages.length > 0;
 
+  const sections: { key: SheetKey; title: string; empty: boolean; content: React.ReactNode }[] = [
+    {
+      key: "contact",
+      title: "Contact",
+      empty: !profile.email && profile.phone_numbers.length === 0,
+      content: (
+        <div className="flex flex-wrap gap-2">
+          {profile.email && (
+            <span className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black">
+              {profile.email}
+            </span>
+          )}
+          {profile.phone_numbers.map((phone) => (
+            <span
+              key={phone}
+              className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black"
+            >
+              {phone}
+            </span>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "social",
+      title: "Social networks",
+      empty: socialLinks.length === 0,
+      content: (
+        <div className="flex flex-wrap gap-3">
+          {socialLinks.map((link) => {
+            const platform = findSocialPlatform(link.platform);
+            if (!platform) return null;
+            const Icon = platform.Icon;
+            return (
+              <span
+                key={link.platform}
+                title={platform.label}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-black"
+              >
+                <Icon className="h-4 w-4" />
+              </span>
+            );
+          })}
+        </div>
+      ),
+    },
+    {
+      key: "about",
+      title: "About",
+      empty: !hasAbout,
+      content: (
+        <dl className="flex flex-col gap-2 text-sm text-black/70">
+          {(profile.current_city || profile.hometown) && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Location</dt>
+              <dd className="text-right">
+                {[profile.current_city, profile.hometown && `from ${profile.hometown}`]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </dd>
+            </div>
+          )}
+          {profile.birthday && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Birthday</dt>
+              <dd>
+                {new Date(`${profile.birthday}T00:00:00`).toLocaleDateString(
+                  undefined,
+                  { month: "long", day: "numeric" }
+                )}
+              </dd>
+            </div>
+          )}
+          {profile.gender && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Gender</dt>
+              <dd>{profile.gender}</dd>
+            </div>
+          )}
+          {profile.relationship_status && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Relationship</dt>
+              <dd>{profile.relationship_status}</dd>
+            </div>
+          )}
+          {profile.languages.length > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-black/40">Languages</dt>
+              <dd className="text-right">{profile.languages.join(", ")}</dd>
+            </div>
+          )}
+        </dl>
+      ),
+    },
+    {
+      key: "hobbies",
+      title: "Hobbies",
+      empty: profile.hobbies.length === 0,
+      content: <ChipRow values={profile.hobbies} />,
+    },
+    {
+      key: "interests",
+      title: "Interests",
+      empty: interestGroups.length === 0,
+      content: (
+        <div className="flex flex-col gap-3">
+          {interestGroups.map((group) => (
+            <div key={group.label}>
+              <p className="text-xs font-medium text-black/50">{group.label}</p>
+              <div className="mt-1.5">
+                <ChipRow values={group.values} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "work",
+      title: "Work",
+      empty: works.length === 0,
+      content: (
+        <div className="flex flex-col gap-3">
+          {works.map((entry, i) => (
+            <div key={i} className="text-sm">
+              <p className="font-semibold text-black">
+                {[entry.title, entry.company].filter(Boolean).join(" at ")}
+              </p>
+              {entry.years && <p className="text-black/40">{entry.years}</p>}
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "education",
+      title: "Education",
+      empty: education.length === 0,
+      content: (
+        <div className="flex flex-col gap-3">
+          {education.map((entry, i) => (
+            <div key={i} className="text-sm">
+              <p className="font-semibold text-black">
+                {[entry.degree, entry.school].filter(Boolean).join(" · ")}
+              </p>
+              {entry.years && <p className="text-black/40">{entry.years}</p>}
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "travel",
+      title: "Places been to",
+      empty: profile.travel_places.length === 0,
+      content: <ChipRow values={profile.travel_places} />,
+    },
+    {
+      key: "links",
+      title: "Links",
+      empty: links.length === 0,
+      content: (
+        <div className="flex flex-col gap-2">
+          {links.map((link, i) => (
+            <span key={i} className="block text-sm font-semibold text-black">
+              {link.label || link.url}
+            </span>
+          ))}
+        </div>
+      ),
+    },
+  ];
+
+  // Filled sections first (in their normal order), empty ones sink to the
+  // bottom so the profile reads cleanly without needing to fill everything.
+  const orderedSections = [
+    ...sections.filter((s) => !s.empty),
+    ...sections.filter((s) => s.empty),
+  ];
+
   return (
     <div className="mx-auto w-full max-w-md pb-16">
       <div className="relative">
@@ -348,179 +528,16 @@ export default function EditableProfileView({
 
         {actionButtons && <div className="mt-4">{actionButtons}</div>}
 
-        <SectionRow
-          title="Contact"
-          onEdit={() => openSheet("contact")}
-          empty={!profile.email && profile.phone_numbers.length === 0}
-        >
-          <div className="flex flex-wrap gap-2">
-            {profile.email && (
-              <span className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black">
-                {profile.email}
-              </span>
-            )}
-            {profile.phone_numbers.map((phone) => (
-              <span
-                key={phone}
-                className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black"
-              >
-                {phone}
-              </span>
-            ))}
-          </div>
-        </SectionRow>
-
-        <SectionRow
-          title="Social networks"
-          onEdit={() => openSheet("social")}
-          empty={socialLinks.length === 0}
-        >
-          <div className="flex flex-wrap gap-3">
-            {socialLinks.map((link) => {
-              const platform = findSocialPlatform(link.platform);
-              if (!platform) return null;
-              const Icon = platform.Icon;
-              return (
-                <span
-                  key={link.platform}
-                  title={platform.label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-black"
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-              );
-            })}
-          </div>
-        </SectionRow>
-
-        <SectionRow
-          title="About"
-          onEdit={() => openSheet("about")}
-          empty={!hasAbout}
-        >
-          <dl className="flex flex-col gap-2 text-sm text-black/70">
-            {(profile.current_city || profile.hometown) && (
-              <div className="flex justify-between gap-4">
-                <dt className="text-black/40">Location</dt>
-                <dd className="text-right">
-                  {[profile.current_city, profile.hometown && `from ${profile.hometown}`]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </dd>
-              </div>
-            )}
-            {profile.birthday && (
-              <div className="flex justify-between gap-4">
-                <dt className="text-black/40">Birthday</dt>
-                <dd>
-                  {new Date(`${profile.birthday}T00:00:00`).toLocaleDateString(
-                    undefined,
-                    { month: "long", day: "numeric" }
-                  )}
-                </dd>
-              </div>
-            )}
-            {profile.gender && (
-              <div className="flex justify-between gap-4">
-                <dt className="text-black/40">Gender</dt>
-                <dd>{profile.gender}</dd>
-              </div>
-            )}
-            {profile.relationship_status && (
-              <div className="flex justify-between gap-4">
-                <dt className="text-black/40">Relationship</dt>
-                <dd>{profile.relationship_status}</dd>
-              </div>
-            )}
-            {profile.languages.length > 0 && (
-              <div className="flex justify-between gap-4">
-                <dt className="text-black/40">Languages</dt>
-                <dd className="text-right">{profile.languages.join(", ")}</dd>
-              </div>
-            )}
-          </dl>
-        </SectionRow>
-
-        <SectionRow
-          title="Hobbies"
-          onEdit={() => openSheet("hobbies")}
-          empty={profile.hobbies.length === 0}
-        >
-          <ChipRow values={profile.hobbies} />
-        </SectionRow>
-
-        <SectionRow
-          title="Interests"
-          onEdit={() => openSheet("interests")}
-          empty={interestGroups.length === 0}
-        >
-          <div className="flex flex-col gap-3">
-            {interestGroups.map((group) => (
-              <div key={group.label}>
-                <p className="text-xs font-medium text-black/50">{group.label}</p>
-                <div className="mt-1.5">
-                  <ChipRow values={group.values} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </SectionRow>
-
-        <SectionRow
-          title="Work"
-          onEdit={() => openSheet("work")}
-          empty={works.length === 0}
-        >
-          <div className="flex flex-col gap-3">
-            {works.map((entry, i) => (
-              <div key={i} className="text-sm">
-                <p className="font-semibold text-black">
-                  {[entry.title, entry.company].filter(Boolean).join(" at ")}
-                </p>
-                {entry.years && <p className="text-black/40">{entry.years}</p>}
-              </div>
-            ))}
-          </div>
-        </SectionRow>
-
-        <SectionRow
-          title="Education"
-          onEdit={() => openSheet("education")}
-          empty={education.length === 0}
-        >
-          <div className="flex flex-col gap-3">
-            {education.map((entry, i) => (
-              <div key={i} className="text-sm">
-                <p className="font-semibold text-black">
-                  {[entry.degree, entry.school].filter(Boolean).join(" · ")}
-                </p>
-                {entry.years && <p className="text-black/40">{entry.years}</p>}
-              </div>
-            ))}
-          </div>
-        </SectionRow>
-
-        <SectionRow
-          title="Places been to"
-          onEdit={() => openSheet("travel")}
-          empty={profile.travel_places.length === 0}
-        >
-          <ChipRow values={profile.travel_places} />
-        </SectionRow>
-
-        <SectionRow
-          title="Links"
-          onEdit={() => openSheet("links")}
-          empty={links.length === 0}
-        >
-          <div className="flex flex-col gap-2">
-            {links.map((link, i) => (
-              <span key={i} className="block text-sm font-semibold text-black">
-                {link.label || link.url}
-              </span>
-            ))}
-          </div>
-        </SectionRow>
+        {orderedSections.map((section) => (
+          <SectionRow
+            key={section.key}
+            title={section.title}
+            onEdit={() => openSheet(section.key)}
+            empty={section.empty}
+          >
+            {section.content}
+          </SectionRow>
+        ))}
       </div>
 
       {avatarUpload.pendingImageSrc && (

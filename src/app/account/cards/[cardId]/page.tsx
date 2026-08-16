@@ -99,14 +99,14 @@ export default function CardDetailPage() {
     <div className="flex gap-3">
       <button
         type="button"
-        onClick={() => setMode("edit")}
+        onClick={() => setMode(mode === "edit" ? "preview" : "edit")}
         className={`flex-1 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
           mode === "edit"
             ? "bg-black text-white"
             : "border border-black text-black hover:opacity-60"
         }`}
       >
-        Edit profile
+        {mode === "edit" ? "Save" : "Edit profile"}
       </button>
       <button
         type="button"

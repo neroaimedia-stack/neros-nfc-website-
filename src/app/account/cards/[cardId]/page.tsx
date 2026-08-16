@@ -113,6 +113,14 @@ export default function CardDetailPage() {
         </p>
       )}
 
+      <Link
+        href={`/c/${card.id}`}
+        target="_blank"
+        className="mt-2 inline-block text-sm font-semibold text-black underline underline-offset-2 hover:opacity-60"
+      >
+        View public profile ›
+      </Link>
+
       {card.product_type === "business-card" ? (
         <BusinessProfileEditor cardId={card.id} />
       ) : (

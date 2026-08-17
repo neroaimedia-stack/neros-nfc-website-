@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiCalendar, FiGlobe, FiHeart, FiMapPin, FiUser } from "react-icons/fi";
+import { FiCalendar, FiGlobe, FiHeart, FiMail, FiMapPin, FiPhone, FiUser } from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
 import { useImageUpload } from "@/lib/use-image-upload";
 import {
@@ -254,22 +254,18 @@ export default function EditableProfileView({
       title: "Contact",
       empty: profile.emails.length === 0 && profile.phone_numbers.length === 0,
       content: (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 text-sm">
           {profile.emails.map((email) => (
-            <span
-              key={email}
-              className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black"
-            >
-              {email}
-            </span>
+            <div key={email} className="flex items-center gap-1.5">
+              <FiMail className="h-4 w-4 shrink-0 text-black/50" />
+              <span className="font-medium text-black">{email}</span>
+            </div>
           ))}
           {profile.phone_numbers.map((phone) => (
-            <span
-              key={phone}
-              className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black"
-            >
-              {phone}
-            </span>
+            <div key={phone} className="flex items-center gap-1.5">
+              <FiPhone className="h-4 w-4 shrink-0 text-black/50" />
+              <span className="font-medium text-black">{phone}</span>
+            </div>
           ))}
         </div>
       ),

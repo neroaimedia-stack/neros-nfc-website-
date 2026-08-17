@@ -7,11 +7,13 @@ export default function TagListInput({
   values,
   onChange,
   placeholder,
+  maxLength = 60,
 }: {
   label: string;
   values: string[];
   onChange: (values: string[]) => void;
   placeholder?: string;
+  maxLength?: number;
 }) {
   const [draft, setDraft] = useState("");
 
@@ -45,6 +47,7 @@ export default function TagListInput({
             }
           }}
           placeholder={placeholder}
+          maxLength={maxLength}
           className="min-w-0 flex-1 rounded-full border border-black/15 px-4 py-2 text-sm outline-none focus:border-black"
         />
         <button

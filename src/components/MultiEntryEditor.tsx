@@ -5,6 +5,7 @@ export type EntryField = {
   label: string;
   placeholder?: string;
   options?: string[];
+  maxLength?: number;
 };
 
 export default function MultiEntryEditor({
@@ -89,6 +90,7 @@ export default function MultiEntryEditor({
                       value={entry[field.key] ?? ""}
                       onChange={(e) => updateEntry(index, field.key, e.target.value)}
                       placeholder={field.placeholder ?? field.label}
+                      maxLength={field.maxLength ?? 100}
                       className="min-w-0 w-full rounded-xl border border-black/15 px-3 py-2 text-sm outline-none focus:border-black"
                     />
                   )

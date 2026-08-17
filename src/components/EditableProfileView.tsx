@@ -131,12 +131,14 @@ function TextField({
   onChange,
   placeholder,
   type = "text",
+  maxLength,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
+  maxLength?: number;
 }) {
   return (
     <div className="min-w-0">
@@ -146,6 +148,7 @@ function TextField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        maxLength={maxLength}
         className="mt-1 w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
       />
     </div>
@@ -616,12 +619,14 @@ export default function EditableProfileView({
             value={draft.full_name}
             onChange={(v) => updateDraft("full_name", v)}
             placeholder="Jane Doe"
+            maxLength={80}
           />
           <TextField
             label="Job title"
             value={draft.job_title}
             onChange={(v) => updateDraft("job_title", v)}
             placeholder="Founder, HERNEROS"
+            maxLength={80}
           />
         </FieldEditSheet>
       )}
@@ -639,8 +644,12 @@ export default function EditableProfileView({
             onChange={(e) => updateDraft("bio", e.target.value)}
             rows={4}
             placeholder="A short intro about you"
+            maxLength={280}
             className="w-full resize-none rounded-xl border border-black/15 p-4 text-sm outline-none focus:border-black"
           />
+          <p className="mt-1 text-right text-xs text-black/40">
+            {draft.bio.length}/280
+          </p>
         </FieldEditSheet>
       )}
 
@@ -657,12 +666,14 @@ export default function EditableProfileView({
             values={draft.emails}
             onChange={(v) => updateDraft("emails", v)}
             placeholder="you@example.com"
+            maxLength={254}
           />
           <TagListInput
             label="Phone numbers"
             values={draft.phone_numbers}
             onChange={(v) => updateDraft("phone_numbers", v)}
             placeholder="+1 555 123 4567"
+            maxLength={20}
           />
         </FieldEditSheet>
       )}
@@ -694,11 +705,13 @@ export default function EditableProfileView({
             label="Current city"
             value={draft.current_city}
             onChange={(v) => updateDraft("current_city", v)}
+            maxLength={60}
           />
           <TextField
             label="Hometown"
             value={draft.hometown}
             onChange={(v) => updateDraft("hometown", v)}
+            maxLength={60}
           />
           <TextField
             label="Birthday"
@@ -711,6 +724,7 @@ export default function EditableProfileView({
             value={draft.gender}
             onChange={(v) => updateDraft("gender", v)}
             placeholder="e.g. Woman, Man, Non-binary"
+            maxLength={40}
           />
           <div>
             <label className="text-sm font-medium text-black" htmlFor="relationship">
@@ -734,6 +748,7 @@ export default function EditableProfileView({
             values={draft.languages}
             onChange={(v) => updateDraft("languages", v)}
             placeholder="English"
+            maxLength={30}
           />
         </FieldEditSheet>
       )}
@@ -751,6 +766,7 @@ export default function EditableProfileView({
             values={draft.hobbies}
             onChange={(v) => updateDraft("hobbies", v)}
             placeholder="Photography"
+            maxLength={40}
           />
         </FieldEditSheet>
       )}
@@ -768,30 +784,35 @@ export default function EditableProfileView({
             values={draft.interests.music}
             onChange={(v) => updateDraftInterest("music", v)}
             placeholder="Jazz"
+            maxLength={40}
           />
           <TagListInput
             label="Movies"
             values={draft.interests.movies}
             onChange={(v) => updateDraftInterest("movies", v)}
             placeholder="Sci-fi"
+            maxLength={40}
           />
           <TagListInput
             label="Games"
             values={draft.interests.games}
             onChange={(v) => updateDraftInterest("games", v)}
             placeholder="Chess"
+            maxLength={40}
           />
           <TagListInput
             label="TV shows"
             values={draft.interests.tvShows}
             onChange={(v) => updateDraftInterest("tvShows", v)}
             placeholder="Documentaries"
+            maxLength={40}
           />
           <TagListInput
             label="Sports & athletes"
             values={draft.interests.sports}
             onChange={(v) => updateDraftInterest("sports", v)}
             placeholder="Basketball"
+            maxLength={40}
           />
         </FieldEditSheet>
       )}
@@ -807,9 +828,9 @@ export default function EditableProfileView({
           <MultiEntryEditor
             label="Work experience"
             fields={[
-              { key: "company", label: "Company" },
-              { key: "title", label: "Role" },
-              { key: "years", label: "Years", placeholder: "2020 – Present" },
+              { key: "company", label: "Company", maxLength: 80 },
+              { key: "title", label: "Role", maxLength: 80 },
+              { key: "years", label: "Years", placeholder: "2020 – Present", maxLength: 30 },
             ]}
             value={draft.works}
             onChange={(v) => updateDraft("works", v)}
@@ -843,9 +864,14 @@ export default function EditableProfileView({
                   "Doctorate (PhD)",
                 ],
               },
-              { key: "school", label: "School" },
-              { key: "degree", label: "Degree" },
-              { key: "years", label: "Years", placeholder: "2016 – 2020 or Ongoing" },
+              { key: "school", label: "School", maxLength: 100 },
+              { key: "degree", label: "Degree", maxLength: 80 },
+              {
+                key: "years",
+                label: "Years",
+                placeholder: "2016 – 2020 or Ongoing",
+                maxLength: 30,
+              },
             ]}
             value={draft.education}
             onChange={(v) => updateDraft("education", v)}
@@ -867,6 +893,7 @@ export default function EditableProfileView({
             values={draft.travel_places}
             onChange={(v) => updateDraft("travel_places", v)}
             placeholder="Tokyo, Japan"
+            maxLength={60}
           />
         </FieldEditSheet>
       )}
@@ -882,8 +909,8 @@ export default function EditableProfileView({
           <MultiEntryEditor
             label="Other links"
             fields={[
-              { key: "label", label: "Label", placeholder: "Portfolio" },
-              { key: "url", label: "URL", placeholder: "https://" },
+              { key: "label", label: "Label", placeholder: "Portfolio", maxLength: 40 },
+              { key: "url", label: "URL", placeholder: "https://", maxLength: 300 },
             ]}
             value={draft.links}
             onChange={(v) => updateDraft("links", v)}

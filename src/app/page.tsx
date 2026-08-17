@@ -5,8 +5,98 @@ import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
 import OrderCardMock from "@/components/OrderCardMock";
 import HowItWorks from "@/components/HowItWorks";
+import Carousel from "@/components/Carousel";
 
 export default function Home() {
+  const cardItems = [
+    <div
+      key="business"
+      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+    >
+      <FlippableCard
+        className="mx-auto mb-5 w-[220px] max-w-full"
+        reflection={false}
+      />
+      <h3 className="text-lg font-semibold text-black">Business Card</h3>
+      <p className="mt-2 text-sm text-black/60">
+        Share your profile and contact info with one tap.
+      </p>
+      <Link
+        href="/product/business-card"
+        className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+      >
+        Buy Now
+      </Link>
+    </div>,
+    <div
+      key="review"
+      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+    >
+      <ReviewCardMock className="mx-auto mb-5 w-[130px]" />
+      <h3 className="text-lg font-semibold text-black">Review Card</h3>
+      <p className="mt-2 text-sm text-black/60">
+        Drive customers straight to your review or social page.
+      </p>
+      <Link
+        href="/product/review-card"
+        className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+      >
+        Buy Now
+      </Link>
+    </div>,
+    <div
+      key="wifi"
+      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+    >
+      <WifiCardMock className="mx-auto mb-5 w-[130px]" />
+      <h3 className="text-lg font-semibold text-black">Wifi Card</h3>
+      <p className="mt-2 text-sm text-black/60">
+        Let guests connect to your Wi-Fi with a single tap.
+      </p>
+      <Link
+        href="/product/wifi-card"
+        className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+      >
+        Buy Now
+      </Link>
+    </div>,
+    <div
+      key="order"
+      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+    >
+      <OrderCardMock className="mx-auto mb-5 w-[130px]" />
+      <h3 className="text-lg font-semibold text-black">Order Card</h3>
+      <p className="mt-2 text-sm text-black/60">
+        Let guests browse your menu and order with a single tap.
+      </p>
+      <Link
+        href="/product/order-card"
+        className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+      >
+        Buy Now
+      </Link>
+    </div>,
+    <div
+      key="custom"
+      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+    >
+      <div className="mx-auto mb-5 flex aspect-[340/214] w-[220px] max-w-full items-center justify-center rounded-[18px] border-2 border-dashed border-black/20 bg-neutral-50">
+        <span className="text-4xl font-light text-black/25">+</span>
+      </div>
+      <h3 className="text-lg font-semibold text-black">Custom</h3>
+      <p className="mt-2 text-sm text-black/60">
+        Custom design, bulk orders, distributorship, or something unique?
+        Let&apos;s talk.
+      </p>
+      <Link
+        href="/custom"
+        className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+      >
+        Talk to us
+      </Link>
+    </div>,
+  ];
+
   return (
     <main className="flex flex-col">
       <section className="mx-auto flex w-full max-w-6xl flex-col items-center gap-10 px-6 pb-20 pt-16 lg:flex-row lg:justify-between lg:pt-24">
@@ -38,86 +128,8 @@ export default function Home() {
         <h2 className="text-center text-3xl font-bold text-black">
           Choose your card
         </h2>
-        <div className="mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4">
-          <div className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
-            <FlippableCard
-              className="mx-auto mb-5 w-[220px] max-w-full"
-              reflection={false}
-            />
-            <h3 className="text-lg font-semibold text-black">
-              Business Card
-            </h3>
-            <p className="mt-2 text-sm text-black/60">
-              Share your profile and contact info with one tap.
-            </p>
-            <Link
-              href="/product/business-card"
-              className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              Buy Now
-            </Link>
-          </div>
-
-          <div className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
-            <ReviewCardMock className="mx-auto mb-5 w-[130px]" />
-            <h3 className="text-lg font-semibold text-black">
-              Review Card
-            </h3>
-            <p className="mt-2 text-sm text-black/60">
-              Drive customers straight to your review or social page.
-            </p>
-            <Link
-              href="/product/review-card"
-              className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              Buy Now
-            </Link>
-          </div>
-
-          <div className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
-            <WifiCardMock className="mx-auto mb-5 w-[130px]" />
-            <h3 className="text-lg font-semibold text-black">Wifi Card</h3>
-            <p className="mt-2 text-sm text-black/60">
-              Let guests connect to your Wi-Fi with a single tap.
-            </p>
-            <Link
-              href="/product/wifi-card"
-              className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              Buy Now
-            </Link>
-          </div>
-
-          <div className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
-            <OrderCardMock className="mx-auto mb-5 w-[130px]" />
-            <h3 className="text-lg font-semibold text-black">Order Card</h3>
-            <p className="mt-2 text-sm text-black/60">
-              Let guests browse your menu and order with a single tap.
-            </p>
-            <Link
-              href="/product/order-card"
-              className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              Buy Now
-            </Link>
-          </div>
-
-          <div className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm">
-            <div className="mx-auto mb-5 flex aspect-[340/214] w-[220px] max-w-full items-center justify-center rounded-[18px] border-2 border-dashed border-black/20 bg-neutral-50">
-              <span className="text-4xl font-light text-black/25">+</span>
-            </div>
-            <h3 className="text-lg font-semibold text-black">Custom</h3>
-            <p className="mt-2 text-sm text-black/60">
-              Custom design, bulk orders, distributorship, or something
-              unique? Let&apos;s talk.
-            </p>
-            <Link
-              href="/custom"
-              className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-            >
-              Talk to us
-            </Link>
-          </div>
+        <div className="mt-8">
+          <Carousel items={cardItems} />
         </div>
       </section>
 

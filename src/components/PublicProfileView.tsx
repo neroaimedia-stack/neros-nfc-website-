@@ -459,12 +459,14 @@ export default function PublicProfileView({
           </div>
           <div className="min-w-0 pt-3 pb-1">
             {profile.full_name && (
-              <h1 className="truncate text-3xl font-bold text-black">
+              <h1 className="line-clamp-2 text-2xl font-bold break-words text-black sm:text-3xl">
                 {profile.full_name}
               </h1>
             )}
             {profile.job_title && (
-              <p className="truncate text-base font-medium text-black/80">{profile.job_title}</p>
+              <p className="line-clamp-2 text-sm font-medium break-words text-black/80 sm:text-base">
+                {profile.job_title}
+              </p>
             )}
           </div>
         </div>

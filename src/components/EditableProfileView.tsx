@@ -556,16 +556,18 @@ export default function EditableProfileView({
           <div className="flex min-w-0 flex-1 items-start justify-between gap-2 pt-3 pb-1">
             <div className="min-w-0">
               {profile.full_name ? (
-                <h1 className="truncate text-3xl font-bold text-black">
+                <h1 className="line-clamp-2 text-2xl font-bold break-words text-black sm:text-3xl">
                   {profile.full_name}
                 </h1>
               ) : (
-                <p className="text-3xl font-bold text-black/25">Add your name</p>
+                <p className="text-2xl font-bold text-black/25 sm:text-3xl">Add your name</p>
               )}
               {profile.job_title ? (
-                <p className="truncate text-base font-medium text-black/80">{profile.job_title}</p>
+                <p className="line-clamp-2 text-sm font-medium break-words text-black/80 sm:text-base">
+                  {profile.job_title}
+                </p>
               ) : (
-                <p className="text-base font-medium text-black/25">Add a title</p>
+                <p className="text-sm font-medium text-black/25 sm:text-base">Add a title</p>
               )}
             </div>
             <EditBadge

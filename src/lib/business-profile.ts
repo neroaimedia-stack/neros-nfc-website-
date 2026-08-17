@@ -74,6 +74,20 @@ export const emptyProfile: ProfileState = {
   links: [],
 };
 
+export function calculateAge(birthday: string): number | null {
+  const birthDate = new Date(`${birthday}T00:00:00`);
+  if (Number.isNaN(birthDate.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const hasHadBirthdayThisYear =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+  if (!hasHadBirthdayThisYear) age--;
+
+  return age;
+}
+
 export const RELATIONSHIP_OPTIONS = [
   "",
   "Single",

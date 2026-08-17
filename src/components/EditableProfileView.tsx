@@ -10,6 +10,7 @@ import {
   FiExternalLink,
   FiFilm,
   FiGlobe,
+  FiHash,
   FiHeart,
   FiMail,
   FiMapPin,
@@ -28,6 +29,7 @@ import {
   type ProfileState,
   type SectionKey,
   RELATIONSHIP_OPTIONS,
+  calculateAge,
 } from "@/lib/business-profile";
 import TagListInput from "@/components/TagListInput";
 import ExpandableList from "@/components/ExpandableList";
@@ -337,6 +339,15 @@ export default function EditableProfileView({
                   { month: "long", day: "numeric" }
                 )}
               </dd>
+            </div>
+          )}
+          {profile.birthday && calculateAge(profile.birthday) !== null && (
+            <div className="flex justify-between gap-4">
+              <dt className="flex items-center gap-1.5 text-black/50">
+                <FiHash className="h-4 w-4 shrink-0" />
+                Age
+              </dt>
+              <dd className="font-medium">{calculateAge(profile.birthday)}</dd>
             </div>
           )}
           {profile.gender && (

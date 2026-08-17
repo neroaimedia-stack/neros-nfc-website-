@@ -30,6 +30,8 @@ import {
   RELATIONSHIP_OPTIONS,
 } from "@/lib/business-profile";
 import TagListInput from "@/components/TagListInput";
+import ExpandableList from "@/components/ExpandableList";
+import ExpandableText from "@/components/ExpandableText";
 import SocialLinksEditor from "@/components/SocialLinksEditor";
 import MultiEntryEditor from "@/components/MultiEntryEditor";
 import FieldEditSheet from "@/components/FieldEditSheet";
@@ -284,8 +286,11 @@ export default function EditableProfileView({
       title: "Social networks",
       empty: socialLinks.length === 0,
       content: (
-        <div className="flex flex-col gap-3">
-          {socialLinks.map((link) => {
+        <ExpandableList
+          items={socialLinks}
+          max={5}
+          className="flex flex-col gap-3"
+          renderItem={(link) => {
             const platform = findSocialPlatform(link.platform);
             if (!platform) return null;
             const Icon = platform.Icon;
@@ -297,8 +302,8 @@ export default function EditableProfileView({
                 <span className="text-sm font-medium text-black">{platform.label}</span>
               </div>
             );
-          })}
-        </div>
+          }}
+        />
       ),
     },
     {
@@ -369,14 +374,17 @@ export default function EditableProfileView({
       title: "Hobbies",
       empty: profile.hobbies.length === 0,
       content: (
-        <div className="flex flex-col gap-2 text-sm">
-          {profile.hobbies.map((hobby) => (
+        <ExpandableList
+          items={profile.hobbies}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(hobby) => (
             <div key={hobby} className="flex items-center gap-1.5">
               <FiStar className="h-4 w-4 shrink-0 text-black/50" />
               <span className="font-medium text-black">{hobby}</span>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -391,13 +399,16 @@ export default function EditableProfileView({
                 <group.icon className="h-3.5 w-3.5 shrink-0" />
                 {group.label}
               </p>
-              <div className="mt-1.5 flex flex-col gap-1.5 pl-5 text-sm">
-                {group.values.map((v) => (
+              <ExpandableList
+                items={group.values}
+                max={6}
+                className="mt-1.5 flex flex-col gap-1.5 pl-5 text-sm"
+                renderItem={(v) => (
                   <span key={v} className="font-medium text-black">
                     {v}
                   </span>
-                ))}
-              </div>
+                )}
+              />
             </div>
           ))}
         </div>
@@ -408,8 +419,11 @@ export default function EditableProfileView({
       title: "Work",
       empty: works.length === 0,
       content: (
-        <div className="flex flex-col gap-3">
-          {works.map((entry, i) => (
+        <ExpandableList
+          items={works}
+          max={4}
+          className="flex flex-col gap-3"
+          renderItem={(entry, i) => (
             <div key={i} className="flex items-start gap-2 text-sm">
               <FiBriefcase className="mt-0.5 h-4 w-4 shrink-0 text-black/50" />
               <div>
@@ -419,8 +433,8 @@ export default function EditableProfileView({
                 {entry.years && <p className="text-black/40">{entry.years}</p>}
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -428,8 +442,11 @@ export default function EditableProfileView({
       title: "Education",
       empty: education.length === 0,
       content: (
-        <div className="flex flex-col gap-3">
-          {education.map((entry, i) => (
+        <ExpandableList
+          items={education}
+          max={4}
+          className="flex flex-col gap-3"
+          renderItem={(entry, i) => (
             <div key={i} className="flex items-start gap-2 text-sm">
               <FiBookOpen className="mt-0.5 h-4 w-4 shrink-0 text-black/50" />
               <div>
@@ -439,8 +456,8 @@ export default function EditableProfileView({
                 {entry.years && <p className="text-black/40">{entry.years}</p>}
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -448,14 +465,17 @@ export default function EditableProfileView({
       title: "Places been to",
       empty: profile.travel_places.length === 0,
       content: (
-        <div className="flex flex-col gap-2 text-sm">
-          {profile.travel_places.map((place) => (
+        <ExpandableList
+          items={profile.travel_places}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(place) => (
             <div key={place} className="flex items-center gap-1.5">
               <FiMapPin className="h-4 w-4 shrink-0 text-black/50" />
               <span className="font-medium text-black">{place}</span>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -463,14 +483,17 @@ export default function EditableProfileView({
       title: "Links",
       empty: links.length === 0,
       content: (
-        <div className="flex flex-col gap-2 text-sm">
-          {links.map((link, i) => (
+        <ExpandableList
+          items={links}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(link, i) => (
             <div key={i} className="flex items-center gap-1.5">
               <FiExternalLink className="h-4 w-4 shrink-0 text-black/50" />
               <span className="font-semibold text-black">{link.label || link.url}</span>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
   ];
@@ -556,7 +579,7 @@ export default function EditableProfileView({
         <div className="mt-3 flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             {profile.bio ? (
-              <p className="text-sm text-black/80">{profile.bio}</p>
+              <ExpandableText text={profile.bio} max={140} className="text-sm text-black/80" />
             ) : (
               <p className="text-sm text-black/25">Add a bio</p>
             )}

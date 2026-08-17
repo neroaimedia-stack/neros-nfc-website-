@@ -20,6 +20,8 @@ import {
 import { findSocialPlatform } from "@/lib/social-platforms";
 import { sanitizeUrl } from "@/lib/sanitize";
 import type { SectionKey } from "@/lib/business-profile";
+import ExpandableList from "@/components/ExpandableList";
+import ExpandableText from "@/components/ExpandableText";
 
 type SocialLink = { platform: string; url: string };
 type Entry = Record<string, string>;
@@ -198,8 +200,11 @@ export default function PublicProfileView({
       title: "Social networks",
       empty: socialLinks.length === 0,
       content: (
-        <div className="flex flex-col gap-3">
-          {socialLinks.map((link) => {
+        <ExpandableList
+          items={socialLinks}
+          max={5}
+          className="flex flex-col gap-3"
+          renderItem={(link) => {
             const platform = findSocialPlatform(link.platform);
             if (!platform) return null;
             const safeUrl = sanitizeUrl(link.url);
@@ -219,8 +224,8 @@ export default function PublicProfileView({
                 <span className="text-sm font-medium text-black">{platform.label}</span>
               </a>
             );
-          })}
-        </div>
+          }}
+        />
       ),
     },
     {
@@ -286,14 +291,17 @@ export default function PublicProfileView({
       title: "Hobbies",
       empty: !profile.hobbies || profile.hobbies.length === 0,
       content: (
-        <div className="flex flex-col gap-2 text-sm">
-          {(profile.hobbies ?? []).map((hobby) => (
+        <ExpandableList
+          items={profile.hobbies ?? []}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(hobby) => (
             <div key={hobby} className="flex items-center gap-1.5">
               <FiStar className="h-4 w-4 shrink-0 text-black/50" />
               <span className="font-medium text-black">{hobby}</span>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -308,13 +316,16 @@ export default function PublicProfileView({
                 <group.icon className="h-3.5 w-3.5 shrink-0" />
                 {group.label}
               </p>
-              <div className="mt-1.5 flex flex-col gap-1.5 pl-5 text-sm">
-                {group.values.map((v) => (
+              <ExpandableList
+                items={group.values}
+                max={6}
+                className="mt-1.5 flex flex-col gap-1.5 pl-5 text-sm"
+                renderItem={(v) => (
                   <span key={v} className="font-medium text-black">
                     {v}
                   </span>
-                ))}
-              </div>
+                )}
+              />
             </div>
           ))}
         </div>
@@ -325,8 +336,11 @@ export default function PublicProfileView({
       title: "Work",
       empty: works.length === 0,
       content: (
-        <div className="flex flex-col gap-3">
-          {works.map((entry, i) => (
+        <ExpandableList
+          items={works}
+          max={4}
+          className="flex flex-col gap-3"
+          renderItem={(entry, i) => (
             <div key={i} className="flex items-start gap-2 text-sm">
               <FiBriefcase className="mt-0.5 h-4 w-4 shrink-0 text-black/50" />
               <div>
@@ -336,8 +350,8 @@ export default function PublicProfileView({
                 {entry.years && <p className="text-black/40">{entry.years}</p>}
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -345,8 +359,11 @@ export default function PublicProfileView({
       title: "Education",
       empty: education.length === 0,
       content: (
-        <div className="flex flex-col gap-3">
-          {education.map((entry, i) => (
+        <ExpandableList
+          items={education}
+          max={4}
+          className="flex flex-col gap-3"
+          renderItem={(entry, i) => (
             <div key={i} className="flex items-start gap-2 text-sm">
               <FiBookOpen className="mt-0.5 h-4 w-4 shrink-0 text-black/50" />
               <div>
@@ -356,8 +373,8 @@ export default function PublicProfileView({
                 {entry.years && <p className="text-black/40">{entry.years}</p>}
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -365,14 +382,17 @@ export default function PublicProfileView({
       title: "Places been to",
       empty: !profile.travel_places || profile.travel_places.length === 0,
       content: (
-        <div className="flex flex-col gap-2 text-sm">
-          {(profile.travel_places ?? []).map((place) => (
+        <ExpandableList
+          items={profile.travel_places ?? []}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(place) => (
             <div key={place} className="flex items-center gap-1.5">
               <FiMapPin className="h-4 w-4 shrink-0 text-black/50" />
               <span className="font-medium text-black">{place}</span>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -380,8 +400,11 @@ export default function PublicProfileView({
       title: "Links",
       empty: links.length === 0,
       content: (
-        <div className="flex flex-col gap-2 text-sm">
-          {links.map((link, i) => {
+        <ExpandableList
+          items={links}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(link, i) => {
             const safeUrl = sanitizeUrl(link.url ?? "");
             if (!safeUrl) return null;
             return (
@@ -396,8 +419,8 @@ export default function PublicProfileView({
                 <span className="font-semibold text-black">{link.label || link.url}</span>
               </a>
             );
-          })}
-        </div>
+          }}
+        />
       ),
     },
   ];
@@ -447,7 +470,11 @@ export default function PublicProfileView({
         </div>
 
         {profile.bio && (
-          <p className="mt-3 text-sm text-black/80">{profile.bio}</p>
+          <ExpandableText
+            text={profile.bio}
+            max={140}
+            className="mt-3 text-sm text-black/80"
+          />
         )}
 
         {actionButtons && <div className="mt-3">{actionButtons}</div>}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -39,6 +39,8 @@ export default function CardDetailPage() {
   const [card, setCard] = useState<CardRecord | null>(null);
   const [checked, setChecked] = useState(false);
   const [mode, setMode] = useState<"preview" | "edit">("edit");
+  const [copied, setCopied] = useState(false);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (authLoading) return;
@@ -56,6 +58,10 @@ export default function CardDetailPage() {
         setChecked(true);
       });
   }, [user, authLoading, cardId]);
+
+  useEffect(() => {
+    return () => clearTimeout(copiedTimeoutRef.current);
+  }, []);
 
   if (authLoading || !checked) {
     return (
@@ -86,6 +92,26 @@ export default function CardDetailPage() {
 
   const isBusinessCard = card.product_type === "business-card";
 
+  const handleShare = async () => {
+    const url = `${window.location.origin}/c/${card.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+    setCopied(true);
+    clearTimeout(copiedTimeoutRef.current);
+    copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+  };
+
   const backLink = (
     <Link
       href="/account"
@@ -110,14 +136,10 @@ export default function CardDetailPage() {
       </button>
       <button
         type="button"
-        onClick={() => setMode("preview")}
-        className={`flex-1 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
-          mode === "preview"
-            ? "bg-black text-white"
-            : "border border-black text-black hover:opacity-60"
-        }`}
+        onClick={handleShare}
+        className="flex-1 rounded-full border border-black px-4 py-2 text-xs font-semibold text-black transition-colors hover:opacity-60"
       >
-        View public profile
+        Share profile
       </button>
     </div>
   );
@@ -163,6 +185,16 @@ export default function CardDetailPage() {
           able to update what it opens right from here.
         </div>
       )}
+
+      <div
+        className={`pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-6 transition-all duration-300 ${
+          copied ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+        }`}
+      >
+        <div className="rounded-full bg-black px-4 py-2 text-xs font-semibold text-white shadow-lg">
+          Link copied!
+        </div>
+      </div>
     </div>
   );
 }

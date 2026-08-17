@@ -107,10 +107,12 @@ export default function PublicProfileView({
   profile,
   onBack,
   actionButtons,
+  isOwnerPreview = false,
 }: {
   profile: BusinessProfileRow;
   onBack?: () => void;
   actionButtons?: React.ReactNode;
+  isOwnerPreview?: boolean;
 }) {
   const socialLinks = (profile.social_links ?? []).filter((l) => l.url.trim());
   const works = (profile.works ?? []).filter((w) => w.company || w.title);
@@ -482,10 +484,12 @@ export default function PublicProfileView({
           />
         )}
 
-        <SaveContactButton
-          profile={profile}
-          className="mt-3 block w-full rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
-        />
+        {!isOwnerPreview && (
+          <SaveContactButton
+            profile={profile}
+            className="mt-3 block w-full rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
+          />
+        )}
 
         {actionButtons && <div className="mt-3">{actionButtons}</div>}
       </div>

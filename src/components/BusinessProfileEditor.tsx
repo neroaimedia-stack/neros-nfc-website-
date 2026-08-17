@@ -72,6 +72,7 @@ export default function BusinessProfileEditor({
         profile={profileToRow(cardId, profile)}
         onBack={onBack}
         actionButtons={actionButtons}
+        isOwnerPreview
       />
     );
   }

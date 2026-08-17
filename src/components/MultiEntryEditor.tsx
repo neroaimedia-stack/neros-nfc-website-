@@ -4,6 +4,7 @@ export type EntryField = {
   key: string;
   label: string;
   placeholder?: string;
+  options?: string[];
 };
 
 export default function MultiEntryEditor({
@@ -66,16 +67,32 @@ export default function MultiEntryEditor({
                 </button>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {fields.map((field) => (
-                  <input
-                    key={field.key}
-                    type="text"
-                    value={entry[field.key] ?? ""}
-                    onChange={(e) => updateEntry(index, field.key, e.target.value)}
-                    placeholder={field.placeholder ?? field.label}
-                    className="min-w-0 w-full rounded-xl border border-black/15 px-3 py-2 text-sm outline-none focus:border-black"
-                  />
-                ))}
+                {fields.map((field) =>
+                  field.options ? (
+                    <select
+                      key={field.key}
+                      value={entry[field.key] ?? ""}
+                      onChange={(e) => updateEntry(index, field.key, e.target.value)}
+                      className="min-w-0 w-full rounded-xl border border-black/15 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+                    >
+                      <option value="">{field.label}</option>
+                      {field.options.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      key={field.key}
+                      type="text"
+                      value={entry[field.key] ?? ""}
+                      onChange={(e) => updateEntry(index, field.key, e.target.value)}
+                      placeholder={field.placeholder ?? field.label}
+                      className="min-w-0 w-full rounded-xl border border-black/15 px-3 py-2 text-sm outline-none focus:border-black"
+                    />
+                  )
+                )}
               </div>
             </div>
           ))}

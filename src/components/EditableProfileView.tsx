@@ -226,7 +226,7 @@ export default function EditableProfileView({
 
   const socialLinks = profile.social_links.filter((l) => l.url.trim());
   const works = profile.works.filter((w) => w.company || w.title);
-  const education = profile.education.filter((e) => e.school || e.degree);
+  const education = profile.education.filter((e) => e.school || e.degree || e.level);
   const links = profile.links.filter((l) => l.url?.trim());
   const interestGroups: { label: string; values: string[] }[] = [
     { label: "Music", values: profile.interests.music },
@@ -404,7 +404,7 @@ export default function EditableProfileView({
           {education.map((entry, i) => (
             <div key={i} className="text-sm">
               <p className="font-semibold text-black">
-                {[entry.degree, entry.school].filter(Boolean).join(" · ")}
+                {[entry.level, entry.degree, entry.school].filter(Boolean).join(" · ")}
               </p>
               {entry.years && <p className="text-black/40">{entry.years}</p>}
             </div>
@@ -794,9 +794,21 @@ export default function EditableProfileView({
           <MultiEntryEditor
             label="Education"
             fields={[
+              {
+                key: "level",
+                label: "Level",
+                options: [
+                  "Elementary",
+                  "High school",
+                  "Senior high school",
+                  "Vocational",
+                  "College",
+                  "Postgraduate",
+                ],
+              },
               { key: "school", label: "School" },
               { key: "degree", label: "Degree" },
-              { key: "years", label: "Years", placeholder: "2016 – 2020" },
+              { key: "years", label: "Years", placeholder: "2016 – 2020 or Ongoing" },
             ]}
             value={draft.education}
             onChange={(v) => updateDraft("education", v)}

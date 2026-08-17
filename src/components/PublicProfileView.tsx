@@ -105,7 +105,9 @@ export default function PublicProfileView({
 }) {
   const socialLinks = (profile.social_links ?? []).filter((l) => l.url.trim());
   const works = (profile.works ?? []).filter((w) => w.company || w.title);
-  const education = (profile.education ?? []).filter((e) => e.school || e.degree);
+  const education = (profile.education ?? []).filter(
+    (e) => e.school || e.degree || e.level
+  );
   const links = (profile.links ?? []).filter((l) => l.url?.trim());
   const interests = profile.interests ?? {};
   const interestGroups: { label: string; values: string[] }[] = [
@@ -322,7 +324,7 @@ export default function PublicProfileView({
           {education.map((entry, i) => (
             <div key={i} className="text-sm">
               <p className="font-semibold text-black">
-                {[entry.degree, entry.school].filter(Boolean).join(" · ")}
+                {[entry.level, entry.degree, entry.school].filter(Boolean).join(" · ")}
               </p>
               {entry.years && <p className="text-black/40">{entry.years}</p>}
             </div>

@@ -1,3 +1,5 @@
+"use client";
+
 import type { IconType } from "react-icons";
 import {
   FiActivity,
@@ -22,6 +24,7 @@ import { sanitizeUrl } from "@/lib/sanitize";
 import type { SectionKey } from "@/lib/business-profile";
 import ExpandableList from "@/components/ExpandableList";
 import ExpandableText from "@/components/ExpandableText";
+import SaveContactButton from "@/components/SaveContactButton";
 
 type SocialLink = { platform: string; url: string };
 type Entry = Record<string, string>;
@@ -478,6 +481,11 @@ export default function PublicProfileView({
             className="mt-3 text-sm text-black/80"
           />
         )}
+
+        <SaveContactButton
+          profile={profile}
+          className="mt-3 block w-full rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
+        />
 
         {actionButtons && <div className="mt-3">{actionButtons}</div>}
       </div>

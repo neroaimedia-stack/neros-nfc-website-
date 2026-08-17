@@ -487,7 +487,7 @@ export default function PublicProfileView({
         {!isOwnerPreview && (
           <SaveContactButton
             profile={profile}
-            className="mt-3 block w-full rounded-full bg-black px-6 py-2.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80 sm:py-3"
+            className="mt-3 block w-full rounded-full bg-black px-6 py-2 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80 sm:py-3"
           />
         )}
 

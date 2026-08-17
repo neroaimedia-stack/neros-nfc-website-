@@ -1,4 +1,22 @@
-import { FiCalendar, FiGlobe, FiHeart, FiMail, FiMapPin, FiPhone, FiUser } from "react-icons/fi";
+import type { IconType } from "react-icons";
+import {
+  FiActivity,
+  FiBookOpen,
+  FiBriefcase,
+  FiCalendar,
+  FiExternalLink,
+  FiFilm,
+  FiGlobe,
+  FiHeart,
+  FiMail,
+  FiMapPin,
+  FiMusic,
+  FiPhone,
+  FiStar,
+  FiTarget,
+  FiTv,
+  FiUser,
+} from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
 import type { SectionKey } from "@/lib/business-profile";
 
@@ -35,21 +53,6 @@ export type BusinessProfileRow = {
   travel_places: string[] | null;
   links: Entry[] | null;
 };
-
-function ChipRow({ values }: { values: string[] }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {values.map((v) => (
-        <span
-          key={v}
-          className="rounded-full bg-black/5 px-3 py-1.5 text-xs font-medium text-black"
-        >
-          {v}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function Section({
   title,
@@ -110,12 +113,12 @@ export default function PublicProfileView({
   );
   const links = (profile.links ?? []).filter((l) => l.url?.trim());
   const interests = profile.interests ?? {};
-  const interestGroups: { label: string; values: string[] }[] = [
-    { label: "Music", values: interests.music ?? [] },
-    { label: "Movies", values: interests.movies ?? [] },
-    { label: "Games", values: interests.games ?? [] },
-    { label: "TV shows", values: interests.tvShows ?? [] },
-    { label: "Sports & athletes", values: interests.sports ?? [] },
+  const interestGroups: { label: string; icon: IconType; values: string[] }[] = [
+    { label: "Music", icon: FiMusic, values: interests.music ?? [] },
+    { label: "Movies", icon: FiFilm, values: interests.movies ?? [] },
+    { label: "Games", icon: FiTarget, values: interests.games ?? [] },
+    { label: "TV shows", icon: FiTv, values: interests.tvShows ?? [] },
+    { label: "Sports & athletes", icon: FiActivity, values: interests.sports ?? [] },
   ].filter((g) => g.values.length > 0);
 
   const hasDetails =
@@ -279,7 +282,16 @@ export default function PublicProfileView({
       key: "hobbies",
       title: "Hobbies",
       empty: !profile.hobbies || profile.hobbies.length === 0,
-      content: <ChipRow values={profile.hobbies ?? []} />,
+      content: (
+        <div className="flex flex-col gap-2 text-sm">
+          {(profile.hobbies ?? []).map((hobby) => (
+            <div key={hobby} className="flex items-center gap-1.5">
+              <FiStar className="h-4 w-4 shrink-0 text-black/50" />
+              <span className="font-medium text-black">{hobby}</span>
+            </div>
+          ))}
+        </div>
+      ),
     },
     {
       key: "interests",
@@ -289,9 +301,16 @@ export default function PublicProfileView({
         <div className="flex flex-col gap-3">
           {interestGroups.map((group) => (
             <div key={group.label}>
-              <p className="text-xs font-medium text-black/50">{group.label}</p>
-              <div className="mt-1.5">
-                <ChipRow values={group.values} />
+              <p className="flex items-center gap-1.5 text-xs font-medium text-black/50">
+                <group.icon className="h-3.5 w-3.5 shrink-0" />
+                {group.label}
+              </p>
+              <div className="mt-1.5 flex flex-col gap-1.5 pl-5 text-sm">
+                {group.values.map((v) => (
+                  <span key={v} className="font-medium text-black">
+                    {v}
+                  </span>
+                ))}
               </div>
             </div>
           ))}
@@ -305,11 +324,14 @@ export default function PublicProfileView({
       content: (
         <div className="flex flex-col gap-3">
           {works.map((entry, i) => (
-            <div key={i} className="text-sm">
-              <p className="font-semibold text-black">
-                {[entry.title, entry.company].filter(Boolean).join(" at ")}
-              </p>
-              {entry.years && <p className="text-black/40">{entry.years}</p>}
+            <div key={i} className="flex items-start gap-2 text-sm">
+              <FiBriefcase className="mt-0.5 h-4 w-4 shrink-0 text-black/50" />
+              <div>
+                <p className="font-semibold text-black">
+                  {[entry.title, entry.company].filter(Boolean).join(" at ")}
+                </p>
+                {entry.years && <p className="text-black/40">{entry.years}</p>}
+              </div>
             </div>
           ))}
         </div>
@@ -322,11 +344,14 @@ export default function PublicProfileView({
       content: (
         <div className="flex flex-col gap-3">
           {education.map((entry, i) => (
-            <div key={i} className="text-sm">
-              <p className="font-semibold text-black">
-                {[entry.level, entry.degree, entry.school].filter(Boolean).join(" · ")}
-              </p>
-              {entry.years && <p className="text-black/40">{entry.years}</p>}
+            <div key={i} className="flex items-start gap-2 text-sm">
+              <FiBookOpen className="mt-0.5 h-4 w-4 shrink-0 text-black/50" />
+              <div>
+                <p className="font-semibold text-black">
+                  {[entry.level, entry.degree, entry.school].filter(Boolean).join(" · ")}
+                </p>
+                {entry.years && <p className="text-black/40">{entry.years}</p>}
+              </div>
             </div>
           ))}
         </div>
@@ -336,23 +361,33 @@ export default function PublicProfileView({
       key: "travel",
       title: "Places been to",
       empty: !profile.travel_places || profile.travel_places.length === 0,
-      content: <ChipRow values={profile.travel_places ?? []} />,
+      content: (
+        <div className="flex flex-col gap-2 text-sm">
+          {(profile.travel_places ?? []).map((place) => (
+            <div key={place} className="flex items-center gap-1.5">
+              <FiMapPin className="h-4 w-4 shrink-0 text-black/50" />
+              <span className="font-medium text-black">{place}</span>
+            </div>
+          ))}
+        </div>
+      ),
     },
     {
       key: "links",
       title: "Links",
       empty: links.length === 0,
       content: (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 text-sm">
           {links.map((link, i) => (
             <a
               key={i}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-black underline underline-offset-2 hover:opacity-60"
+              className="flex items-center gap-1.5 transition-opacity hover:opacity-60"
             >
-              {link.label || link.url}
+              <FiExternalLink className="h-4 w-4 shrink-0 text-black/50" />
+              <span className="font-semibold text-black">{link.label || link.url}</span>
             </a>
           ))}
         </div>

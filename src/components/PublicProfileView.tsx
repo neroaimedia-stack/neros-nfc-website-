@@ -428,43 +428,43 @@ export default function PublicProfileView({
   const orderedSections = sections.filter((s) => !s.empty);
 
   return (
-    <div className="mx-auto w-full max-w-md pb-16">
+    <div className="mx-auto w-full max-w-md pb-16 md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
       <div className="relative">
         {profile.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={profile.cover_url}
             alt=""
-            className="h-36 w-full object-cover"
+            className="h-36 w-full object-cover md:h-48 lg:h-56"
           />
         ) : (
-          <div className="h-36 w-full bg-black/5" />
+          <div className="h-36 w-full bg-black/5 md:h-48 lg:h-56" />
         )}
         {onBack && <BackButton onClick={onBack} />}
       </div>
 
-      <div className="px-6">
+      <div className="px-6 md:px-8">
         <div className="flex items-end gap-3">
-          <div className="relative z-10 -mt-12 shrink-0">
+          <div className="relative z-10 -mt-12 shrink-0 md:-mt-14 lg:-mt-16">
             {profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={profile.avatar_url}
                 alt={profile.full_name ?? "Profile picture"}
-                className="h-24 w-24 rounded-full border-4 border-white object-cover object-top"
+                className="h-24 w-24 rounded-full border-4 border-white object-cover object-top md:h-28 md:w-28 lg:h-32 lg:w-32"
               />
             ) : (
-              <div className="h-24 w-24 rounded-full border-4 border-white bg-black/10" />
+              <div className="h-24 w-24 rounded-full border-4 border-white bg-black/10 md:h-28 md:w-28 lg:h-32 lg:w-32" />
             )}
           </div>
           <div className="min-w-0 pt-3 pb-1">
             {profile.full_name && (
-              <h1 className="line-clamp-2 text-2xl font-bold break-words text-black sm:text-3xl">
+              <h1 className="line-clamp-2 text-2xl font-bold break-words text-black sm:text-3xl md:text-4xl">
                 {profile.full_name}
               </h1>
             )}
             {profile.job_title && (
-              <p className="line-clamp-2 text-sm font-medium break-words text-black/80 sm:text-base">
+              <p className="line-clamp-2 text-sm font-medium break-words text-black/80 sm:text-base md:text-lg">
                 {profile.job_title}
               </p>
             )}

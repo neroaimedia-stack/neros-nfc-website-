@@ -21,7 +21,7 @@ export default function FieldEditSheet({
       onClick={onCancel}
     >
       <div
-        className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col rounded-t-3xl bg-white"
+        className="mx-auto flex max-h-[85vh] w-full max-w-md flex-col rounded-t-3xl bg-white md:max-w-xl lg:max-w-2xl xl:max-w-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-black/10 px-6 py-4">

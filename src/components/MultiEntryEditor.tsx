@@ -40,22 +40,29 @@ export default function MultiEntryEditor({
 
   return (
     <div>
-      <label className="text-sm font-medium text-black">{label}</label>
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-sm font-medium text-black">{label}</label>
+        <button
+          type="button"
+          onClick={addEntry}
+          className="shrink-0 rounded-full border border-black px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-60"
+        >
+          {addLabel}
+        </button>
+      </div>
 
       {value.length > 0 && (
-        <div className="mt-2 flex flex-col gap-3">
+        <div className="mt-3 flex flex-col">
           {value.map((entry, index) => (
-            <div
-              key={index}
-              className="flex flex-col gap-2 rounded-2xl border border-black/10 p-3"
-            >
+            <div key={index} className="border-b border-black/10 py-3 last:border-b-0">
               <div className="flex justify-end">
                 <button
                   type="button"
                   onClick={() => removeEntry(index)}
-                  className="text-xs font-medium text-black/40 hover:text-black"
+                  aria-label="Remove entry"
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-black/40 hover:bg-black/5 hover:text-black"
                 >
-                  Remove
+                  ×
                 </button>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -74,14 +81,6 @@ export default function MultiEntryEditor({
           ))}
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={addEntry}
-        className="mt-3 rounded-full border border-black px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-60"
-      >
-        {addLabel}
-      </button>
     </div>
   );
 }

@@ -32,26 +32,7 @@ export default function TagListInput({
   return (
     <div>
       <label className="text-sm font-medium text-black">{label}</label>
-      {values.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {values.map((tag) => (
-            <span
-              key={tag}
-              className="flex items-center gap-1.5 rounded-full bg-black/5 py-1.5 pr-2 pl-3 text-xs font-medium text-black"
-            >
-              {tag}
-              <button
-                type="button"
-                onClick={() => removeTag(tag)}
-                aria-label={`Remove ${tag}`}
-                className="flex h-4 w-4 items-center justify-center rounded-full text-black/40 hover:bg-black/10 hover:text-black"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
+
       <div className="mt-2 flex gap-2">
         <input
           type="text"
@@ -74,6 +55,27 @@ export default function TagListInput({
           Add
         </button>
       </div>
+
+      {values.length > 0 && (
+        <div className="mt-3 flex flex-col">
+          {values.map((tag) => (
+            <div
+              key={tag}
+              className="flex items-center justify-between border-b border-black/10 py-3 last:border-b-0"
+            >
+              <span className="text-sm font-medium text-black">{tag}</span>
+              <button
+                type="button"
+                onClick={() => removeTag(tag)}
+                aria-label={`Remove ${tag}`}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-black/40 hover:bg-black/5 hover:text-black"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

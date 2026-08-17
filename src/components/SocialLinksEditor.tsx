@@ -1,6 +1,7 @@
 "use client";
 
 import { findSocialPlatform, SOCIAL_PLATFORMS } from "@/lib/social-platforms";
+import { sanitizeText } from "@/lib/sanitize";
 
 export type SocialLink = { platform: string; url: string };
 
@@ -42,7 +43,7 @@ export default function SocialLinksEditor({
                 <input
                   type="url"
                   value={link.url}
-                  onChange={(e) => updateUrl(link.platform, e.target.value)}
+                  onChange={(e) => updateUrl(link.platform, sanitizeText(e.target.value))}
                   placeholder={platform.placeholder}
                   maxLength={300}
                   className="min-w-0 flex-1 rounded-full border border-black/15 px-4 py-2 text-sm outline-none focus:border-black"

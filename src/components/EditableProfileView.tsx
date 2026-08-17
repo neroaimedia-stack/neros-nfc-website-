@@ -21,6 +21,7 @@ import {
   FiUser,
 } from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
+import { isValidEmail, isValidPhone, sanitizeText } from "@/lib/sanitize";
 import { useImageUpload } from "@/lib/use-image-upload";
 import {
   type Interests,
@@ -146,7 +147,9 @@ function TextField({
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) =>
+          onChange(type === "date" ? e.target.value : sanitizeText(e.target.value))
+        }
         placeholder={placeholder}
         maxLength={maxLength}
         className="mt-1 w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
@@ -641,7 +644,7 @@ export default function EditableProfileView({
         >
           <textarea
             value={draft.bio}
-            onChange={(e) => updateDraft("bio", e.target.value)}
+            onChange={(e) => updateDraft("bio", sanitizeText(e.target.value))}
             rows={4}
             placeholder="A short intro about you"
             maxLength={280}
@@ -667,6 +670,8 @@ export default function EditableProfileView({
             onChange={(v) => updateDraft("emails", v)}
             placeholder="you@example.com"
             maxLength={254}
+            validate={isValidEmail}
+            invalidMessage="Enter a valid email address."
           />
           <TagListInput
             label="Phone numbers"
@@ -674,6 +679,8 @@ export default function EditableProfileView({
             onChange={(v) => updateDraft("phone_numbers", v)}
             placeholder="+1 555 123 4567"
             maxLength={20}
+            validate={isValidPhone}
+            invalidMessage="Enter a valid phone number."
           />
         </FieldEditSheet>
       )}

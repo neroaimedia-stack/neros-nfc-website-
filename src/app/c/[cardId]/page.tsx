@@ -67,9 +67,7 @@ export default async function CardScanPage({
   }
 
   const { data: profile } = await supabase
-    .from("business_profiles")
-    .select("*")
-    .eq("card_id", card.id)
+    .rpc("get_business_profile", { p_card_id: card.id })
     .maybeSingle<BusinessProfileRow>();
 
   if (!profile) {

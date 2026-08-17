@@ -18,6 +18,7 @@ import {
   FiUser,
 } from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
+import { sanitizeUrl } from "@/lib/sanitize";
 import type { SectionKey } from "@/lib/business-profile";
 
 type SocialLink = { platform: string; url: string };
@@ -201,11 +202,13 @@ export default function PublicProfileView({
           {socialLinks.map((link) => {
             const platform = findSocialPlatform(link.platform);
             if (!platform) return null;
+            const safeUrl = sanitizeUrl(link.url);
+            if (!safeUrl) return null;
             const Icon = platform.Icon;
             return (
               <a
                 key={link.platform}
-                href={link.url}
+                href={safeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 transition-opacity hover:opacity-60"
@@ -378,18 +381,22 @@ export default function PublicProfileView({
       empty: links.length === 0,
       content: (
         <div className="flex flex-col gap-2 text-sm">
-          {links.map((link, i) => (
-            <a
-              key={i}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 transition-opacity hover:opacity-60"
-            >
-              <FiExternalLink className="h-4 w-4 shrink-0 text-black/50" />
-              <span className="font-semibold text-black">{link.label || link.url}</span>
-            </a>
-          ))}
+          {links.map((link, i) => {
+            const safeUrl = sanitizeUrl(link.url ?? "");
+            if (!safeUrl) return null;
+            return (
+              <a
+                key={i}
+                href={safeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 transition-opacity hover:opacity-60"
+              >
+                <FiExternalLink className="h-4 w-4 shrink-0 text-black/50" />
+                <span className="font-semibold text-black">{link.label || link.url}</span>
+              </a>
+            );
+          })}
         </div>
       ),
     },

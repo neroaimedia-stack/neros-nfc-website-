@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { sanitizeText } from "@/lib/sanitize";
 
 export default function TagListInput({
   label,
@@ -8,23 +9,39 @@ export default function TagListInput({
   onChange,
   placeholder,
   maxLength = 60,
+  validate,
+  invalidMessage = "That doesn't look right.",
 }: {
   label: string;
   values: string[];
   onChange: (values: string[]) => void;
   placeholder?: string;
   maxLength?: number;
+  validate?: (value: string) => boolean;
+  invalidMessage?: string;
 }) {
   const [draft, setDraft] = useState("");
+  const [error, setError] = useState("");
 
   const addTag = () => {
-    const trimmed = draft.trim();
-    if (!trimmed || values.includes(trimmed)) {
+    const trimmed = sanitizeText(draft).trim();
+    if (!trimmed) {
       setDraft("");
+      setError("");
+      return;
+    }
+    if (validate && !validate(trimmed)) {
+      setError(invalidMessage);
+      return;
+    }
+    if (values.includes(trimmed)) {
+      setDraft("");
+      setError("");
       return;
     }
     onChange([...values, trimmed]);
     setDraft("");
+    setError("");
   };
 
   const removeTag = (tag: string) => {
@@ -39,7 +56,10 @@ export default function TagListInput({
         <input
           type="text"
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            setError("");
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -58,6 +78,8 @@ export default function TagListInput({
           Add
         </button>
       </div>
+
+      {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
 
       {values.length > 0 && (
         <div className="mt-3 flex flex-col">

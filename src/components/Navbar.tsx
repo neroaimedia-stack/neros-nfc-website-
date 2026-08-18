@@ -11,7 +11,7 @@ const links = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/c/")) return null;
+  if (pathname?.startsWith("/c/") || pathname?.startsWith("/admin")) return null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-black/10 bg-white/90 backdrop-blur">

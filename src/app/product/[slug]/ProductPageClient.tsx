@@ -6,7 +6,7 @@ import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
 import OrderCardMock from "@/components/OrderCardMock";
-import type { Product } from "@/lib/products";
+import { isOutOfStock, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { CARD_COLORS, DEFAULT_CARD_COLOR } from "@/lib/card-colors";
 import { REVIEW_PLATFORMS, QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
@@ -97,6 +97,9 @@ export default function ProductPageClient({
   const isOrderCard = product?.slug === "order-card";
   const isBusinessCard = product?.slug === "business-card";
   const useToggleSelector = isWifi || isOrderCard || isBusinessCard;
+  const outOfStock = product ? isOutOfStock(product) : false;
+  const isPreorder = outOfStock && !!product?.allowPreorder;
+  const isBlocked = outOfStock && !product?.allowPreorder;
   const { addItem } = useCart();
   const currency = useCurrency();
   const [color, setColor] = useState(product?.colors[0] ?? "");
@@ -653,22 +656,44 @@ export default function ProductPageClient({
             />
           </div>
 
+          {outOfStock && (
+            <p
+              className={`mt-6 rounded-xl px-4 py-2.5 text-sm font-medium ${
+                isPreorder ? "bg-amber-50 text-amber-800" : "bg-black/5 text-black/60"
+              }`}
+            >
+              {isPreorder
+                ? "Currently out of stock — pre-order now and we'll ship as soon as it's back."
+                : "Currently out of stock."}
+            </p>
+          )}
+
           <div className="mt-8 flex flex-col gap-3">
             <button
               type="button"
               onClick={handleAddToCart}
-              className="rounded-full border border-black px-6 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-60"
+              disabled={isBlocked}
+              className="rounded-full border border-black px-6 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-60 disabled:cursor-not-allowed disabled:opacity-30"
             >
-              {added ? "Added ✓" : "Add to cart"}
+              {isBlocked
+                ? "Out of stock"
+                : added
+                  ? "Added ✓"
+                  : isPreorder
+                    ? "Pre-order"
+                    : "Add to cart"}
             </button>
             <Link
-              href="/cart"
+              href={isBlocked ? "#" : "/cart"}
+              aria-disabled={isBlocked}
               onClick={(e) => {
-                if (!handleAddToCart()) e.preventDefault();
+                if (isBlocked || !handleAddToCart()) e.preventDefault();
               }}
-              className="rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
+              className={`rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80 ${
+                isBlocked ? "pointer-events-none opacity-30" : ""
+              }`}
             >
-              Buy it now
+              {isPreorder ? "Pre-order now" : "Buy it now"}
             </Link>
           </div>
         </div>

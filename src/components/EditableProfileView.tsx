@@ -156,8 +156,70 @@ function TextField({
         }
         placeholder={placeholder}
         maxLength={maxLength}
-        className="mt-1 w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+        className="mt-1 h-11 w-full rounded-xl border border-black/15 px-4 text-sm outline-none focus:border-black"
       />
+    </div>
+  );
+}
+
+const GENDER_OPTIONS = ["Male", "Female", "Non-binary"];
+
+function GenderField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const isPreset = GENDER_OPTIONS.includes(value);
+  const [customMode, setCustomMode] = useState(value !== "" && !isPreset);
+
+  return (
+    <div>
+      <label className="text-sm font-medium text-black">Gender</label>
+      <div className="mt-1 flex flex-wrap gap-2">
+        {GENDER_OPTIONS.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => {
+              setCustomMode(false);
+              onChange(option);
+            }}
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+              !customMode && value === option
+                ? "border-black bg-black text-white"
+                : "border-black/15 text-black hover:border-black/40"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => {
+            setCustomMode(true);
+            if (isPreset) onChange("");
+          }}
+          className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+            customMode
+              ? "border-black bg-black text-white"
+              : "border-black/15 text-black hover:border-black/40"
+          }`}
+        >
+          Custom
+        </button>
+      </div>
+      {customMode && (
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(sanitizeText(e.target.value))}
+          placeholder="Self-describe"
+          maxLength={40}
+          className="mt-2 h-11 w-full rounded-xl border border-black/15 px-4 text-sm outline-none focus:border-black"
+        />
+      )}
     </div>
   );
 }
@@ -762,13 +824,15 @@ export default function EditableProfileView({
             value={draft.birthday}
             onChange={(v) => updateDraft("birthday", v)}
           />
-          <TextField
-            label="Gender"
-            value={draft.gender}
-            onChange={(v) => updateDraft("gender", v)}
-            placeholder="e.g. Woman, Man, Non-binary"
-            maxLength={40}
-          />
+          {draft.birthday && calculateAge(draft.birthday) !== null && (
+            <div>
+              <label className="text-sm font-medium text-black">Age</label>
+              <div className="mt-1 flex h-11 w-full items-center rounded-xl border border-black/15 bg-black/5 px-4 text-sm text-black/70">
+                {calculateAge(draft.birthday)} · calculated from birthday
+              </div>
+            </div>
+          )}
+          <GenderField value={draft.gender} onChange={(v) => updateDraft("gender", v)} />
           <div>
             <label className="text-sm font-medium text-black" htmlFor="relationship">
               Relationship status

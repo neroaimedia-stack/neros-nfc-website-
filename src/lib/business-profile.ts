@@ -42,6 +42,7 @@ export type ProfileState = {
   current_city: string;
   hometown: string;
   birthday: string;
+  age: string;
   gender: string;
   languages: string[];
   works: Record<string, string>[];
@@ -65,6 +66,7 @@ export const emptyProfile: ProfileState = {
   current_city: "",
   hometown: "",
   birthday: "",
+  age: "",
   gender: "",
   languages: [],
   works: [],
@@ -73,20 +75,6 @@ export const emptyProfile: ProfileState = {
   travel_places: [],
   links: [],
 };
-
-export function calculateAge(birthday: string): number | null {
-  const birthDate = new Date(`${birthday}T00:00:00`);
-  if (Number.isNaN(birthDate.getTime())) return null;
-
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const hasHadBirthdayThisYear =
-    today.getMonth() > birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
-  if (!hasHadBirthdayThisYear) age--;
-
-  return age;
-}
 
 export const RELATIONSHIP_OPTIONS = [
   "",
@@ -113,6 +101,7 @@ export function profileFromRow(data: Record<string, unknown>): ProfileState {
     current_city: (data.current_city as string) ?? "",
     hometown: (data.hometown as string) ?? "",
     birthday: (data.birthday as string) ?? "",
+    age: data.age != null ? String(data.age) : "",
     gender: (data.gender as string) ?? "",
     languages: (data.languages as string[]) ?? [],
     works: (data.works as Record<string, string>[]) ?? [],
@@ -142,6 +131,7 @@ export function profileToRow(
     current_city: profile.current_city || null,
     hometown: profile.hometown || null,
     birthday: profile.birthday || null,
+    age: profile.age ? Number(profile.age) : null,
     gender: profile.gender || null,
     languages: profile.languages,
     works: profile.works,

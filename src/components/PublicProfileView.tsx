@@ -22,7 +22,7 @@ import {
 } from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
 import { sanitizeUrl } from "@/lib/sanitize";
-import { calculateAge, type SectionKey } from "@/lib/business-profile";
+import type { SectionKey } from "@/lib/business-profile";
 import ExpandableList from "@/components/ExpandableList";
 import ExpandableText from "@/components/ExpandableText";
 import SaveContactButton from "@/components/SaveContactButton";
@@ -52,6 +52,7 @@ export type BusinessProfileRow = {
   current_city: string | null;
   hometown: string | null;
   birthday: string | null;
+  age: number | null;
   gender: string | null;
   languages: string[] | null;
   works: Entry[] | null;
@@ -134,6 +135,7 @@ export default function PublicProfileView({
     profile.current_city ||
     profile.hometown ||
     profile.birthday ||
+    profile.age != null ||
     profile.gender ||
     profile.relationship_status ||
     (profile.languages && profile.languages.length > 0);
@@ -262,13 +264,13 @@ export default function PublicProfileView({
               <dd className="font-medium">{formatBirthday(profile.birthday)}</dd>
             </div>
           )}
-          {profile.birthday && calculateAge(profile.birthday) !== null && (
+          {profile.age != null && (
             <div className="flex justify-between gap-4">
               <dt className="flex items-center gap-1.5 text-black/50">
                 <FiHash className="h-4 w-4 shrink-0" />
                 Age
               </dt>
-              <dd className="font-medium">{calculateAge(profile.birthday)}</dd>
+              <dd className="font-medium">{profile.age}</dd>
             </div>
           )}
           {profile.gender && (

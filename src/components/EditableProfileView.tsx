@@ -29,7 +29,6 @@ import {
   type ProfileState,
   type SectionKey,
   RELATIONSHIP_OPTIONS,
-  calculateAge,
 } from "@/lib/business-profile";
 import TagListInput from "@/components/TagListInput";
 import ExpandableList from "@/components/ExpandableList";
@@ -136,6 +135,7 @@ function TextField({
   onChange,
   placeholder,
   type = "text",
+  inputMode,
   maxLength,
 }: {
   label: string;
@@ -143,6 +143,7 @@ function TextField({
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   maxLength?: number;
 }) {
   return (
@@ -150,6 +151,7 @@ function TextField({
       <label className="text-sm font-medium text-black">{label}</label>
       <input
         type={type}
+        inputMode={inputMode}
         value={value}
         onChange={(e) =>
           onChange(type === "date" ? e.target.value : sanitizeText(e.target.value))
@@ -162,7 +164,10 @@ function TextField({
   );
 }
 
-const GENDER_OPTIONS = ["Male", "Female", "Non-binary"];
+const GENDER_OPTIONS = ["", "Male", "Female", "Non-binary"];
+const GENDER_CUSTOM = "__custom__";
+const selectFieldClassName =
+  "mt-1 h-11 w-full rounded-xl border border-black/15 bg-white px-4 text-sm outline-none focus:border-black";
 
 function GenderField({
   value,
@@ -176,40 +181,30 @@ function GenderField({
 
   return (
     <div>
-      <label className="text-sm font-medium text-black">Gender</label>
-      <div className="mt-1 flex flex-wrap gap-2">
-        {GENDER_OPTIONS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => {
-              setCustomMode(false);
-              onChange(option);
-            }}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-              !customMode && value === option
-                ? "border-black bg-black text-white"
-                : "border-black/15 text-black hover:border-black/40"
-            }`}
-          >
-            {option}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => {
+      <label className="text-sm font-medium text-black" htmlFor="gender">
+        Gender
+      </label>
+      <select
+        id="gender"
+        value={customMode ? GENDER_CUSTOM : value}
+        onChange={(e) => {
+          if (e.target.value === GENDER_CUSTOM) {
             setCustomMode(true);
-            if (isPreset) onChange("");
-          }}
-          className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-            customMode
-              ? "border-black bg-black text-white"
-              : "border-black/15 text-black hover:border-black/40"
-          }`}
-        >
-          Custom
-        </button>
-      </div>
+            onChange("");
+          } else {
+            setCustomMode(false);
+            onChange(e.target.value);
+          }
+        }}
+        className={selectFieldClassName}
+      >
+        {GENDER_OPTIONS.map((option) => (
+          <option key={option} value={option}>
+            {option || "Prefer not to say"}
+          </option>
+        ))}
+        <option value={GENDER_CUSTOM}>Custom</option>
+      </select>
       {customMode && (
         <input
           type="text"
@@ -220,6 +215,93 @@ function GenderField({
           className="mt-2 h-11 w-full rounded-xl border border-black/15 px-4 text-sm outline-none focus:border-black"
         />
       )}
+    </div>
+  );
+}
+
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function daysInMonth(year: string, month: string): number {
+  if (!year || !month) return 31;
+  return new Date(Number(year), Number(month), 0).getDate();
+}
+
+function BirthdayField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const year = match ? match[1] : "";
+  const month = match ? match[2] : "";
+  const day = match ? match[3] : "";
+
+  function update(nextYear: string, nextMonth: string, nextDay: string) {
+    if (!nextYear || !nextMonth || !nextDay) {
+      onChange("");
+      return;
+    }
+    const clampedDay = String(
+      Math.min(Number(nextDay), daysInMonth(nextYear, nextMonth))
+    ).padStart(2, "0");
+    onChange(`${nextYear}-${nextMonth}-${clampedDay}`);
+  }
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
+  const days = Array.from({ length: daysInMonth(year, month) }, (_, i) =>
+    String(i + 1).padStart(2, "0")
+  );
+
+  return (
+    <div>
+      <label className="text-sm font-medium text-black">Birthday</label>
+      <div className="mt-1 grid grid-cols-3 gap-2">
+        <select
+          aria-label="Birth month"
+          value={month}
+          onChange={(e) => update(year, e.target.value, day)}
+          className={selectFieldClassName}
+        >
+          <option value="">Month</option>
+          {MONTHS.map((m, i) => (
+            <option key={m} value={String(i + 1).padStart(2, "0")}>
+              {m}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="Birth day"
+          value={day}
+          onChange={(e) => update(year, month, e.target.value)}
+          className={selectFieldClassName}
+        >
+          <option value="">Day</option>
+          {days.map((d) => (
+            <option key={d} value={d}>
+              {Number(d)}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="Birth year"
+          value={year}
+          onChange={(e) => update(e.target.value, month, day)}
+          className={selectFieldClassName}
+        >
+          <option value="">Year</option>
+          {years.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
@@ -314,6 +396,7 @@ export default function EditableProfileView({
     !!profile.current_city ||
     !!profile.hometown ||
     !!profile.birthday ||
+    !!profile.age ||
     !!profile.gender ||
     !!profile.relationship_status ||
     profile.languages.length > 0;
@@ -403,13 +486,13 @@ export default function EditableProfileView({
               </dd>
             </div>
           )}
-          {profile.birthday && calculateAge(profile.birthday) !== null && (
+          {profile.age && (
             <div className="flex justify-between gap-4">
               <dt className="flex items-center gap-1.5 text-black/50">
                 <FiHash className="h-4 w-4 shrink-0" />
                 Age
               </dt>
-              <dd className="font-medium">{calculateAge(profile.birthday)}</dd>
+              <dd className="font-medium">{profile.age}</dd>
             </div>
           )}
           {profile.gender && (
@@ -818,20 +901,19 @@ export default function EditableProfileView({
             onChange={(v) => updateDraft("hometown", v)}
             maxLength={60}
           />
-          <TextField
-            label="Birthday"
-            type="date"
+          <BirthdayField
             value={draft.birthday}
             onChange={(v) => updateDraft("birthday", v)}
           />
-          {draft.birthday && calculateAge(draft.birthday) !== null && (
-            <div>
-              <label className="text-sm font-medium text-black">Age</label>
-              <div className="mt-1 flex h-11 w-full items-center rounded-xl border border-black/15 bg-black/5 px-4 text-sm text-black/70">
-                {calculateAge(draft.birthday)} · calculated from birthday
-              </div>
-            </div>
-          )}
+          <TextField
+            label="Age"
+            type="text"
+            inputMode="numeric"
+            value={draft.age}
+            onChange={(v) => updateDraft("age", v.replace(/\D/g, "").slice(0, 3))}
+            placeholder="e.g. 25"
+            maxLength={3}
+          />
           <GenderField value={draft.gender} onChange={(v) => updateDraft("gender", v)} />
           <div>
             <label className="text-sm font-medium text-black" htmlFor="relationship">

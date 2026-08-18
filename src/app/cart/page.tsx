@@ -13,15 +13,24 @@ export default function CartPage() {
   const [promoInput, setPromoInput] = useState("");
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [discountRate, setDiscountRate] = useState(0);
+  const [promoProductSlugs, setPromoProductSlugs] = useState<string[]>([]);
   const [promoError, setPromoError] = useState("");
   const [showPromoInput, setShowPromoInput] = useState(false);
   const [checkingPromo, setCheckingPromo] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
 
-  const discount = subtotal * discountRate;
+  const discountableSubtotal =
+    promoProductSlugs.length === 0
+      ? subtotal
+      : items
+          .filter((i) => promoProductSlugs.includes(i.productSlug))
+          .reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const discount = discountableSubtotal * discountRate;
   const total = subtotal - discount;
   const monthlyTotal = items.reduce((sum, i) => sum + (i.monthlyFee || 0), 0);
+  const promoAppliesToNothing =
+    appliedCode !== null && promoProductSlugs.length > 0 && discountableSubtotal === 0;
 
   const display = (amountUSD: number) =>
     formatCurrency(fromUSD(amountUSD, currency), currency);
@@ -36,21 +45,29 @@ export default function CartPage() {
       .eq("code", code)
       .eq("active", true)
       .maybeSingle();
-    setCheckingPromo(false);
-    if (data) {
-      setAppliedCode(code);
-      setDiscountRate(Number(data.discount_rate));
-      setPromoError("");
-    } else {
+    if (!data) {
+      setCheckingPromo(false);
       setAppliedCode(null);
       setDiscountRate(0);
+      setPromoProductSlugs([]);
       setPromoError("Invalid promo code");
+      return;
     }
+    const { data: scopeRows } = await supabase
+      .from("promo_code_products")
+      .select("product_slug")
+      .eq("promo_code", code);
+    setCheckingPromo(false);
+    setAppliedCode(code);
+    setDiscountRate(Number(data.discount_rate));
+    setPromoProductSlugs((scopeRows ?? []).map((r) => r.product_slug));
+    setPromoError("");
   };
 
   const handleRemovePromo = () => {
     setAppliedCode(null);
     setDiscountRate(0);
+    setPromoProductSlugs([]);
     setPromoInput("");
     setPromoError("");
     setShowPromoInput(false);
@@ -228,6 +245,11 @@ export default function CartPage() {
                 Remove
               </button>
             </div>
+            {promoAppliesToNothing && (
+              <p className="mt-2 text-xs text-amber-600">
+                This code doesn&apos;t apply to any items currently in your cart.
+              </p>
+            )}
           </>
         ) : showPromoInput ? (
           <>

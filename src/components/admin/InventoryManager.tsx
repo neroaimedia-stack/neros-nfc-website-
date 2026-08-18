@@ -3,6 +3,52 @@
 import { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
+import FlippableCard from "@/components/FlippableCard";
+import ReviewCardMock from "@/components/ReviewCardMock";
+import WifiCardMock from "@/components/WifiCardMock";
+import OrderCardMock from "@/components/OrderCardMock";
+
+function VariantThumb({ slug, variant }: { slug: string; variant: string }) {
+  const className = "w-16 shrink-0";
+  switch (slug) {
+    case "review-card":
+      return <ReviewCardMock platform={variant} shadow={false} className={className} />;
+    case "wifi-card":
+      return <WifiCardMock format={variant} shadow={false} className={className} />;
+    case "order-card":
+      return <OrderCardMock format={variant} shadow={false} className={className} />;
+    case "business-card":
+      return (
+        <FlippableCard
+          shadow={false}
+          reflection={false}
+          personalized={false}
+          className={className}
+        />
+      );
+    default:
+      return null;
+  }
+}
+
+function VariantThumbs({ slug, colors }: { slug: string; colors: string[] }) {
+  const variants = slug === "business-card" ? [colors[0] ?? ""] : colors;
+  if (variants.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {variants.map((variant, i) => (
+        <div key={`${variant}-${i}`} className="flex flex-col items-center gap-1">
+          <VariantThumb slug={slug} variant={variant} />
+          {slug !== "business-card" && (
+            <span className="max-w-16 truncate text-center text-[10px] text-black/40">
+              {variant}
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 type Product = {
   slug: string;
@@ -104,6 +150,10 @@ function ProductRow({
             {allowPreorder ? "Out of stock · pre-order on" : "Out of stock · blocked"}
           </span>
         )}
+      </div>
+
+      <div className="mt-4">
+        <VariantThumbs slug={product.slug} colors={colors} />
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">

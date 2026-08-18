@@ -1,4 +1,5 @@
 import DashboardStats from "@/components/admin/DashboardStats";
+import OrdersChart from "@/components/admin/OrdersChart";
 
 export default function AdminHomePage() {
   return (
@@ -7,6 +8,9 @@ export default function AdminHomePage() {
       <p className="mt-1 text-sm text-black/60">A quick look at how the store is doing.</p>
       <div className="mt-6">
         <DashboardStats />
+      </div>
+      <div className="mt-4">
+        <OrdersChart />
       </div>
     </div>
   );

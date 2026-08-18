@@ -134,7 +134,7 @@ export default function PromosManager() {
 
   return (
     <div>
-      <form onSubmit={addPromo} className="flex flex-col gap-3 rounded-2xl border border-black/10 p-4">
+      <form onSubmit={addPromo} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 p-4">
         <div className="flex gap-3">
           <input
             type="text"

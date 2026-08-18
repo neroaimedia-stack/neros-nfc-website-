@@ -2,7 +2,7 @@ import OrdersManager from "@/components/admin/OrdersManager";
 
 export default function AdminOrdersPage() {
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="w-full">
       <h1 className="text-2xl font-bold text-black">Orders</h1>
       <p className="mt-1 text-sm text-black/60">
         Review incoming orders, update fulfillment status, and see personalization details.

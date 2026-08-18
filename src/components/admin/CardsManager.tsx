@@ -62,7 +62,7 @@ export default function CardsManager() {
 
   return (
     <div>
-      <form onSubmit={generate} className="flex flex-col gap-3 rounded-2xl border border-black/10 p-4">
+      <form onSubmit={generate} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 p-4">
         <div className="flex gap-3">
           <select
             value={productType}

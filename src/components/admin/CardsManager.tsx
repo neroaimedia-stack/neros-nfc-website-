@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   FiChevronDown,
   FiCopy,
+  FiDownload,
   FiExternalLink,
   FiSearch,
   FiTrash2,
@@ -39,6 +40,15 @@ function formatDate(iso: string) {
     month: "short",
     day: "numeric",
   });
+}
+
+function StatTile({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex-1 rounded-xl bg-black/[0.03] px-4 py-3 text-center">
+      <p className="text-2xl font-bold text-black">{value}</p>
+      <p className="mt-0.5 text-xs text-black/50">{label}</p>
+    </div>
+  );
 }
 
 function CardDetails({ card }: { card: CardRow }) {
@@ -177,6 +187,30 @@ export default function CardsManager() {
     load();
   };
 
+  const exportCsv = () => {
+    if (!cards || cards.length === 0) return;
+    const escape = (value: string) =>
+      /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+    const header = ["Code", "Product Type", "Status", "Owner Email", "Date Claimed"];
+    const rows = cards.map((c) => [
+      c.code,
+      PRODUCT_TYPE_LABELS[c.product_type] ?? c.product_type,
+      c.claimed_at ? "Claimed" : "Unclaimed",
+      c.owner_email ?? "",
+      c.claimed_at ? formatDate(c.claimed_at) : "",
+    ]);
+    const csv = [header, ...rows].map((row) => row.map(escape).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `herneros-nfc-cards-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const filteredCards = useMemo(() => {
     if (!cards) return null;
     const query = search.trim().toLowerCase();
@@ -191,43 +225,70 @@ export default function CardsManager() {
 
   const claimedCount = filteredCards?.filter((c) => c.claimed_at).length ?? 0;
   const totalCount = filteredCards?.length ?? 0;
+  const allClaimedCount = cards?.filter((c) => c.claimed_at).length ?? 0;
+  const allTotalCount = cards?.length ?? 0;
 
   return (
     <div>
-      <form onSubmit={generate} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 p-4">
-        <div className="flex gap-3">
-          <div className="relative min-w-0 flex-1">
-            <select
-              value={productType}
-              onChange={(e) => setProductType(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-black/15 bg-white py-2.5 pr-10 pl-4 text-sm outline-none focus:border-black"
-            >
-              {PRODUCT_TYPES.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-            <FiChevronDown className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 text-black/40" />
-          </div>
-          <input
-            type="number"
-            min={1}
-            max={100}
-            value={count}
-            onChange={(e) => setCount(e.target.value)}
-            className="w-24 rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
-          />
-        </div>
-        {error && <p className="text-xs text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={generating}
-          className="self-start rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
+        <form
+          onSubmit={generate}
+          className="flex w-full flex-col gap-3 rounded-2xl border border-black/10 p-4 lg:max-w-xl"
         >
-          {generating ? "Generating…" : "+ Generate codes"}
-        </button>
-      </form>
+          <div className="flex gap-3">
+            <div className="relative min-w-0 flex-1">
+              <select
+                value={productType}
+                onChange={(e) => setProductType(e.target.value)}
+                className="w-full appearance-none rounded-xl border border-black/15 bg-white py-2.5 pr-10 pl-4 text-sm outline-none focus:border-black"
+              >
+                {PRODUCT_TYPES.map((p) => (
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+              <FiChevronDown className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 text-black/40" />
+            </div>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={count}
+              onChange={(e) => setCount(e.target.value)}
+              className="w-24 rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+            />
+          </div>
+          {error && <p className="text-xs text-red-600">{error}</p>}
+          <button
+            type="submit"
+            disabled={generating}
+            className="self-start rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+          >
+            {generating ? "Generating…" : "+ Generate codes"}
+          </button>
+        </form>
+
+        <div className="flex flex-1 flex-col justify-between gap-4 rounded-2xl border border-black/10 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold text-black">Overview</p>
+            <button
+              type="button"
+              onClick={exportCsv}
+              disabled={!cards || cards.length === 0}
+              className="flex items-center gap-1.5 rounded-full border border-black px-3.5 py-1.5 text-xs font-semibold text-black transition-opacity hover:opacity-60 disabled:opacity-40"
+            >
+              <FiDownload className="h-3.5 w-3.5" />
+              Export CSV
+            </button>
+          </div>
+          <div className="flex gap-3">
+            <StatTile label="Total codes" value={allTotalCount} />
+            <StatTile label="Claimed" value={allClaimedCount} />
+            <StatTile label="Unclaimed" value={allTotalCount - allClaimedCount} />
+          </div>
+        </div>
+      </div>
 
       {justGenerated.length > 0 && (
         <div className="mt-4 max-w-xl rounded-2xl border border-black/10 p-4">
@@ -261,8 +322,8 @@ export default function CardsManager() {
           )}
         </div>
 
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative max-w-xs flex-1">
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
             <FiSearch className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-black/30" />
             <input
               type="text"
@@ -273,7 +334,7 @@ export default function CardsManager() {
             />
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 sm:shrink-0">
             <button
               type="button"
               onClick={() => setCategoryFilter("all")}

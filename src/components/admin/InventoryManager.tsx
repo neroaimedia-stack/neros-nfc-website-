@@ -565,7 +565,7 @@ function AddProductForm({ onCreated }: { onCreated: () => void }) {
   };
 
   return (
-    <form onSubmit={submit} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 bg-white p-4">
+    <form onSubmit={submit} className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-white p-4">
       <p className="text-sm font-semibold text-black">Add product</p>
       <div className="flex gap-3">
         <input

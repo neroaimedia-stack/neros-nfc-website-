@@ -5,6 +5,15 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 const MAX_VISIBLE_DISTANCE = 2.4;
 
+// Shortest signed distance from 0 to `raw` on a circle of size n, e.g. with
+// n=5 a raw delta of 4 is really -1 away (wrap the other direction).
+function wrappedDelta(raw: number, n: number) {
+  let d = raw % n;
+  if (d > n / 2) d -= n;
+  if (d < -n / 2) d += n;
+  return d;
+}
+
 export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [cardGap, setCardGap] = useState(300);
@@ -13,6 +22,7 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const [dragging, setDragging] = useState(false);
   const startXRef = useRef(0);
   const draggedRef = useRef(false);
+  const n = items.length;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -24,8 +34,7 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
     return () => observer.disconnect();
   }, []);
 
-  const clampIndex = (i: number) => Math.max(0, Math.min(items.length - 1, i));
-  const goTo = (i: number) => setActiveIndex(clampIndex(i));
+  const goTo = (i: number) => setActiveIndex(((i % n) + n) % n);
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     setDragging(true);
@@ -71,7 +80,7 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
         onClickCapture={handleClickCapture}
       >
         {items.map((item, i) => {
-          const distance = i - activeIndex - dragOffset / cardGap;
+          const distance = wrappedDelta(i - activeIndex - dragOffset / cardGap, n);
           const abs = Math.abs(distance);
           if (abs > MAX_VISIBLE_DISTANCE) return null;
 
@@ -109,9 +118,8 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
         <button
           type="button"
           onClick={() => goTo(activeIndex - 1)}
-          disabled={activeIndex === 0}
           aria-label="Previous card"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-black/15 text-black transition-opacity hover:opacity-60 disabled:opacity-25"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-black/15 text-black transition-opacity hover:opacity-60"
         >
           <FiChevronLeft className="h-4 w-4" />
         </button>
@@ -134,9 +142,8 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
         <button
           type="button"
           onClick={() => goTo(activeIndex + 1)}
-          disabled={activeIndex === items.length - 1}
           aria-label="Next card"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-black/15 text-black transition-opacity hover:opacity-60 disabled:opacity-25"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-black/15 text-black transition-opacity hover:opacity-60"
         >
           <FiChevronRight className="h-4 w-4" />
         </button>

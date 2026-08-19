@@ -134,7 +134,7 @@ export default function PromosManager() {
 
   return (
     <div>
-      <form onSubmit={addPromo} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 p-4">
+      <form onSubmit={addPromo} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 bg-white p-4">
         <div className="flex gap-3">
           <input
             type="text"
@@ -176,9 +176,9 @@ export default function PromosManager() {
         </button>
       </form>
 
-      <div className="mt-6 flex flex-col">
-        {promos === null && <p className="text-sm text-black/40">Loading…</p>}
-        {promos?.length === 0 && <p className="text-sm text-black/40">No promo codes yet.</p>}
+      <div className="mt-6 flex flex-col rounded-2xl border border-black/10 bg-white px-4">
+        {promos === null && <p className="py-3 text-sm text-black/40">Loading…</p>}
+        {promos?.length === 0 && <p className="py-3 text-sm text-black/40">No promo codes yet.</p>}
         {promos?.map((promo) => (
           <div key={promo.code} className="border-b border-black/10 py-3">
             <div className="flex items-center justify-between gap-3">

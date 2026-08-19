@@ -21,7 +21,9 @@ export default async function AdminDashboardLayout({
           </p>
           <AdminLogoutButton />
         </header>
-        <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8 lg:px-10">{children}</main>
+        <main className="min-w-0 flex-1 bg-neutral-50 px-4 py-6 md:px-8 md:py-8 lg:px-10">
+          {children}
+        </main>
         <div className="border-t border-black/10 px-4 py-4 md:hidden">
           <AdminLogoutButton />
         </div>

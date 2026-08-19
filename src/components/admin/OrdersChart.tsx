@@ -90,7 +90,7 @@ export default function OrdersChart() {
   const rangeLabel = RANGE_OPTIONS.find((r) => r.key === range)?.label ?? "";
 
   return (
-    <div className="rounded-2xl border border-black/10 p-5">
+    <div className="rounded-2xl border border-black/10 bg-white p-5">
       <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {RANGE_OPTIONS.map((opt) => (
           <button

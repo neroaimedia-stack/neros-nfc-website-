@@ -9,7 +9,7 @@ export async function GET() {
 
   const { data, error } = await getSupabaseAdmin()
     .from("promo_codes")
-    .select("code, discount_rate, active, created_at, promo_code_products(product_slug)")
+    .select("code, discount_rate, active, created_at, promo_code_products(product_slug, variant)")
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -18,18 +18,34 @@ export async function GET() {
     const { promo_code_products, ...rest } = row;
     return {
       ...rest,
-      product_slugs: (promo_code_products ?? []).map((p) => p.product_slug),
+      scope: (promo_code_products ?? []).map((p) => ({ slug: p.product_slug, variant: p.variant })),
     };
   });
 
   return NextResponse.json({ promos });
 }
 
+type ScopeEntry = { slug: string; variant: string };
+
+function isValidScope(value: unknown): value is ScopeEntry[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (v) =>
+        typeof v === "object" &&
+        v !== null &&
+        typeof (v as ScopeEntry).slug === "string" &&
+        (v as ScopeEntry).slug.trim() &&
+        typeof (v as ScopeEntry).variant === "string"
+    )
+  );
+}
+
 export async function POST(request: Request) {
   const admin = await getAdminSession();
   if (!admin) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
-  let body: { code?: unknown; discount_rate?: unknown; product_slugs?: unknown };
+  let body: { code?: unknown; discount_rate?: unknown; scope?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -38,13 +54,7 @@ export async function POST(request: Request) {
 
   const code = typeof body.code === "string" ? body.code.trim().toUpperCase() : "";
   const discountRate = Number(body.discount_rate);
-  const productSlugs =
-    body.product_slugs === undefined
-      ? []
-      : Array.isArray(body.product_slugs) &&
-          body.product_slugs.every((s) => typeof s === "string")
-        ? (body.product_slugs as string[])
-        : null;
+  const scope = body.scope === undefined ? [] : isValidScope(body.scope) ? body.scope : null;
 
   if (!code) {
     return NextResponse.json({ error: "Code is required." }, { status: 400 });
@@ -55,8 +65,8 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  if (productSlugs === null) {
-    return NextResponse.json({ error: "product_slugs must be a list of strings." }, { status: 400 });
+  if (scope === null) {
+    return NextResponse.json({ error: "scope must be a list of { slug, variant }." }, { status: 400 });
   }
 
   const db = getSupabaseAdmin();
@@ -69,10 +79,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  if (productSlugs.length > 0) {
+  if (scope.length > 0) {
     const { error: scopeError } = await db
       .from("promo_code_products")
-      .insert(productSlugs.map((slug) => ({ promo_code: code, product_slug: slug })));
+      .insert(scope.map((s) => ({ promo_code: code, product_slug: s.slug, variant: s.variant })));
     if (scopeError) {
       return NextResponse.json({ error: scopeError.message }, { status: 400 });
     }

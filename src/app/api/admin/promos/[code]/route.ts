@@ -3,6 +3,22 @@ import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-session";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
+type ScopeEntry = { slug: string; variant: string };
+
+function isValidScope(value: unknown): value is ScopeEntry[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (v) =>
+        typeof v === "object" &&
+        v !== null &&
+        typeof (v as ScopeEntry).slug === "string" &&
+        (v as ScopeEntry).slug.trim() &&
+        typeof (v as ScopeEntry).variant === "string"
+    )
+  );
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ code: string }> }
@@ -13,7 +29,7 @@ export async function PATCH(
   const { code } = await params;
   const decodedCode = decodeURIComponent(code);
 
-  let body: { active?: unknown; product_slugs?: unknown };
+  let body: { active?: unknown; scope?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -33,12 +49,9 @@ export async function PATCH(
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  if (body.product_slugs !== undefined) {
-    if (
-      !Array.isArray(body.product_slugs) ||
-      !body.product_slugs.every((s) => typeof s === "string")
-    ) {
-      return NextResponse.json({ error: "product_slugs must be a list of strings." }, { status: 400 });
+  if (body.scope !== undefined) {
+    if (!isValidScope(body.scope)) {
+      return NextResponse.json({ error: "scope must be a list of { slug, variant }." }, { status: 400 });
     }
     const { error: deleteError } = await db
       .from("promo_code_products")
@@ -46,11 +59,12 @@ export async function PATCH(
       .eq("promo_code", decodedCode);
     if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
 
-    if (body.product_slugs.length > 0) {
+    if (body.scope.length > 0) {
       const { error: insertError } = await db.from("promo_code_products").insert(
-        (body.product_slugs as string[]).map((slug) => ({
+        body.scope.map((s) => ({
           promo_code: decodedCode,
-          product_slug: slug,
+          product_slug: s.slug,
+          variant: s.variant,
         }))
       );
       if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 });

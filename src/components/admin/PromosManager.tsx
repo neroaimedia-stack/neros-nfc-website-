@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FiCheck } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
+import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import ProductThumb from "@/components/admin/ProductThumb";
 
 type Promo = {
@@ -10,10 +11,19 @@ type Promo = {
   discount_rate: number;
   active: boolean;
   created_at: string;
-  product_slugs: string[];
+  scope: { slug: string; variant: string }[];
 };
 
 type ProductOption = { slug: string; title: string; price: number; colors: string[] };
+type ScopeEntry = { slug: string; variant: string };
+
+// Review Card's NFC+QR option is a separate toggle at checkout, not a stored
+// color, but it's still a distinct thing customers buy — mirror the same
+// expansion used in Inventory so it can be scoped independently here too.
+function managedVariantNames(slug: string, colors: string[]): string[] {
+  if (slug !== "review-card") return colors;
+  return colors.flatMap((c) => [c, `${c}${QR_VARIANT_SUFFIX}`]);
+}
 
 function ProductScopePicker({
   products,
@@ -22,58 +32,76 @@ function ProductScopePicker({
   onToggle,
 }: {
   products: ProductOption[];
-  selected: string[];
+  selected: ScopeEntry[];
   discountPercent: number;
-  onToggle: (slug: string) => void;
+  onToggle: (entry: ScopeEntry) => void;
 }) {
   const discounted = discountPercent > 0 && discountPercent <= 100;
+  const isSelected = (slug: string, variant: string) =>
+    selected.some((s) => s.slug === slug && s.variant === variant);
 
   return (
     <div>
       <p className="text-xs font-medium text-black/50">
         Applies to <span className="font-normal">(leave all unchecked for every product)</span>
       </p>
-      <div className="mt-1.5 flex flex-col gap-2">
+      <div className="mt-1.5 flex flex-col gap-3">
         {products.map((p) => {
-          const active = selected.includes(p.slug);
+          const variantNames = p.colors.length > 0 ? managedVariantNames(p.slug, p.colors) : [""];
           const afterPrice = discounted ? p.price * (1 - discountPercent / 100) : null;
           return (
-            <div
-              key={p.slug}
-              role="button"
-              tabIndex={0}
-              onClick={() => onToggle(p.slug)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onToggle(p.slug);
-                }
-              }}
-              aria-pressed={active}
-              className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border p-2.5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 ${
-                active ? "border-black bg-black/[0.03]" : "border-black/10 hover:border-black/25"
-              }`}
-            >
-              <ProductThumb slug={p.slug} variant={p.colors[0] ?? ""} className="pointer-events-none w-12 shrink-0" />
-              <span className="min-w-0 flex-1 truncate text-sm font-medium text-black">{p.title}</span>
-              <span className="shrink-0 text-right text-sm whitespace-nowrap">
-                {afterPrice != null ? (
-                  <>
-                    <span className="text-black/40 line-through">{formatCurrency(p.price, "USD")}</span>
-                    <span className="mx-1 text-black/30">→</span>
-                    <span className="font-semibold text-black">{formatCurrency(afterPrice, "USD")}</span>
-                  </>
-                ) : (
-                  <span className="text-black/60">{formatCurrency(p.price, "USD")}</span>
-                )}
-              </span>
-              <span
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  active ? "border-black bg-black text-white" : "border-black/20"
-                }`}
-              >
-                {active && <FiCheck className="h-3 w-3" />}
-              </span>
+            <div key={p.slug}>
+              <p className="mb-1 text-xs font-semibold text-black/70">{p.title}</p>
+              <div className="flex flex-col gap-1.5">
+                {variantNames.map((variant) => {
+                  const active = isSelected(p.slug, variant);
+                  return (
+                    <div
+                      key={variant || "__whole__"}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => onToggle({ slug: p.slug, variant })}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onToggle({ slug: p.slug, variant });
+                        }
+                      }}
+                      aria-pressed={active}
+                      className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border p-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 ${
+                        active ? "border-black bg-black/[0.03]" : "border-black/10 hover:border-black/25"
+                      }`}
+                    >
+                      <ProductThumb
+                        slug={p.slug}
+                        variant={variant || (p.colors[0] ?? "")}
+                        className="pointer-events-none w-10 shrink-0"
+                      />
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-black">
+                        {variant || "Whole product"}
+                      </span>
+                      <span className="shrink-0 text-right text-sm whitespace-nowrap">
+                        {afterPrice != null ? (
+                          <>
+                            <span className="text-black/40 line-through">{formatCurrency(p.price, "USD")}</span>
+                            <span className="mx-1 text-black/30">→</span>
+                            <span className="font-semibold text-black">{formatCurrency(afterPrice, "USD")}</span>
+                          </>
+                        ) : (
+                          <span className="text-black/60">{formatCurrency(p.price, "USD")}</span>
+                        )}
+                      </span>
+                      <span
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                          active ? "border-black bg-black text-white" : "border-black/20"
+                        }`}
+                      >
+                        {active && <FiCheck className="h-3 w-3" />}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })}
@@ -87,11 +115,11 @@ export default function PromosManager() {
   const [products, setProducts] = useState<ProductOption[]>([]);
   const [code, setCode] = useState("");
   const [percent, setPercent] = useState("");
-  const [scopeSlugs, setScopeSlugs] = useState<string[]>([]);
+  const [scope, setScope] = useState<ScopeEntry[]>([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingCode, setEditingCode] = useState<string | null>(null);
-  const [editScope, setEditScope] = useState<string[]>([]);
+  const [editScope, setEditScope] = useState<ScopeEntry[]>([]);
   const [savingScope, setSavingScope] = useState(false);
 
   const load = async () => {
@@ -118,6 +146,15 @@ export default function PromosManager() {
       });
   }, []);
 
+  const toggleScope = (entries: ScopeEntry[], setter: (next: ScopeEntry[]) => void, entry: ScopeEntry) => {
+    const exists = entries.some((s) => s.slug === entry.slug && s.variant === entry.variant);
+    setter(
+      exists
+        ? entries.filter((s) => !(s.slug === entry.slug && s.variant === entry.variant))
+        : [...entries, entry]
+    );
+  };
+
   const addPromo = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -126,7 +163,7 @@ export default function PromosManager() {
     const res = await fetch("/api/admin/promos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, discount_rate: rate, product_slugs: scopeSlugs }),
+      body: JSON.stringify({ code, discount_rate: rate, scope }),
     });
     const data = await res.json();
     setSaving(false);
@@ -136,7 +173,7 @@ export default function PromosManager() {
     }
     setCode("");
     setPercent("");
-    setScopeSlugs([]);
+    setScope([]);
     load();
   };
 
@@ -159,7 +196,7 @@ export default function PromosManager() {
 
   const startEditScope = (promo: Promo) => {
     setEditingCode(promo.code);
-    setEditScope(promo.product_slugs);
+    setEditScope(promo.scope);
   };
 
   const saveScope = async (promo: Promo) => {
@@ -167,7 +204,7 @@ export default function PromosManager() {
     await fetch(`/api/admin/promos/${encodeURIComponent(promo.code)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ product_slugs: editScope }),
+      body: JSON.stringify({ scope: editScope }),
     });
     setSavingScope(false);
     setEditingCode(null);
@@ -200,13 +237,9 @@ export default function PromosManager() {
         {products.length > 0 && (
           <ProductScopePicker
             products={products}
-            selected={scopeSlugs}
+            selected={scope}
             discountPercent={Number(percent)}
-            onToggle={(slug) =>
-              setScopeSlugs((prev) =>
-                prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
-              )
-            }
+            onToggle={(entry) => toggleScope(scope, setScope, entry)}
           />
         )}
         {error && <p className="text-xs text-red-600">{error}</p>}
@@ -229,9 +262,9 @@ export default function PromosManager() {
                 <p className="font-semibold text-black">{promo.code}</p>
                 <p className="text-xs text-black/40">
                   {Math.round(promo.discount_rate * 100)}% off · {promo.active ? "Active" : "Inactive"} ·{" "}
-                  {promo.product_slugs.length === 0
+                  {promo.scope.length === 0
                     ? "All products"
-                    : `${promo.product_slugs.length} product${promo.product_slugs.length === 1 ? "" : "s"}`}
+                    : `${promo.scope.length} item${promo.scope.length === 1 ? "" : "s"}`}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
@@ -265,11 +298,7 @@ export default function PromosManager() {
                   products={products}
                   selected={editScope}
                   discountPercent={Math.round(promo.discount_rate * 100)}
-                  onToggle={(slug) =>
-                    setEditScope((prev) =>
-                      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
-                    )
-                  }
+                  onToggle={(entry) => toggleScope(editScope, setEditScope, entry)}
                 />
                 <button
                   type="button"

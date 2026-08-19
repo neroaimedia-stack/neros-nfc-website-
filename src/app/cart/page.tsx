@@ -13,24 +13,26 @@ export default function CartPage() {
   const [promoInput, setPromoInput] = useState("");
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [discountRate, setDiscountRate] = useState(0);
-  const [promoProductSlugs, setPromoProductSlugs] = useState<string[]>([]);
+  const [promoScope, setPromoScope] = useState<{ slug: string; variant: string }[]>([]);
   const [promoError, setPromoError] = useState("");
   const [showPromoInput, setShowPromoInput] = useState(false);
   const [checkingPromo, setCheckingPromo] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
 
+  const itemMatchesScope = (item: (typeof items)[number]) =>
+    promoScope.some(
+      (s) => s.slug === item.productSlug && (s.variant === "" || s.variant === item.color)
+    );
   const discountableSubtotal =
-    promoProductSlugs.length === 0
+    promoScope.length === 0
       ? subtotal
-      : items
-          .filter((i) => promoProductSlugs.includes(i.productSlug))
-          .reduce((sum, i) => sum + i.price * i.quantity, 0);
+      : items.filter(itemMatchesScope).reduce((sum, i) => sum + i.price * i.quantity, 0);
   const discount = discountableSubtotal * discountRate;
   const total = subtotal - discount;
   const monthlyTotal = items.reduce((sum, i) => sum + (i.monthlyFee || 0), 0);
   const promoAppliesToNothing =
-    appliedCode !== null && promoProductSlugs.length > 0 && discountableSubtotal === 0;
+    appliedCode !== null && promoScope.length > 0 && discountableSubtotal === 0;
 
   const display = (amountUSD: number) =>
     formatCurrency(fromUSD(amountUSD, currency), currency);
@@ -49,25 +51,25 @@ export default function CartPage() {
       setCheckingPromo(false);
       setAppliedCode(null);
       setDiscountRate(0);
-      setPromoProductSlugs([]);
+      setPromoScope([]);
       setPromoError("Invalid promo code");
       return;
     }
     const { data: scopeRows } = await supabase
       .from("promo_code_products")
-      .select("product_slug")
+      .select("product_slug, variant")
       .eq("promo_code", code);
     setCheckingPromo(false);
     setAppliedCode(code);
     setDiscountRate(Number(data.discount_rate));
-    setPromoProductSlugs((scopeRows ?? []).map((r) => r.product_slug));
+    setPromoScope((scopeRows ?? []).map((r) => ({ slug: r.product_slug, variant: r.variant })));
     setPromoError("");
   };
 
   const handleRemovePromo = () => {
     setAppliedCode(null);
     setDiscountRate(0);
-    setPromoProductSlugs([]);
+    setPromoScope([]);
     setPromoInput("");
     setPromoError("");
     setShowPromoInput(false);

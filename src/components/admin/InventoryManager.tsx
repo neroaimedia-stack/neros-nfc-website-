@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { FiCamera, FiSearch, FiTrash2 } from "react-icons/fi";
+import { FiCamera, FiChevronDown, FiSearch, FiTrash2 } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
 import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import ImageCropModal from "@/components/ImageCropModal";
@@ -100,6 +100,7 @@ function VariantRow({
   onRemove?: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [expanded, setExpanded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [pendingImageSrc, setPendingImageSrc] = useState<string | null>(null);
@@ -143,119 +144,145 @@ function VariantRow({
     onChange({ ...detail, imageUrl: data.url });
   };
 
+  const priceLabel = detail.price.trim() ? formatCurrency(Number(detail.price), "USD") : "Base price";
+
   return (
     <div
-      className={`flex flex-col gap-3 rounded-xl border p-3.5 sm:flex-row sm:items-start ${
-        derived ? "border-black/5 bg-black/[0.015]" : "border-black/10 bg-white"
-      }`}
+      className={`rounded-xl border ${derived ? "border-black/5 bg-black/[0.015]" : "border-black/10 bg-white"}`}
     >
-      <div className="flex shrink-0 flex-col items-center gap-1.5">
-        {showPictureUpload ? (
-          <>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              aria-label={detail.imageUrl ? `Change photo for ${name}` : `Add photo for ${name}`}
-              className="group relative block overflow-hidden rounded-lg transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 disabled:opacity-60"
-            >
-              <ProductThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
-              <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
-                {uploading ? (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <FiCamera className="h-4 w-4 text-white" />
-                )}
-              </span>
-              <span className="pointer-events-none absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-black text-white shadow">
-                <FiCamera className="h-2.5 w-2.5" />
-              </span>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            {detail.imageUrl && (
-              <button
-                type="button"
-                onClick={() => onChange({ ...detail, imageUrl: null })}
-                className="text-[11px] font-medium text-black/40 hover:text-red-600"
-              >
-                Remove
-              </button>
-            )}
-            {uploadError && <p className="max-w-20 text-center text-[10px] text-red-600">{uploadError}</p>}
-            {pendingImageSrc && (
-              <ImageCropModal
-                imageSrc={pendingImageSrc}
-                aspect={1}
-                onCancel={closeCropper}
-                onConfirm={handleCropConfirm}
-              />
-            )}
-          </>
-        ) : (
-          <ProductThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
+      <div className="flex items-center gap-2 p-2.5">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setExpanded((v) => !v)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setExpanded((v) => !v);
+            }
+          }}
+          aria-expanded={expanded}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40"
+        >
+          <ProductThumb
+            slug={slug}
+            variant={name}
+            imageOverride={detail.imageUrl}
+            className="pointer-events-none w-9 shrink-0"
+          />
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-black">{name}</span>
+          <span className="shrink-0 text-xs text-black/50">{priceLabel}</span>
+          <FiChevronDown
+            className={`h-3.5 w-3.5 shrink-0 text-black/40 transition-transform ${expanded ? "rotate-180" : ""}`}
+          />
+        </div>
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label={`Remove ${name}`}
+            className="shrink-0 rounded-full p-1 text-black/40 hover:bg-red-50 hover:text-red-600"
+          >
+            <FiTrash2 className="h-3.5 w-3.5" />
+          </button>
         )}
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-black">{name}</span>
-          {onRemove && (
-            <button
-              type="button"
-              onClick={onRemove}
-              aria-label={`Remove ${name}`}
-              className="shrink-0 rounded-full p-1 text-black/40 hover:bg-red-50 hover:text-red-600"
-            >
-              <FiTrash2 className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-
-        <div className={`grid gap-2 ${trackStock ? "sm:grid-cols-[7rem_7rem_1fr]" : "sm:grid-cols-[7rem_1fr]"}`}>
-          <div>
-            <label className="text-xs text-black/50">Price override</label>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              placeholder="Base price"
-              value={detail.price}
-              onChange={(e) => onChange({ ...detail, price: e.target.value })}
-              className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
-            />
+      {expanded && (
+        <div className="flex flex-col gap-3 border-t border-black/10 p-3 sm:flex-row sm:items-start">
+          <div className="flex shrink-0 flex-col items-center gap-1.5">
+            {showPictureUpload ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  aria-label={detail.imageUrl ? `Change photo for ${name}` : `Add photo for ${name}`}
+                  className="group relative block overflow-hidden rounded-lg transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 disabled:opacity-60"
+                >
+                  <ProductThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
+                    {uploading ? (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    ) : (
+                      <FiCamera className="h-4 w-4 text-white" />
+                    )}
+                  </span>
+                  <span className="pointer-events-none absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-black text-white shadow">
+                    <FiCamera className="h-2.5 w-2.5" />
+                  </span>
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                {detail.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => onChange({ ...detail, imageUrl: null })}
+                    className="text-[11px] font-medium text-black/40 hover:text-red-600"
+                  >
+                    Remove
+                  </button>
+                )}
+                {uploadError && <p className="max-w-20 text-center text-[10px] text-red-600">{uploadError}</p>}
+                {pendingImageSrc && (
+                  <ImageCropModal
+                    imageSrc={pendingImageSrc}
+                    aspect={1}
+                    onCancel={closeCropper}
+                    onConfirm={handleCropConfirm}
+                  />
+                )}
+              </>
+            ) : (
+              <ProductThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
+            )}
           </div>
-          {trackStock && (
+
+          <div className={`grid min-w-0 flex-1 gap-2 ${trackStock ? "sm:grid-cols-[7rem_7rem_1fr]" : "sm:grid-cols-[7rem_1fr]"}`}>
             <div>
-              <label className="text-xs text-black/50">Stock</label>
+              <label className="text-xs text-black/50">Price override</label>
               <input
                 type="number"
                 min={0}
-                step="1"
-                placeholder="Qty"
-                value={detail.stockQuantity}
-                onChange={(e) => onChange({ ...detail, stockQuantity: e.target.value })}
+                step="0.01"
+                placeholder="Base price"
+                value={detail.price}
+                onChange={(e) => onChange({ ...detail, price: e.target.value })}
                 className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
               />
             </div>
-          )}
-          <div>
-            <label className="text-xs text-black/50">Description</label>
-            <input
-              type="text"
-              placeholder="Optional note shown to customers"
-              value={detail.description}
-              onChange={(e) => onChange({ ...detail, description: e.target.value })}
-              className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
-            />
+            {trackStock && (
+              <div>
+                <label className="text-xs text-black/50">Stock</label>
+                <input
+                  type="number"
+                  min={0}
+                  step="1"
+                  placeholder="Qty"
+                  value={detail.stockQuantity}
+                  onChange={(e) => onChange({ ...detail, stockQuantity: e.target.value })}
+                  className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
+                />
+              </div>
+            )}
+            <div>
+              <label className="text-xs text-black/50">Description</label>
+              <input
+                type="text"
+                placeholder="Optional note shown to customers"
+                value={detail.description}
+                onChange={(e) => onChange({ ...detail, description: e.target.value })}
+                className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -287,6 +314,7 @@ function ProductRow({
   const [saved, setSaved] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   const managedNames = managedVariantNames(product.slug, colors);
   const getDetail = (name: string) => details[name] ?? EMPTY_DETAIL;
@@ -395,178 +423,210 @@ function ProductRow({
   const outOfStock = trackStock && Number(stockQuantity) <= 0;
 
   return (
-    <div className="rounded-2xl border border-black/10 bg-white shadow-sm p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p className="font-semibold text-black">{product.title}</p>
-          <p className="text-xs text-black/40">{product.slug}</p>
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="rounded-2xl border border-black/10 bg-white shadow-sm">
+      <div className="flex items-center gap-3 p-3.5">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setExpanded((v) => !v)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setExpanded((v) => !v);
+            }
+          }}
+          aria-expanded={expanded}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40"
+        >
+          <ProductThumb
+            slug={product.slug}
+            variant={colors[0] ?? ""}
+            className="pointer-events-none w-10 shrink-0"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold text-black">{product.title}</span>
+            <span className="block truncate text-xs text-black/40">{product.slug}</span>
+          </span>
           {outOfStock && (
             <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                 allowPreorder ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
               }`}
             >
-              {allowPreorder ? "Out of stock · pre-order on" : "Out of stock · blocked"}
+              Out of stock
             </span>
           )}
-          <button
-            type="button"
-            onClick={deleteProduct}
-            disabled={deleting}
-            aria-label={`Delete ${product.title}`}
-            className="rounded-full p-2 text-black/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
-          >
-            <FiTrash2 className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-      {deleteError && <p className="mt-2 text-xs text-red-600">{deleteError}</p>}
-
-      <div className="mt-4">
-        <label className="text-xs font-medium text-black/60" htmlFor={`description-${product.slug}`}>
-          Description
-        </label>
-        <textarea
-          id={`description-${product.slug}`}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          placeholder="Shown on the product page"
-          className="mt-1 w-full resize-none rounded-xl border border-black/15 px-3 py-2 text-sm outline-none focus:border-black"
-        />
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-3 border-b border-black/10 pb-4">
-        <div className="w-32">
-          <label className="text-xs font-medium text-black/60" htmlFor={`price-${product.slug}`}>
-            Base price (USD)
-          </label>
-          <input
-            id={`price-${product.slug}`}
-            type="number"
-            min={0}
-            step="0.01"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
+          {dirty && !expanded && (
+            <span className="shrink-0 rounded-full bg-black/5 px-2.5 py-1 text-[11px] font-semibold text-black/50">
+              Unsaved
+            </span>
+          )}
+          <span className="shrink-0 text-sm font-medium text-black/60">
+            {formatCurrency(product.price, "USD")}
+          </span>
+          <FiChevronDown
+            className={`h-4 w-4 shrink-0 text-black/40 transition-transform ${expanded ? "rotate-180" : ""}`}
           />
         </div>
+        <button
+          type="button"
+          onClick={deleteProduct}
+          disabled={deleting}
+          aria-label={`Delete ${product.title}`}
+          className="shrink-0 rounded-full p-2 text-black/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+        >
+          <FiTrash2 className="h-4 w-4" />
+        </button>
+      </div>
+      {deleteError && <p className="px-3.5 pb-3 text-xs text-red-600">{deleteError}</p>}
 
-        <div className="w-32">
-          <label className="text-xs font-medium text-black/60" htmlFor={`compare-price-${product.slug}`}>
-            Compare-at price
-          </label>
-          <input
-            id={`compare-price-${product.slug}`}
-            type="number"
-            min={0}
-            step="0.01"
-            placeholder="None"
-            value={compareAtPrice}
-            onChange={(e) => setCompareAtPrice(e.target.value)}
-            className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
-          />
-        </div>
+      {expanded && (
+        <div className="border-t border-black/10 p-3.5 sm:p-5">
+          <div>
+            <label className="text-xs font-medium text-black/60" htmlFor={`description-${product.slug}`}>
+              Description
+            </label>
+            <textarea
+              id={`description-${product.slug}`}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              placeholder="Shown on the product page"
+              className="mt-1 w-full resize-none rounded-xl border border-black/15 px-3 py-2 text-sm outline-none focus:border-black"
+            />
+          </div>
 
-        <div className="pb-2.5">
-          <Toggle checked={trackStock} onChange={setTrackStock} label="Track stock" />
-        </div>
-
-        {trackStock && (
-          <>
-            <div className="w-24">
-              <label className="text-xs font-medium text-black/60" htmlFor={`stock-${product.slug}`}>
-                Quantity
+          <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-3 border-b border-black/10 pb-4">
+            <div className="w-32">
+              <label className="text-xs font-medium text-black/60" htmlFor={`price-${product.slug}`}>
+                Base price (USD)
               </label>
               <input
-                id={`stock-${product.slug}`}
+                id={`price-${product.slug}`}
                 type="number"
                 min={0}
-                value={stockQuantity}
-                onChange={(e) => setStockQuantity(e.target.value)}
+                step="0.01"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
                 className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
               />
             </div>
+
+            <div className="w-32">
+              <label className="text-xs font-medium text-black/60" htmlFor={`compare-price-${product.slug}`}>
+                Compare-at price
+              </label>
+              <input
+                id={`compare-price-${product.slug}`}
+                type="number"
+                min={0}
+                step="0.01"
+                placeholder="None"
+                value={compareAtPrice}
+                onChange={(e) => setCompareAtPrice(e.target.value)}
+                className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
+              />
+            </div>
+
             <div className="pb-2.5">
-              <Toggle
-                checked={allowPreorder}
-                onChange={setAllowPreorder}
-                label="Allow pre-order when out of stock"
-              />
+              <Toggle checked={trackStock} onChange={setTrackStock} label="Track stock" />
             </div>
-          </>
-        )}
-      </div>
 
-      <div className="mt-4">
-        <p className="text-sm font-medium text-black">Variants</p>
-        <div className="mt-2 flex flex-col gap-2">
-          {colors.map((name) => (
-            <div key={name} className="flex flex-col gap-2">
-              <VariantRow
-                slug={product.slug}
-                name={name}
-                detail={getDetail(name)}
-                derived={false}
-                trackStock={trackStock}
-                onChange={(next) => updateDetail(name, next)}
-                onRemove={() => removeVariant(name)}
-              />
-              {product.slug === "review-card" && (
-                <VariantRow
-                  slug={product.slug}
-                  name={`${name}${QR_VARIANT_SUFFIX}`}
-                  detail={getDetail(`${name}${QR_VARIANT_SUFFIX}`)}
-                  derived
-                  trackStock={trackStock}
-                  onChange={(next) => updateDetail(`${name}${QR_VARIANT_SUFFIX}`, next)}
-                />
-              )}
+            {trackStock && (
+              <>
+                <div className="w-24">
+                  <label className="text-xs font-medium text-black/60" htmlFor={`stock-${product.slug}`}>
+                    Quantity
+                  </label>
+                  <input
+                    id={`stock-${product.slug}`}
+                    type="number"
+                    min={0}
+                    value={stockQuantity}
+                    onChange={(e) => setStockQuantity(e.target.value)}
+                    className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
+                  />
+                </div>
+                <div className="pb-2.5">
+                  <Toggle
+                    checked={allowPreorder}
+                    onChange={setAllowPreorder}
+                    label="Allow pre-order when out of stock"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="mt-4">
+            <p className="text-sm font-medium text-black">Variants</p>
+            <div className="mt-2 flex flex-col gap-2">
+              {colors.map((name) => (
+                <div key={name} className="flex flex-col gap-2">
+                  <VariantRow
+                    slug={product.slug}
+                    name={name}
+                    detail={getDetail(name)}
+                    derived={false}
+                    trackStock={trackStock}
+                    onChange={(next) => updateDetail(name, next)}
+                    onRemove={() => removeVariant(name)}
+                  />
+                  {product.slug === "review-card" && (
+                    <VariantRow
+                      slug={product.slug}
+                      name={`${name}${QR_VARIANT_SUFFIX}`}
+                      detail={getDetail(`${name}${QR_VARIANT_SUFFIX}`)}
+                      derived
+                      trackStock={trackStock}
+                      onChange={(next) => updateDetail(`${name}${QR_VARIANT_SUFFIX}`, next)}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="mt-2 flex gap-2">
-          <input
-            type="text"
-            value={newVariantName}
-            onChange={(e) => setNewVariantName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addVariant();
-              }
-            }}
-            placeholder="Add a variant"
-            className="h-10 min-w-0 flex-1 rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
-          />
-          <button
-            type="button"
-            onClick={addVariant}
-            className="shrink-0 rounded-xl border border-black px-4 text-xs font-semibold text-black transition-opacity hover:opacity-60"
-          >
-            Add
-          </button>
-        </div>
-      </div>
+            <div className="mt-2 flex gap-2">
+              <input
+                type="text"
+                value={newVariantName}
+                onChange={(e) => setNewVariantName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addVariant();
+                  }
+                }}
+                placeholder="Add a variant"
+                className="h-10 min-w-0 flex-1 rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
+              />
+              <button
+                type="button"
+                onClick={addVariant}
+                className="shrink-0 rounded-xl border border-black px-4 text-xs font-semibold text-black transition-opacity hover:opacity-60"
+              >
+                Add
+              </button>
+            </div>
+          </div>
 
-      {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
+          {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
 
-      <div className="mt-4 flex items-center gap-3">
-        <button
-          type="button"
-          onClick={save}
-          disabled={!dirty || saving}
-          className="rounded-full bg-black px-5 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-40"
-        >
-          {saving ? "Saving…" : "Save changes"}
-        </button>
-        {saved && <span className="text-xs font-medium text-green-600">Saved ✓</span>}
-        <span className="text-xs text-black/40">
-          {formatCurrency(product.price, "USD")} current price
-        </span>
-      </div>
+          <div className="mt-4 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={save}
+              disabled={!dirty || saving}
+              className="rounded-full bg-black px-5 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-40"
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+            {saved && <span className="text-xs font-medium text-green-600">Saved ✓</span>}
+            <span className="text-xs text-black/40">
+              {formatCurrency(product.price, "USD")} current price
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

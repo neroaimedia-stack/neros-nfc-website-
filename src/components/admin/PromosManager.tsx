@@ -88,7 +88,7 @@ function ProductScopePicker({
           <button
             type="button"
             onClick={toggleAllVisible}
-            className="shrink-0 text-xs font-semibold text-black underline decoration-black/30 underline-offset-2 hover:decoration-black"
+            className="shrink-0 rounded-full border border-black/15 px-3 py-1 text-xs font-semibold text-black transition-colors hover:border-black/30 hover:bg-black/5"
           >
             {allVisibleSelected ? "Remove all" : "Apply to all"}
           </button>

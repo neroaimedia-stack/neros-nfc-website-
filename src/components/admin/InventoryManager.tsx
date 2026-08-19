@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { FiCamera, FiPackage, FiTrash2 } from "react-icons/fi";
+import { FiCamera, FiPackage, FiSearch, FiTrash2 } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
 import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import FlippableCard from "@/components/FlippableCard";
@@ -712,6 +712,7 @@ function AddProductForm({ onCreated }: { onCreated: () => void }) {
 
 export default function InventoryManager() {
   const [products, setProducts] = useState<Product[] | null>(null);
+  const [search, setSearch] = useState("");
 
   const load = () => {
     fetch("/api/admin/products")
@@ -723,11 +724,33 @@ export default function InventoryManager() {
     load();
   }, []);
 
+  const query = search.trim().toLowerCase();
+  const filteredProducts = products?.filter(
+    (p) => !query || p.title.toLowerCase().includes(query) || p.slug.toLowerCase().includes(query)
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <AddProductForm onCreated={load} />
+
+      {products !== null && products.length > 0 && (
+        <div className="relative">
+          <FiSearch className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-black/30" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search products by name or slug"
+            className="w-full rounded-full border border-black/15 bg-white py-2 pr-4 pl-9 text-sm outline-none focus:border-black"
+          />
+        </div>
+      )}
+
       {products === null && <p className="text-sm text-black/40">Loading products…</p>}
-      {products?.map((product) => (
+      {products !== null && filteredProducts?.length === 0 && (
+        <p className="text-sm text-black/40">No products match &ldquo;{search}&rdquo;.</p>
+      )}
+      {filteredProducts?.map((product) => (
         <ProductRow
           key={product.slug}
           product={product}

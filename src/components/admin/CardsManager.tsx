@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FiChevronDown,
   FiCopy,
   FiExternalLink,
+  FiSearch,
   FiTrash2,
   FiUser,
 } from "react-icons/fi";
@@ -127,6 +128,8 @@ export default function CardsManager() {
   const [justGenerated, setJustGenerated] = useState<{ code: string; product_type: string }[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const load = async () => {
     const res = await fetch("/api/admin/cards");
@@ -174,24 +177,39 @@ export default function CardsManager() {
     load();
   };
 
-  const claimedCount = cards?.filter((c) => c.claimed_at).length ?? 0;
-  const totalCount = cards?.length ?? 0;
+  const filteredCards = useMemo(() => {
+    if (!cards) return null;
+    const query = search.trim().toLowerCase();
+    return cards.filter((card) => {
+      if (categoryFilter !== "all" && card.product_type !== categoryFilter) return false;
+      if (!query) return true;
+      return [card.code, card.owner_email, card.profile_name]
+        .filter(Boolean)
+        .some((value) => value!.toLowerCase().includes(query));
+    });
+  }, [cards, search, categoryFilter]);
+
+  const claimedCount = filteredCards?.filter((c) => c.claimed_at).length ?? 0;
+  const totalCount = filteredCards?.length ?? 0;
 
   return (
     <div>
       <form onSubmit={generate} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 p-4">
         <div className="flex gap-3">
-          <select
-            value={productType}
-            onChange={(e) => setProductType(e.target.value)}
-            className="min-w-0 flex-1 rounded-xl border border-black/15 bg-white px-4 py-2.5 text-sm outline-none focus:border-black"
-          >
-            {PRODUCT_TYPES.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+          <div className="relative min-w-0 flex-1">
+            <select
+              value={productType}
+              onChange={(e) => setProductType(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-black/15 bg-white py-2.5 pr-10 pl-4 text-sm outline-none focus:border-black"
+            >
+              {PRODUCT_TYPES.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <FiChevronDown className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 text-black/40" />
+          </div>
           <input
             type="number"
             min={1}
@@ -243,11 +261,55 @@ export default function CardsManager() {
           )}
         </div>
 
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative max-w-xs flex-1">
+            <FiSearch className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-black/30" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search code, email, or name"
+              className="w-full rounded-full border border-black/15 bg-white py-2 pr-4 pl-9 text-sm outline-none focus:border-black"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setCategoryFilter("all")}
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                categoryFilter === "all"
+                  ? "border-black bg-black text-white"
+                  : "border-black/15 text-black/60 hover:border-black/30"
+              }`}
+            >
+              All
+            </button>
+            {PRODUCT_TYPES.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                onClick={() => setCategoryFilter(p.value)}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                  categoryFilter === p.value
+                    ? "border-black bg-black text-white"
+                    : "border-black/15 text-black/60 hover:border-black/30"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {cards === null && <p className="mt-3 text-sm text-black/40">Loading…</p>}
         {cards?.length === 0 && <p className="mt-3 text-sm text-black/40">No cards yet.</p>}
+        {cards !== null && cards.length > 0 && filteredCards?.length === 0 && (
+          <p className="mt-3 text-sm text-black/40">No cards match your search.</p>
+        )}
 
         <div className="mt-3 flex flex-col gap-2">
-          {cards?.map((card) => {
+          {filteredCards?.map((card) => {
             const isClaimed = !!card.claimed_at;
             const isOpen = expanded === card.id;
             return (

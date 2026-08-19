@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { FiChevronDown } from "react-icons/fi";
 import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
 
 type OrderItem = {
@@ -149,18 +150,21 @@ export default function OrdersManager() {
                     <label className="text-xs font-medium text-black/50" htmlFor={`status-${order.id}`}>
                       Update status
                     </label>
-                    <select
-                      id={`status-${order.id}`}
-                      value={order.status}
-                      onChange={(e) => updateStatus(order, e.target.value)}
-                      className="rounded-xl border border-black/15 bg-white px-3 py-1.5 text-xs font-medium capitalize outline-none focus:border-black"
-                    >
-                      {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        id={`status-${order.id}`}
+                        value={order.status}
+                        onChange={(e) => updateStatus(order, e.target.value)}
+                        className="appearance-none rounded-xl border border-black/15 bg-white py-1.5 pr-8 pl-3 text-xs font-medium capitalize outline-none focus:border-black"
+                      >
+                        {STATUS_OPTIONS.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                      <FiChevronDown className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-black/40" />
+                    </div>
                     {order.promo_code && (
                       <span className="text-xs text-black/40">
                         Promo: <span className="font-semibold text-black">{order.promo_code}</span>{" "}

@@ -14,9 +14,13 @@ function wrappedDelta(raw: number, n: number) {
 }
 
 const TRANSITION_MS = 500;
+// Extra horizontal breathing room between card centers, on top of the
+// card's own measured width, so neighbors always peek rather than overlap.
+const PEEK_GAP = 28;
 
 export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [cardGap, setCardGap] = useState(300);
   const [activeIndex, setActiveIndex] = useState(0);
   // Stacking order lags behind activeIndex until a snap animation finishes,
@@ -30,9 +34,12 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const n = items.length;
 
   useEffect(() => {
-    const el = containerRef.current;
+    const el = cardRef.current;
     if (!el) return;
-    const measure = () => setCardGap(Math.min(300, Math.max(220, el.clientWidth * 0.62)));
+    const measure = () => {
+      const width = el.getBoundingClientRect().width;
+      if (width > 0) setCardGap(width + PEEK_GAP);
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
@@ -109,6 +116,7 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
         return (
           <div
             key={i}
+            ref={isActive ? cardRef : undefined}
             className="absolute top-1/2 left-1/2"
             style={{
               transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale})`,

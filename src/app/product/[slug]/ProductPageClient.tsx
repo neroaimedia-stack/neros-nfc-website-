@@ -153,7 +153,12 @@ export default function ProductPageClient({
     );
   }
 
-  const variantDetail = product.variantDetails[variant] ?? product.variantDetails[color];
+  // The QR variant is independently editable in admin (its own row, own price),
+  // so it must never inherit the base color's override when left blank. The
+  // "+ Website" addon has no row of its own, so it still falls back to color.
+  const variantDetail =
+    product.variantDetails[variant] ??
+    (isReview && hasQR ? undefined : product.variantDetails[color]);
   const priceUSD =
     variantDetail?.price != null
       ? toUSD(variantDetail.price, product.currency)

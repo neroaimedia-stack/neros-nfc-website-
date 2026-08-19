@@ -19,6 +19,10 @@ export default function CartPage() {
   const [checkingPromo, setCheckingPromo] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
 
   const itemMatchesScope = (item: (typeof items)[number]) =>
     promoScope.some(
@@ -76,6 +80,11 @@ export default function CartPage() {
   };
 
   const checkoutBody = [
+    `Recipient: ${customerName}`,
+    `Email: ${email}`,
+    `Phone: ${phone}`,
+    `Shipping address: ${shippingAddress}`,
+    "",
     ...items.map((item) => {
       const lines = [`- ${item.title} (${item.color}) x${item.quantity}`];
       if (item.name) lines.push(`  Name: ${item.name}`);
@@ -100,6 +109,10 @@ export default function CartPage() {
   const checkoutHref = `mailto:herneros.ph@gmail.com?subject=Order%20Checkout&body=${encodeURIComponent(checkoutBody)}`;
 
   const handleCheckout = async () => {
+    if (!customerName.trim() || !email.trim() || !phone.trim() || !shippingAddress.trim()) {
+      setCheckoutError("Please fill in your name, email, phone, and shipping address.");
+      return;
+    }
     setCheckingOut(true);
     setCheckoutError("");
     try {
@@ -111,6 +124,10 @@ export default function CartPage() {
           total,
           promo_code: appliedCode,
           currency: "USD",
+          customer_name: customerName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          shipping_address: shippingAddress.trim(),
         })
         .select("id")
         .single();
@@ -293,6 +310,40 @@ export default function CartPage() {
             Have a promo code?
           </button>
         )}
+      </div>
+
+      <div className="mt-6 border-t border-black/10 pt-6">
+        <p className="text-sm font-semibold text-black">Shipping details</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <input
+            type="text"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            placeholder="Full name"
+            className="rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black"
+          />
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Phone number"
+            className="rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black"
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email address"
+            className="rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black sm:col-span-2"
+          />
+          <textarea
+            value={shippingAddress}
+            onChange={(e) => setShippingAddress(e.target.value)}
+            placeholder="Shipping address"
+            rows={2}
+            className="resize-none rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black sm:col-span-2"
+          />
+        </div>
       </div>
 
       <div className="mt-6 flex flex-col gap-2 border-t border-black/10 pt-6">

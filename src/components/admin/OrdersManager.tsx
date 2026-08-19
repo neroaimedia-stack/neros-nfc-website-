@@ -28,6 +28,10 @@ type Order = {
   currency: string;
   status: string;
   created_at: string;
+  customer_name: string | null;
+  email: string | null;
+  phone: string | null;
+  shipping_address: string | null;
   order_items: OrderItem[];
 };
 
@@ -120,7 +124,8 @@ export default function OrdersManager() {
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-black">
-                    #{order.id.slice(0, 8)} · {order.order_items.length} item
+                    {order.customer_name ? `${order.customer_name} · ` : ""}#{order.id.slice(0, 8)} ·{" "}
+                    {order.order_items.length} item
                     {order.order_items.length === 1 ? "" : "s"}
                   </p>
                   <p className="text-xs text-black/40">
@@ -146,6 +151,34 @@ export default function OrdersManager() {
 
               {isOpen && (
                 <div className="border-t border-black/10 px-4 py-4">
+                  {(order.customer_name || order.email || order.phone || order.shipping_address) && (
+                    <div className="mb-4 rounded-xl bg-black/[0.03] p-3 text-sm">
+                      <p className="text-xs font-semibold tracking-wide text-black/50 uppercase">Customer</p>
+                      <div className="mt-1.5 flex flex-col gap-1">
+                        {order.customer_name && (
+                          <p className="text-black">{order.customer_name}</p>
+                        )}
+                        {order.email && (
+                          <p className="text-black/70">
+                            <a href={`mailto:${order.email}`} className="hover:underline">
+                              {order.email}
+                            </a>
+                          </p>
+                        )}
+                        {order.phone && (
+                          <p className="text-black/70">
+                            <a href={`tel:${order.phone}`} className="hover:underline">
+                              {order.phone}
+                            </a>
+                          </p>
+                        )}
+                        {order.shipping_address && (
+                          <p className="whitespace-pre-line text-black/70">{order.shipping_address}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap items-center gap-3">
                     <label className="text-xs font-medium text-black/50" htmlFor={`status-${order.id}`}>
                       Update status

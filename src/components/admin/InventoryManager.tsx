@@ -1,13 +1,40 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { FiImage, FiPackage, FiTrash2 } from "react-icons/fi";
+import { FiCamera, FiPackage, FiTrash2 } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
 import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
 import OrderCardMock from "@/components/OrderCardMock";
+import ImageCropModal from "@/components/ImageCropModal";
+
+function Toggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (value: boolean) => void;
+  label: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2.5 text-sm text-black">
+      <span className="relative inline-flex h-5 w-9 shrink-0 items-center">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="peer sr-only"
+        />
+        <span className="absolute inset-0 rounded-full bg-black/15 transition-colors peer-checked:bg-black" />
+        <span className="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
+      </span>
+      {label}
+    </label>
+  );
+}
 
 function VariantThumb({
   slug,
@@ -18,7 +45,7 @@ function VariantThumb({
   variant: string;
   imageOverride?: string | null;
 }) {
-  const className = "w-16 shrink-0";
+  const className = "w-20 shrink-0";
   switch (slug) {
     case "review-card":
       return (
@@ -53,8 +80,14 @@ function VariantThumb({
       );
     default:
       if (imageOverride) {
-        // eslint-disable-next-line @next/next/no-img-element
-        return <img src={imageOverride} alt={variant} className={`${className} rounded-lg object-cover`} />;
+        return (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageOverride}
+            alt={variant}
+            className={`${className} aspect-square rounded-lg object-cover`}
+          />
+        );
       }
       return (
         <div className={`${className} flex aspect-square items-center justify-center rounded-lg border border-dashed border-black/15 text-black/25`}>
@@ -133,9 +166,15 @@ function VariantRow({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [pendingImageSrc, setPendingImageSrc] = useState<string | null>(null);
   const showPictureUpload = slug !== "business-card";
 
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const closeCropper = () => {
+    if (pendingImageSrc) URL.revokeObjectURL(pendingImageSrc);
+    setPendingImageSrc(null);
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
@@ -143,10 +182,16 @@ function VariantRow({
       setUploadError("Please choose an image file.");
       return;
     }
+    setUploadError("");
+    setPendingImageSrc(URL.createObjectURL(file));
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    closeCropper();
     setUploading(true);
     setUploadError("");
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", blob, "photo.jpg");
     formData.append("slug", slug);
     formData.append("variant", name);
     const res = await fetch("/api/admin/products/upload-image", {
@@ -164,14 +209,32 @@ function VariantRow({
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-xl border p-3 sm:flex-row ${
-        derived ? "border-black/5 bg-black/[0.015]" : "border-black/10"
+      className={`flex flex-col gap-3 rounded-xl border p-3.5 sm:flex-row sm:items-start ${
+        derived ? "border-black/5 bg-black/[0.015]" : "border-black/10 bg-white"
       }`}
     >
       <div className="flex shrink-0 flex-col items-center gap-1.5">
-        <VariantThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
-        {showPictureUpload && (
+        {showPictureUpload ? (
           <>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              aria-label={detail.imageUrl ? `Change photo for ${name}` : `Add photo for ${name}`}
+              className="group relative block overflow-hidden rounded-lg transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 disabled:opacity-60"
+            >
+              <VariantThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
+                {uploading ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <FiCamera className="h-4 w-4 text-white" />
+                )}
+              </span>
+              <span className="pointer-events-none absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-black text-white shadow">
+                <FiCamera className="h-2.5 w-2.5" />
+              </span>
+            </button>
             <input
               ref={fileInputRef}
               type="file"
@@ -179,26 +242,27 @@ function VariantRow({
               className="hidden"
               onChange={handleFileChange}
             />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="flex items-center gap-1 text-[11px] font-medium text-black/50 hover:text-black disabled:opacity-40"
-            >
-              <FiImage className="h-3 w-3" />
-              {uploading ? "Uploading…" : detail.imageUrl ? "Change photo" : "Add photo"}
-            </button>
             {detail.imageUrl && (
               <button
                 type="button"
                 onClick={() => onChange({ ...detail, imageUrl: null })}
-                className="text-[11px] text-red-500 hover:text-red-700"
+                className="text-[11px] font-medium text-black/40 hover:text-red-600"
               >
-                Remove photo
+                Remove
               </button>
             )}
-            {uploadError && <p className="max-w-16 text-center text-[10px] text-red-600">{uploadError}</p>}
+            {uploadError && <p className="max-w-20 text-center text-[10px] text-red-600">{uploadError}</p>}
+            {pendingImageSrc && (
+              <ImageCropModal
+                imageSrc={pendingImageSrc}
+                aspect={1}
+                onCancel={closeCropper}
+                onConfirm={handleCropConfirm}
+              />
+            )}
           </>
+        ) : (
+          <VariantThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
         )}
       </div>
 
@@ -427,15 +491,9 @@ function ProductRow({
           />
         </div>
 
-        <label className="flex items-center gap-2 pb-2.5 text-sm text-black">
-          <input
-            type="checkbox"
-            checked={trackStock}
-            onChange={(e) => setTrackStock(e.target.checked)}
-            className="h-4 w-4 accent-black"
-          />
-          Track stock
-        </label>
+        <div className="pb-2.5">
+          <Toggle checked={trackStock} onChange={setTrackStock} label="Track stock" />
+        </div>
 
         {trackStock && (
           <>
@@ -452,15 +510,13 @@ function ProductRow({
                 className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
               />
             </div>
-            <label className="flex items-center gap-2 pb-2.5 text-sm text-black">
-              <input
-                type="checkbox"
+            <div className="pb-2.5">
+              <Toggle
                 checked={allowPreorder}
-                onChange={(e) => setAllowPreorder(e.target.checked)}
-                className="h-4 w-4 accent-black"
+                onChange={setAllowPreorder}
+                label="Allow pre-order when out of stock"
               />
-              Allow pre-order when out of stock
-            </label>
+            </div>
           </>
         )}
       </div>

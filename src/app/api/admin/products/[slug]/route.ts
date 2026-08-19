@@ -16,6 +16,7 @@ type VariantDetailInput = {
   description?: unknown;
   price?: unknown;
   image_url?: unknown;
+  stock_quantity?: unknown;
 };
 
 function isValidVariantDetails(value: unknown): value is Record<string, VariantDetailInput> {
@@ -26,6 +27,12 @@ function isValidVariantDetails(value: unknown): value is Record<string, VariantD
     if (d.description !== undefined && typeof d.description !== "string") return false;
     if (d.price !== undefined && d.price !== null && typeof d.price !== "number") return false;
     if (d.image_url !== undefined && d.image_url !== null && typeof d.image_url !== "string") return false;
+    if (
+      d.stock_quantity !== undefined &&
+      d.stock_quantity !== null &&
+      (typeof d.stock_quantity !== "number" || !Number.isInteger(d.stock_quantity) || d.stock_quantity < 0)
+    )
+      return false;
     return true;
   });
 }
@@ -108,5 +115,26 @@ export async function PATCH(
     .eq("slug", slug);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const admin = await getAdminSession();
+  if (!admin) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+
+  const { slug } = await params;
+
+  const { error } = await getSupabaseAdmin().from("products").delete().eq("slug", slug);
+
+  if (error) {
+    const message =
+      error.code === "23503"
+        ? "Can't delete — this product has existing orders or reviews tied to it."
+        : error.message;
+    return NextResponse.json({ error: message }, { status: error.code === "23503" ? 409 : 500 });
+  }
   return NextResponse.json({ ok: true });
 }

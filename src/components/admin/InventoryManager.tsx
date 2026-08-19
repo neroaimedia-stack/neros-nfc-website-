@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { FiImage, FiTrash2 } from "react-icons/fi";
+import { FiImage, FiPackage, FiTrash2 } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
 import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import FlippableCard from "@/components/FlippableCard";
@@ -52,7 +52,15 @@ function VariantThumb({
         <FlippableCard shadow={false} reflection={false} personalized={false} className={className} />
       );
     default:
-      return null;
+      if (imageOverride) {
+        // eslint-disable-next-line @next/next/no-img-element
+        return <img src={imageOverride} alt={variant} className={`${className} rounded-lg object-cover`} />;
+      }
+      return (
+        <div className={`${className} flex aspect-square items-center justify-center rounded-lg border border-dashed border-black/15 text-black/25`}>
+          <FiPackage className="h-6 w-6" />
+        </div>
+      );
   }
 }
 
@@ -60,9 +68,10 @@ type VariantDetail = {
   description: string;
   price: string;
   imageUrl: string | null;
+  stockQuantity: string;
 };
 
-const EMPTY_DETAIL: VariantDetail = { description: "", price: "", imageUrl: null };
+const EMPTY_DETAIL: VariantDetail = { description: "", price: "", imageUrl: null, stockQuantity: "" };
 
 type Product = {
   slug: string;
@@ -78,7 +87,7 @@ type Product = {
   sort_order: number;
   variant_details: Record<
     string,
-    { description?: string; price?: number; image_url?: string }
+    { description?: string; price?: number; image_url?: string; stock_quantity?: number }
   >;
 };
 
@@ -98,6 +107,7 @@ function detailsFromProduct(product: Product): Record<string, VariantDetail> {
       description: d?.description ?? "",
       price: d?.price != null ? String(d.price) : "",
       imageUrl: d?.image_url ?? null,
+      stockQuantity: d?.stock_quantity != null ? String(d.stock_quantity) : "",
     };
   }
   return map;
@@ -108,6 +118,7 @@ function VariantRow({
   name,
   detail,
   derived,
+  trackStock,
   onChange,
   onRemove,
 }: {
@@ -115,6 +126,7 @@ function VariantRow({
   name: string;
   detail: VariantDetail;
   derived: boolean;
+  trackStock: boolean;
   onChange: (next: VariantDetail) => void;
   onRemove?: () => void;
 }) {
@@ -205,7 +217,7 @@ function VariantRow({
           )}
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-[7rem_1fr]">
+        <div className={`grid gap-2 ${trackStock ? "sm:grid-cols-[7rem_7rem_1fr]" : "sm:grid-cols-[7rem_1fr]"}`}>
           <div>
             <label className="text-xs text-black/50">Price override</label>
             <input
@@ -218,6 +230,20 @@ function VariantRow({
               className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
             />
           </div>
+          {trackStock && (
+            <div>
+              <label className="text-xs text-black/50">Stock</label>
+              <input
+                type="number"
+                min={0}
+                step="1"
+                placeholder="Qty"
+                value={detail.stockQuantity}
+                onChange={(e) => onChange({ ...detail, stockQuantity: e.target.value })}
+                className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
+              />
+            </div>
+          )}
           <div>
             <label className="text-xs text-black/50">Description</label>
             <input
@@ -237,9 +263,11 @@ function VariantRow({
 function ProductRow({
   product,
   onSaved,
+  onDeleted,
 }: {
   product: Product;
   onSaved: (next: Product) => void;
+  onDeleted: () => void;
 }) {
   const [price, setPrice] = useState(String(product.price));
   const [colors, setColors] = useState<string[]>(product.colors);
@@ -253,6 +281,8 @@ function ProductRow({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const managedNames = managedVariantNames(product.slug, colors);
   const getDetail = (name: string) => details[name] ?? EMPTY_DETAIL;
@@ -289,13 +319,18 @@ function ProductRow({
     setError("");
     setSaved(false);
 
-    const variantDetails: Record<string, { description?: string; price?: number; image_url?: string }> = {};
+    const variantDetails: Record<
+      string,
+      { description?: string; price?: number; image_url?: string; stock_quantity?: number }
+    > = {};
     for (const name of managedNames) {
       const d = getDetail(name);
-      const entry: { description?: string; price?: number; image_url?: string } = {};
+      const entry: { description?: string; price?: number; image_url?: string; stock_quantity?: number } = {};
       if (d.description.trim()) entry.description = d.description.trim();
       if (d.price.trim() && !Number.isNaN(Number(d.price))) entry.price = Number(d.price);
       if (d.imageUrl) entry.image_url = d.imageUrl;
+      if (trackStock && d.stockQuantity.trim() && !Number.isNaN(Number(d.stockQuantity)))
+        entry.stock_quantity = Number(d.stockQuantity);
       if (Object.keys(entry).length > 0) variantDetails[name] = entry;
     }
 
@@ -330,6 +365,20 @@ function ProductRow({
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const deleteProduct = async () => {
+    if (!confirm(`Delete "${product.title}"? This can't be undone.`)) return;
+    setDeleting(true);
+    setDeleteError("");
+    const res = await fetch(`/api/admin/products/${product.slug}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json();
+      setDeleting(false);
+      setDeleteError(data.error ?? "Something went wrong.");
+      return;
+    }
+    onDeleted();
+  };
+
   const outOfStock = trackStock && Number(stockQuantity) <= 0;
 
   return (
@@ -339,16 +388,28 @@ function ProductRow({
           <p className="font-semibold text-black">{product.title}</p>
           <p className="text-xs text-black/40">{product.slug}</p>
         </div>
-        {outOfStock && (
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              allowPreorder ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
-            }`}
+        <div className="flex items-center gap-2">
+          {outOfStock && (
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                allowPreorder ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+              }`}
+            >
+              {allowPreorder ? "Out of stock · pre-order on" : "Out of stock · blocked"}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={deleteProduct}
+            disabled={deleting}
+            aria-label={`Delete ${product.title}`}
+            className="rounded-full p-2 text-black/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
           >
-            {allowPreorder ? "Out of stock · pre-order on" : "Out of stock · blocked"}
-          </span>
-        )}
+            <FiTrash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
+      {deleteError && <p className="mt-2 text-xs text-red-600">{deleteError}</p>}
 
       <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-3 border-b border-black/10 pb-4">
         <div className="w-32">
@@ -414,6 +475,7 @@ function ProductRow({
                 name={name}
                 detail={getDetail(name)}
                 derived={false}
+                trackStock={trackStock}
                 onChange={(next) => updateDetail(name, next)}
                 onRemove={() => removeVariant(name)}
               />
@@ -423,6 +485,7 @@ function ProductRow({
                   name={`${name}${QR_VARIANT_SUFFIX}`}
                   detail={getDetail(`${name}${QR_VARIANT_SUFFIX}`)}
                   derived
+                  trackStock={trackStock}
                   onChange={(next) => updateDetail(`${name}${QR_VARIANT_SUFFIX}`, next)}
                 />
               )}
@@ -573,6 +636,9 @@ export default function InventoryManager() {
             setProducts((prev) =>
               prev ? prev.map((p) => (p.slug === next.slug ? next : p)) : prev
             )
+          }
+          onDeleted={() =>
+            setProducts((prev) => (prev ? prev.filter((p) => p.slug !== product.slug) : prev))
           }
         />
       ))}

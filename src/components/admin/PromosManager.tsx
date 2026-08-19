@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FiCheck } from "react-icons/fi";
+import { formatCurrency } from "@/lib/currency";
+import ProductThumb from "@/components/admin/ProductThumb";
 
 type Promo = {
   code: string;
@@ -10,36 +13,68 @@ type Promo = {
   product_slugs: string[];
 };
 
-type ProductOption = { slug: string; title: string };
+type ProductOption = { slug: string; title: string; price: number; colors: string[] };
 
 function ProductScopePicker({
   products,
   selected,
+  discountPercent,
   onToggle,
 }: {
   products: ProductOption[];
   selected: string[];
+  discountPercent: number;
   onToggle: (slug: string) => void;
 }) {
+  const discounted = discountPercent > 0 && discountPercent <= 100;
+
   return (
     <div>
       <p className="text-xs font-medium text-black/50">
         Applies to <span className="font-normal">(leave all unchecked for every product)</span>
       </p>
-      <div className="mt-1.5 flex flex-wrap gap-2">
+      <div className="mt-1.5 flex flex-col gap-2">
         {products.map((p) => {
           const active = selected.includes(p.slug);
+          const afterPrice = discounted ? p.price * (1 - discountPercent / 100) : null;
           return (
-            <button
+            <div
               key={p.slug}
-              type="button"
+              role="button"
+              tabIndex={0}
               onClick={() => onToggle(p.slug)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                active ? "border-black bg-black text-white" : "border-black/15 text-black/70"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onToggle(p.slug);
+                }
+              }}
+              aria-pressed={active}
+              className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border p-2.5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 ${
+                active ? "border-black bg-black/[0.03]" : "border-black/10 hover:border-black/25"
               }`}
             >
-              {p.title}
-            </button>
+              <ProductThumb slug={p.slug} variant={p.colors[0] ?? ""} className="pointer-events-none w-12 shrink-0" />
+              <span className="min-w-0 flex-1 truncate text-sm font-medium text-black">{p.title}</span>
+              <span className="shrink-0 text-right text-sm whitespace-nowrap">
+                {afterPrice != null ? (
+                  <>
+                    <span className="text-black/40 line-through">{formatCurrency(p.price, "USD")}</span>
+                    <span className="mx-1 text-black/30">→</span>
+                    <span className="font-semibold text-black">{formatCurrency(afterPrice, "USD")}</span>
+                  </>
+                ) : (
+                  <span className="text-black/60">{formatCurrency(p.price, "USD")}</span>
+                )}
+              </span>
+              <span
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                  active ? "border-black bg-black text-white" : "border-black/20"
+                }`}
+              >
+                {active && <FiCheck className="h-3 w-3" />}
+              </span>
+            </div>
           );
         })}
       </div>
@@ -71,7 +106,14 @@ export default function PromosManager() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.products)) {
-          setProducts(data.products.map((p: { slug: string; title: string }) => ({ slug: p.slug, title: p.title })));
+          setProducts(
+            data.products.map((p: { slug: string; title: string; price: number; colors: string[] }) => ({
+              slug: p.slug,
+              title: p.title,
+              price: Number(p.price),
+              colors: p.colors ?? [],
+            }))
+          );
         }
       });
   }, []);
@@ -134,7 +176,7 @@ export default function PromosManager() {
 
   return (
     <div>
-      <form onSubmit={addPromo} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 bg-white shadow-sm p-4">
+      <form onSubmit={addPromo} className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-white shadow-sm p-4">
         <div className="flex gap-3">
           <input
             type="text"
@@ -159,6 +201,7 @@ export default function PromosManager() {
           <ProductScopePicker
             products={products}
             selected={scopeSlugs}
+            discountPercent={Number(percent)}
             onToggle={(slug) =>
               setScopeSlugs((prev) =>
                 prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
@@ -221,6 +264,7 @@ export default function PromosManager() {
                 <ProductScopePicker
                   products={products}
                   selected={editScope}
+                  discountPercent={Math.round(promo.discount_rate * 100)}
                   onToggle={(slug) =>
                     setEditScope((prev) =>
                       prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]

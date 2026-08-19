@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { FiCamera, FiPackage, FiSearch, FiTrash2 } from "react-icons/fi";
+import { FiCamera, FiSearch, FiTrash2 } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
 import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
-import FlippableCard from "@/components/FlippableCard";
-import ReviewCardMock from "@/components/ReviewCardMock";
-import WifiCardMock from "@/components/WifiCardMock";
-import OrderCardMock from "@/components/OrderCardMock";
 import ImageCropModal from "@/components/ImageCropModal";
+import ProductThumb from "@/components/admin/ProductThumb";
 
 function Toggle({
   checked,
@@ -34,67 +31,6 @@ function Toggle({
       {label}
     </label>
   );
-}
-
-function VariantThumb({
-  slug,
-  variant,
-  imageOverride,
-}: {
-  slug: string;
-  variant: string;
-  imageOverride?: string | null;
-}) {
-  const className = "w-20 shrink-0";
-  switch (slug) {
-    case "review-card":
-      return (
-        <ReviewCardMock
-          platform={variant}
-          shadow={false}
-          className={className}
-          imageOverride={imageOverride}
-        />
-      );
-    case "wifi-card":
-      return (
-        <WifiCardMock
-          format={variant}
-          shadow={false}
-          className={className}
-          imageOverride={imageOverride}
-        />
-      );
-    case "order-card":
-      return (
-        <OrderCardMock
-          format={variant}
-          shadow={false}
-          className={className}
-          imageOverride={imageOverride}
-        />
-      );
-    case "business-card":
-      return (
-        <FlippableCard shadow={false} reflection={false} personalized={false} className={className} />
-      );
-    default:
-      if (imageOverride) {
-        return (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageOverride}
-            alt={variant}
-            className={`${className} aspect-square rounded-lg object-cover`}
-          />
-        );
-      }
-      return (
-        <div className={`${className} flex aspect-square items-center justify-center rounded-lg border border-dashed border-black/15 text-black/25`}>
-          <FiPackage className="h-6 w-6" />
-        </div>
-      );
-  }
 }
 
 type VariantDetail = {
@@ -223,7 +159,7 @@ function VariantRow({
               aria-label={detail.imageUrl ? `Change photo for ${name}` : `Add photo for ${name}`}
               className="group relative block overflow-hidden rounded-lg transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black/40 disabled:opacity-60"
             >
-              <VariantThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
+              <ProductThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
               <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
                 {uploading ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -262,7 +198,7 @@ function VariantRow({
             )}
           </>
         ) : (
-          <VariantThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
+          <ProductThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
         )}
       </div>
 

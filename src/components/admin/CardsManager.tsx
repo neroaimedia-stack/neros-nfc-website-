@@ -223,8 +223,6 @@ export default function CardsManager() {
     });
   }, [cards, search, categoryFilter]);
 
-  const claimedCount = filteredCards?.filter((c) => c.claimed_at).length ?? 0;
-  const totalCount = filteredCards?.length ?? 0;
   const allClaimedCount = cards?.filter((c) => c.claimed_at).length ?? 0;
   const allTotalCount = cards?.length ?? 0;
 
@@ -313,14 +311,7 @@ export default function CardsManager() {
       )}
 
       <div className="mt-8">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-black">All cards</p>
-          {cards !== null && (
-            <p className="text-xs text-black/40">
-              {claimedCount} claimed · {totalCount - claimedCount} unclaimed · {totalCount} total
-            </p>
-          )}
-        </div>
+        <p className="text-sm font-semibold text-black">All cards</p>
 
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">

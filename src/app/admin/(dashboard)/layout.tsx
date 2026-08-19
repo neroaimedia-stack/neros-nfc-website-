@@ -12,7 +12,7 @@ export default async function AdminDashboardLayout({
   if (!admin) redirect("/admin/login");
 
   return (
-    <div className="flex min-h-screen w-full flex-col md:flex-row">
+    <div className="flex min-h-screen w-full min-w-0 flex-col md:flex-row">
       <AdminSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="hidden items-center justify-between gap-4 border-b border-black/10 px-6 py-4 md:flex lg:px-10">
@@ -21,7 +21,7 @@ export default async function AdminDashboardLayout({
           </p>
           <AdminLogoutButton />
         </header>
-        <main className="flex-1 px-4 py-6 md:px-8 md:py-8 lg:px-10">{children}</main>
+        <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8 lg:px-10">{children}</main>
         <div className="border-t border-black/10 px-4 py-4 md:hidden">
           <AdminLogoutButton />
         </div>

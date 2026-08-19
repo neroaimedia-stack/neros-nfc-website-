@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import {
   FiAlertTriangle,
-  FiCreditCard,
+  FiBarChart2,
   FiShoppingBag,
-  FiTag,
   FiTrendingUp,
 } from "react-icons/fi";
 import type { IconType } from "react-icons";
@@ -15,9 +14,7 @@ type Stats = {
   totalRevenuePHP: number;
   orderCount: number;
   ordersLast7Days: number;
-  activePromoCount: number;
-  cardsTotal: number;
-  cardsClaimed: number;
+  avgOrderValuePHP: number;
   lowStockProducts: { title: string; stock_quantity: number }[];
 };
 
@@ -77,14 +74,9 @@ export default function DashboardStats() {
         hint={`${stats.ordersLast7Days} in the last 7 days`}
       />
       <StatCard
-        icon={FiTag}
-        label="Active promo codes"
-        value={String(stats.activePromoCount)}
-      />
-      <StatCard
-        icon={FiCreditCard}
-        label="NFC cards claimed"
-        value={`${stats.cardsClaimed} / ${stats.cardsTotal}`}
+        icon={FiBarChart2}
+        label="Avg. order value"
+        value={formatCurrency(stats.avgOrderValuePHP, "PHP")}
       />
       {stats.lowStockProducts.length > 0 && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:col-span-2 lg:col-span-3">

@@ -5,13 +5,13 @@ import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
 import OrderCardMock from "@/components/OrderCardMock";
 import HowItWorks from "@/components/HowItWorks";
-import Carousel from "@/components/Carousel";
+import CardCarousel from "@/components/CardCarousel";
 
 export default function Home() {
   const cardItems = [
     <div
       key="business"
-      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+      className="flex w-72 flex-col rounded-3xl border border-black/10 bg-white p-6 text-center shadow-sm"
     >
       <FlippableCard
         className="mx-auto mb-5 w-[220px] max-w-full"
@@ -30,7 +30,7 @@ export default function Home() {
     </div>,
     <div
       key="review"
-      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+      className="flex w-72 flex-col rounded-3xl border border-black/10 bg-white p-6 text-center shadow-sm"
     >
       <ReviewCardMock className="mx-auto mb-5 w-[130px]" />
       <h3 className="text-lg font-semibold text-black">Review Card</h3>
@@ -46,7 +46,7 @@ export default function Home() {
     </div>,
     <div
       key="wifi"
-      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+      className="flex w-72 flex-col rounded-3xl border border-black/10 bg-white p-6 text-center shadow-sm"
     >
       <WifiCardMock className="mx-auto mb-5 w-[130px]" />
       <h3 className="text-lg font-semibold text-black">Wifi Card</h3>
@@ -62,7 +62,7 @@ export default function Home() {
     </div>,
     <div
       key="order"
-      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+      className="flex w-72 flex-col rounded-3xl border border-black/10 bg-white p-6 text-center shadow-sm"
     >
       <OrderCardMock className="mx-auto mb-5 w-[130px]" />
       <h3 className="text-lg font-semibold text-black">Order Card</h3>
@@ -78,7 +78,7 @@ export default function Home() {
     </div>,
     <div
       key="custom"
-      className="flex w-72 shrink-0 snap-start flex-col rounded-3xl border border-black/10 p-6 text-center shadow-sm"
+      className="flex w-72 flex-col rounded-3xl border border-black/10 bg-white p-6 text-center shadow-sm"
     >
       <div className="mx-auto mb-5 flex aspect-[340/214] w-[220px] max-w-full items-center justify-center rounded-[18px] border-2 border-dashed border-black/20 bg-neutral-50">
         <span className="text-4xl font-light text-black/25">+</span>
@@ -129,7 +129,7 @@ export default function Home() {
           Choose your card
         </h2>
         <div className="mt-8">
-          <Carousel items={cardItems} />
+          <CardCarousel items={cardItems} />
         </div>
       </section>
 

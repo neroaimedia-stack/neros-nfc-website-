@@ -1,5 +1,11 @@
 import { supabase } from "@/lib/supabase";
 
+export type VariantDetail = {
+  description?: string;
+  price?: number;
+  imageUrl?: string;
+};
+
 export type Product = {
   slug: string;
   title: string;
@@ -11,6 +17,7 @@ export type Product = {
   trackStock: boolean;
   stockQuantity: number;
   allowPreorder: boolean;
+  variantDetails: Record<string, VariantDetail>;
 };
 
 export function isOutOfStock(product: Pick<Product, "trackStock" | "stockQuantity">): boolean {
@@ -21,7 +28,7 @@ export async function getProducts(): Promise<Record<string, Product>> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "slug, title, description, price, compare_at_price, currency, colors, track_stock, stock_quantity, allow_preorder"
+      "slug, title, description, price, compare_at_price, currency, colors, track_stock, stock_quantity, allow_preorder, variant_details"
     )
     .order("sort_order", { ascending: true });
 
@@ -29,6 +36,19 @@ export async function getProducts(): Promise<Record<string, Product>> {
 
   const products: Record<string, Product> = {};
   for (const row of data ?? []) {
+    const rawVariants = (row.variant_details ?? {}) as Record<
+      string,
+      { description?: string; price?: number; image_url?: string }
+    >;
+    const variantDetails: Record<string, VariantDetail> = {};
+    for (const [name, detail] of Object.entries(rawVariants)) {
+      variantDetails[name] = {
+        description: detail.description || undefined,
+        price: detail.price != null ? Number(detail.price) : undefined,
+        imageUrl: detail.image_url || undefined,
+      };
+    }
+
     products[row.slug] = {
       slug: row.slug,
       title: row.title,
@@ -41,6 +61,7 @@ export async function getProducts(): Promise<Record<string, Product>> {
       trackStock: row.track_stock ?? false,
       stockQuantity: row.stock_quantity ?? 0,
       allowPreorder: row.allow_preorder ?? true,
+      variantDetails,
     };
   }
   return products;

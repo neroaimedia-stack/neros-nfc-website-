@@ -9,7 +9,26 @@ type ProductPatch = {
   track_stock?: unknown;
   stock_quantity?: unknown;
   allow_preorder?: unknown;
+  variant_details?: unknown;
 };
+
+type VariantDetailInput = {
+  description?: unknown;
+  price?: unknown;
+  image_url?: unknown;
+};
+
+function isValidVariantDetails(value: unknown): value is Record<string, VariantDetailInput> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  return Object.entries(value as Record<string, unknown>).every(([, detail]) => {
+    if (typeof detail !== "object" || detail === null || Array.isArray(detail)) return false;
+    const d = detail as VariantDetailInput;
+    if (d.description !== undefined && typeof d.description !== "string") return false;
+    if (d.price !== undefined && d.price !== null && typeof d.price !== "number") return false;
+    if (d.image_url !== undefined && d.image_url !== null && typeof d.image_url !== "string") return false;
+    return true;
+  });
+}
 
 export async function PATCH(
   request: Request,
@@ -67,6 +86,16 @@ export async function PATCH(
       return NextResponse.json({ error: "allow_preorder must be a boolean." }, { status: 400 });
     }
     update.allow_preorder = body.allow_preorder;
+  }
+
+  if (body.variant_details !== undefined) {
+    if (!isValidVariantDetails(body.variant_details)) {
+      return NextResponse.json(
+        { error: "variant_details must map variant names to { description?, price?, image_url? }." },
+        { status: 400 }
+      );
+    }
+    update.variant_details = body.variant_details;
   }
 
   if (Object.keys(update).length === 0) {

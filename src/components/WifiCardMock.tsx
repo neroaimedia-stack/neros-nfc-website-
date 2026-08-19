@@ -8,10 +8,12 @@ export default function WifiCardMock({
   format = DEFAULT_WIFI_CARD_FORMAT,
   className,
   shadow = true,
+  imageOverride,
 }: {
   format?: string;
   className?: string;
   shadow?: boolean;
+  imageOverride?: string | null;
 }) {
   const style =
     WIFI_CARD_FORMATS[format] ?? WIFI_CARD_FORMATS[DEFAULT_WIFI_CARD_FORMAT];
@@ -21,13 +23,22 @@ export default function WifiCardMock({
       <div
         className={`relative aspect-square w-full overflow-hidden rounded-[8%] ${shadow ? "review-card-shadow" : ""}`}
       >
-        <Image
-          src={style.image}
-          alt={style.label}
-          fill
-          sizes="(max-width: 640px) 90vw, 400px"
-          className="object-cover"
-        />
+        {imageOverride ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageOverride}
+            alt={style.label}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Image
+            src={style.image}
+            alt={style.label}
+            fill
+            sizes="(max-width: 640px) 90vw, 400px"
+            className="object-cover"
+          />
+        )}
       </div>
     </div>
   );

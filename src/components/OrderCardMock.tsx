@@ -8,10 +8,12 @@ export default function OrderCardMock({
   format = DEFAULT_ORDER_CARD_FORMAT,
   className,
   shadow = true,
+  imageOverride,
 }: {
   format?: string;
   className?: string;
   shadow?: boolean;
+  imageOverride?: string | null;
 }) {
   const style =
     ORDER_CARD_FORMATS[format] ?? ORDER_CARD_FORMATS[DEFAULT_ORDER_CARD_FORMAT];
@@ -21,13 +23,22 @@ export default function OrderCardMock({
       <div
         className={`relative aspect-square w-full overflow-hidden rounded-[8%] ${shadow ? "review-card-shadow" : ""}`}
       >
-        <Image
-          src={style.image}
-          alt={style.label}
-          fill
-          sizes="(max-width: 640px) 90vw, 400px"
-          className="object-cover"
-        />
+        {imageOverride ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageOverride}
+            alt={style.label}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Image
+            src={style.image}
+            alt={style.label}
+            fill
+            sizes="(max-width: 640px) 90vw, 400px"
+            className="object-cover"
+          />
+        )}
       </div>
     </div>
   );

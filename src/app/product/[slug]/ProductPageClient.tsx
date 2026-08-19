@@ -153,7 +153,11 @@ export default function ProductPageClient({
     );
   }
 
-  const priceUSD = toUSD(product.price, product.currency);
+  const variantDetail = product.variantDetails[color];
+  const priceUSD =
+    variantDetail?.price != null
+      ? toUSD(variantDetail.price, product.currency)
+      : toUSD(product.price, product.currency);
   const compareAtPriceUSD = product.compareAtPrice
     ? toUSD(product.compareAtPrice, product.currency)
     : undefined;
@@ -225,16 +229,19 @@ export default function ProductPageClient({
             <ReviewCardMock
               className="mx-auto w-[400px] max-w-full"
               platform={variant}
+              imageOverride={hasQR ? undefined : variantDetail?.imageUrl}
             />
           ) : isWifi ? (
             <WifiCardMock
               className="mx-auto w-[400px] max-w-full"
               format={color}
+              imageOverride={variantDetail?.imageUrl}
             />
           ) : isOrderCard ? (
             <OrderCardMock
               className="mx-auto w-[400px] max-w-full"
               format={color}
+              imageOverride={variantDetail?.imageUrl}
             />
           ) : (
             <FlippableCard
@@ -304,6 +311,11 @@ export default function ProductPageClient({
                   {color}
                 </span>
               </div>
+              {variantDetail?.description && (
+                <p className="mt-2 text-xs leading-relaxed text-black/60">
+                  {variantDetail.description}
+                </p>
+              )}
               {useToggleSelector ? (
                 <div className="mt-3 flex gap-2">
                   {product.colors.map((c) => (

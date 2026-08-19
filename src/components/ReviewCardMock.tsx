@@ -8,10 +8,12 @@ export default function ReviewCardMock({
   platform = DEFAULT_REVIEW_PLATFORM,
   className,
   shadow = true,
+  imageOverride,
 }: {
   platform?: string;
   className?: string;
   shadow?: boolean;
+  imageOverride?: string | null;
 }) {
   const style =
     REVIEW_PLATFORMS[platform] ?? REVIEW_PLATFORMS[DEFAULT_REVIEW_PLATFORM];
@@ -21,13 +23,22 @@ export default function ReviewCardMock({
       <div
         className={`relative aspect-square w-full overflow-hidden rounded-[8%] ${shadow ? "review-card-shadow" : ""}`}
       >
-        <Image
-          src={style.image}
-          alt={style.label}
-          fill
-          sizes="(max-width: 640px) 90vw, 400px"
-          className="object-cover"
-        />
+        {imageOverride ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageOverride}
+            alt={style.label}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Image
+            src={style.image}
+            alt={style.label}
+            fill
+            sizes="(max-width: 640px) 90vw, 400px"
+            className="object-cover"
+          />
+        )}
       </div>
     </div>
   );

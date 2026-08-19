@@ -403,19 +403,6 @@ export default function CardsManager() {
                   >
                     <FiTrash2 className="h-4 w-4" />
                   </button>
-
-                  {isClaimed && (
-                    <button
-                      type="button"
-                      onClick={() => setExpanded(isOpen ? null : card.id)}
-                      aria-label={isOpen ? "Collapse details" : "Expand details"}
-                      className="shrink-0 rounded-full p-2 text-black/40 transition-colors hover:bg-black/5 hover:text-black"
-                    >
-                      <FiChevronDown
-                        className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                      />
-                    </button>
-                  )}
                 </div>
 
                 {isClaimed && isOpen && <CardDetails card={card} />}

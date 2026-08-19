@@ -17,11 +17,17 @@ const TRANSITION_MS = 500;
 // Extra horizontal breathing room between card centers, on top of the
 // card's own measured width, so neighbors always peek rather than overlap.
 const PEEK_GAP = 28;
+// Smallest sliver of a neighboring card that must stay visible at the
+// container's edge — on narrow screens the card is nearly as wide as the
+// container, so without this the "ideal" gap above pushes neighbors
+// entirely out of view and the carousel stops looking like one.
+const MIN_PEEK = 40;
 
 export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [cardGap, setCardGap] = useState(300);
+  const [cardWidth, setCardWidth] = useState(288);
+  const [containerWidth, setContainerWidth] = useState(1152);
   const [activeIndex, setActiveIndex] = useState(0);
   // Stacking order lags behind activeIndex until a snap animation finishes,
   // so a card never jumps in front of one it's still visually sliding past.
@@ -33,16 +39,24 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const zTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const n = items.length;
 
+  const idealGap = cardWidth + PEEK_GAP;
+  const maxGapForPeek = containerWidth / 2 + cardWidth / 2 - MIN_PEEK;
+  const cardGap = Math.min(idealGap, Math.max(maxGapForPeek, cardWidth * 0.6));
+
   useEffect(() => {
-    const el = cardRef.current;
-    if (!el) return;
+    const cardEl = cardRef.current;
+    const containerEl = containerRef.current;
+    if (!cardEl || !containerEl) return;
     const measure = () => {
-      const width = el.getBoundingClientRect().width;
-      if (width > 0) setCardGap(width + PEEK_GAP);
+      const cw = cardEl.getBoundingClientRect().width;
+      const containerW = containerEl.getBoundingClientRect().width;
+      if (cw > 0) setCardWidth(cw);
+      if (containerW > 0) setContainerWidth(containerW);
     };
     measure();
     const observer = new ResizeObserver(measure);
-    observer.observe(el);
+    observer.observe(cardEl);
+    observer.observe(containerEl);
     return () => observer.disconnect();
   }, []);
 

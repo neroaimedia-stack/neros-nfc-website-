@@ -5,6 +5,8 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type ProductPatch = {
   price?: unknown;
+  compare_at_price?: unknown;
+  description?: unknown;
   colors?: unknown;
   track_stock?: unknown;
   stock_quantity?: unknown;
@@ -61,6 +63,28 @@ export async function PATCH(
       return NextResponse.json({ error: "Price must be a non-negative number." }, { status: 400 });
     }
     update.price = price;
+  }
+
+  if (body.compare_at_price !== undefined) {
+    if (body.compare_at_price === null) {
+      update.compare_at_price = null;
+    } else {
+      const compareAtPrice = Number(body.compare_at_price);
+      if (!Number.isFinite(compareAtPrice) || compareAtPrice < 0) {
+        return NextResponse.json(
+          { error: "Compare-at price must be a non-negative number." },
+          { status: 400 }
+        );
+      }
+      update.compare_at_price = compareAtPrice;
+    }
+  }
+
+  if (body.description !== undefined) {
+    if (typeof body.description !== "string") {
+      return NextResponse.json({ error: "Description must be a string." }, { status: 400 });
+    }
+    update.description = body.description;
   }
 
   if (body.colors !== undefined) {

@@ -334,6 +334,10 @@ function ProductRow({
   onDeleted: () => void;
 }) {
   const [price, setPrice] = useState(String(product.price));
+  const [compareAtPrice, setCompareAtPrice] = useState(
+    product.compare_at_price != null ? String(product.compare_at_price) : ""
+  );
+  const [description, setDescription] = useState(product.description);
   const [colors, setColors] = useState<string[]>(product.colors);
   const [details, setDetails] = useState<Record<string, VariantDetail>>(() =>
     detailsFromProduct(product)
@@ -361,6 +365,8 @@ function ProductRow({
 
   const dirty =
     price !== String(product.price) ||
+    compareAtPrice !== (product.compare_at_price != null ? String(product.compare_at_price) : "") ||
+    description !== product.description ||
     JSON.stringify(colors) !== JSON.stringify(product.colors) ||
     JSON.stringify(currentManaged) !== JSON.stringify(originalManaged) ||
     trackStock !== product.track_stock ||
@@ -398,11 +404,16 @@ function ProductRow({
       if (Object.keys(entry).length > 0) variantDetails[name] = entry;
     }
 
+    const compareAtPriceValue =
+      compareAtPrice.trim() && !Number.isNaN(Number(compareAtPrice)) ? Number(compareAtPrice) : null;
+
     const res = await fetch(`/api/admin/products/${product.slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         price: Number(price),
+        compare_at_price: compareAtPriceValue,
+        description,
         colors,
         track_stock: trackStock,
         stock_quantity: Number(stockQuantity),
@@ -420,6 +431,8 @@ function ProductRow({
     onSaved({
       ...product,
       price: Number(price),
+      compare_at_price: compareAtPriceValue,
+      description,
       colors,
       track_stock: trackStock,
       stock_quantity: Number(stockQuantity),
@@ -475,6 +488,20 @@ function ProductRow({
       </div>
       {deleteError && <p className="mt-2 text-xs text-red-600">{deleteError}</p>}
 
+      <div className="mt-4">
+        <label className="text-xs font-medium text-black/60" htmlFor={`description-${product.slug}`}>
+          Description
+        </label>
+        <textarea
+          id={`description-${product.slug}`}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          placeholder="Shown on the product page"
+          className="mt-1 w-full resize-none rounded-xl border border-black/15 px-3 py-2 text-sm outline-none focus:border-black"
+        />
+      </div>
+
       <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-3 border-b border-black/10 pb-4">
         <div className="w-32">
           <label className="text-xs font-medium text-black/60" htmlFor={`price-${product.slug}`}>
@@ -487,6 +514,22 @@ function ProductRow({
             step="0.01"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
+            className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
+          />
+        </div>
+
+        <div className="w-32">
+          <label className="text-xs font-medium text-black/60" htmlFor={`compare-price-${product.slug}`}>
+            Compare-at price
+          </label>
+          <input
+            id={`compare-price-${product.slug}`}
+            type="number"
+            min={0}
+            step="0.01"
+            placeholder="None"
+            value={compareAtPrice}
+            onChange={(e) => setCompareAtPrice(e.target.value)}
             className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
           />
         </div>

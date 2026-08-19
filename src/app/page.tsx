@@ -124,7 +124,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="buy" className="mx-auto w-full max-w-6xl px-6 py-12">
+      <section id="buy" className="mx-auto w-full max-w-6xl px-6 pt-20 pb-12">
         <h2 className="text-center text-3xl font-bold text-black">
           Choose your card
         </h2>

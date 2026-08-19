@@ -153,7 +153,7 @@ export default function ProductPageClient({
     );
   }
 
-  const variantDetail = product.variantDetails[color];
+  const variantDetail = product.variantDetails[variant] ?? product.variantDetails[color];
   const priceUSD =
     variantDetail?.price != null
       ? toUSD(variantDetail.price, product.currency)
@@ -229,7 +229,7 @@ export default function ProductPageClient({
             <ReviewCardMock
               className="mx-auto w-[400px] max-w-full"
               platform={variant}
-              imageOverride={hasQR ? undefined : variantDetail?.imageUrl}
+              imageOverride={variantDetail?.imageUrl}
             />
           ) : isWifi ? (
             <WifiCardMock

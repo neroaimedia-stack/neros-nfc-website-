@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { FiImage, FiTrash2 } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
+import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
@@ -48,24 +49,20 @@ function VariantThumb({
       );
     case "business-card":
       return (
-        <FlippableCard
-          shadow={false}
-          reflection={false}
-          personalized={false}
-          className={className}
-        />
+        <FlippableCard shadow={false} reflection={false} personalized={false} className={className} />
       );
     default:
       return null;
   }
 }
 
-type VariantDraft = {
-  name: string;
+type VariantDetail = {
   description: string;
   price: string;
   imageUrl: string | null;
 };
+
+const EMPTY_DETAIL: VariantDetail = { description: "", price: "", imageUrl: null };
 
 type Product = {
   slug: string;
@@ -85,33 +82,46 @@ type Product = {
   >;
 };
 
-function variantsFromProduct(product: Product): VariantDraft[] {
-  return product.colors.map((name) => {
-    const detail = product.variant_details?.[name];
-    return {
-      name,
-      description: detail?.description ?? "",
-      price: detail?.price != null ? String(detail.price) : "",
-      imageUrl: detail?.image_url ?? null,
+// Review Card's NFC+QR option is a separate toggle at checkout, not a stored
+// color — but it still needs its own manageable price/description/photo, so
+// we derive an extra row per platform here for admin editing purposes only.
+function managedVariantNames(slug: string, colors: string[]): string[] {
+  if (slug !== "review-card") return colors;
+  return colors.flatMap((c) => [c, `${c}${QR_VARIANT_SUFFIX}`]);
+}
+
+function detailsFromProduct(product: Product): Record<string, VariantDetail> {
+  const map: Record<string, VariantDetail> = {};
+  for (const name of managedVariantNames(product.slug, product.colors)) {
+    const d = product.variant_details?.[name];
+    map[name] = {
+      description: d?.description ?? "",
+      price: d?.price != null ? String(d.price) : "",
+      imageUrl: d?.image_url ?? null,
     };
-  });
+  }
+  return map;
 }
 
 function VariantRow({
   slug,
-  variant,
+  name,
+  detail,
+  derived,
   onChange,
   onRemove,
 }: {
   slug: string;
-  variant: VariantDraft;
-  onChange: (next: VariantDraft) => void;
-  onRemove: () => void;
+  name: string;
+  detail: VariantDetail;
+  derived: boolean;
+  onChange: (next: VariantDetail) => void;
+  onRemove?: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
-  const showPicture = slug !== "business-card";
+  const showPictureUpload = slug !== "business-card";
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,7 +136,7 @@ function VariantRow({
     const formData = new FormData();
     formData.append("file", file);
     formData.append("slug", slug);
-    formData.append("variant", variant.name);
+    formData.append("variant", name);
     const res = await fetch("/api/admin/products/upload-image", {
       method: "POST",
       body: formData,
@@ -137,54 +147,62 @@ function VariantRow({
       setUploadError(data.error ?? "Upload failed.");
       return;
     }
-    onChange({ ...variant, imageUrl: data.url });
+    onChange({ ...detail, imageUrl: data.url });
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-black/10 p-3 sm:flex-row">
-      {showPicture && (
-        <div className="flex shrink-0 flex-col items-center gap-1.5">
-          <VariantThumb slug={slug} variant={variant.name} imageOverride={variant.imageUrl} />
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="flex items-center gap-1 text-[11px] font-medium text-black/50 hover:text-black disabled:opacity-40"
-          >
-            <FiImage className="h-3 w-3" />
-            {uploading ? "Uploading…" : variant.imageUrl ? "Change photo" : "Add photo"}
-          </button>
-          {variant.imageUrl && (
+    <div
+      className={`flex flex-col gap-3 rounded-xl border p-3 sm:flex-row ${
+        derived ? "border-black/5 bg-black/[0.015] sm:ml-8" : "border-black/10"
+      }`}
+    >
+      <div className="flex shrink-0 flex-col items-center gap-1.5">
+        <VariantThumb slug={slug} variant={name} imageOverride={detail.imageUrl} />
+        {showPictureUpload && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
             <button
               type="button"
-              onClick={() => onChange({ ...variant, imageUrl: null })}
-              className="text-[11px] text-red-500 hover:text-red-700"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-1 text-[11px] font-medium text-black/50 hover:text-black disabled:opacity-40"
             >
-              Remove photo
+              <FiImage className="h-3 w-3" />
+              {uploading ? "Uploading…" : detail.imageUrl ? "Change photo" : "Add photo"}
             </button>
-          )}
-          {uploadError && <p className="max-w-16 text-center text-[10px] text-red-600">{uploadError}</p>}
-        </div>
-      )}
+            {detail.imageUrl && (
+              <button
+                type="button"
+                onClick={() => onChange({ ...detail, imageUrl: null })}
+                className="text-[11px] text-red-500 hover:text-red-700"
+              >
+                Remove photo
+              </button>
+            )}
+            {uploadError && <p className="max-w-16 text-center text-[10px] text-red-600">{uploadError}</p>}
+          </>
+        )}
+      </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-black">{variant.name}</span>
-          <button
-            type="button"
-            onClick={onRemove}
-            aria-label={`Remove ${variant.name}`}
-            className="shrink-0 rounded-full p-1 text-black/40 hover:bg-red-50 hover:text-red-600"
-          >
-            <FiTrash2 className="h-3.5 w-3.5" />
-          </button>
+          <span className="text-sm font-semibold text-black">{name}</span>
+          {onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              aria-label={`Remove ${name}`}
+              className="shrink-0 rounded-full p-1 text-black/40 hover:bg-red-50 hover:text-red-600"
+            >
+              <FiTrash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="grid gap-2 sm:grid-cols-[7rem_1fr]">
@@ -195,8 +213,8 @@ function VariantRow({
               min={0}
               step="0.01"
               placeholder="Base price"
-              value={variant.price}
-              onChange={(e) => onChange({ ...variant, price: e.target.value })}
+              value={detail.price}
+              onChange={(e) => onChange({ ...detail, price: e.target.value })}
               className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
             />
           </div>
@@ -205,8 +223,8 @@ function VariantRow({
             <input
               type="text"
               placeholder="Optional note shown to customers"
-              value={variant.description}
-              onChange={(e) => onChange({ ...variant, description: e.target.value })}
+              value={detail.description}
+              onChange={(e) => onChange({ ...detail, description: e.target.value })}
               className="mt-1 h-9 w-full rounded-lg border border-black/15 px-2.5 text-sm outline-none focus:border-black"
             />
           </div>
@@ -224,7 +242,10 @@ function ProductRow({
   onSaved: (next: Product) => void;
 }) {
   const [price, setPrice] = useState(String(product.price));
-  const [variants, setVariants] = useState<VariantDraft[]>(() => variantsFromProduct(product));
+  const [colors, setColors] = useState<string[]>(product.colors);
+  const [details, setDetails] = useState<Record<string, VariantDetail>>(() =>
+    detailsFromProduct(product)
+  );
   const [newVariantName, setNewVariantName] = useState("");
   const [trackStock, setTrackStock] = useState(product.track_stock);
   const [stockQuantity, setStockQuantity] = useState(String(product.stock_quantity));
@@ -233,27 +254,34 @@ function ProductRow({
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
 
-  const originalVariants = variantsFromProduct(product);
+  const managedNames = managedVariantNames(product.slug, colors);
+  const getDetail = (name: string) => details[name] ?? EMPTY_DETAIL;
+  const updateDetail = (name: string, next: VariantDetail) =>
+    setDetails((prev) => ({ ...prev, [name]: next }));
+
+  const originalDetails = detailsFromProduct(product);
+  const currentManaged = Object.fromEntries(managedNames.map((n) => [n, getDetail(n)]));
+  const originalManaged = Object.fromEntries(
+    managedVariantNames(product.slug, product.colors).map((n) => [n, originalDetails[n] ?? EMPTY_DETAIL])
+  );
+
   const dirty =
     price !== String(product.price) ||
-    JSON.stringify(variants) !== JSON.stringify(originalVariants) ||
+    JSON.stringify(colors) !== JSON.stringify(product.colors) ||
+    JSON.stringify(currentManaged) !== JSON.stringify(originalManaged) ||
     trackStock !== product.track_stock ||
     stockQuantity !== String(product.stock_quantity) ||
     allowPreorder !== product.allow_preorder;
 
-  const updateVariant = (index: number, next: VariantDraft) => {
-    setVariants((prev) => prev.map((v, i) => (i === index ? next : v)));
-  };
-
   const addVariant = () => {
     const trimmed = newVariantName.trim();
-    if (!trimmed || variants.some((v) => v.name === trimmed)) return;
-    setVariants([...variants, { name: trimmed, description: "", price: "", imageUrl: null }]);
+    if (!trimmed || colors.includes(trimmed)) return;
+    setColors([...colors, trimmed]);
     setNewVariantName("");
   };
 
-  const removeVariant = (index: number) => {
-    setVariants((prev) => prev.filter((_, i) => i !== index));
+  const removeVariant = (name: string) => {
+    setColors((prev) => prev.filter((c) => c !== name));
   };
 
   const save = async () => {
@@ -262,12 +290,13 @@ function ProductRow({
     setSaved(false);
 
     const variantDetails: Record<string, { description?: string; price?: number; image_url?: string }> = {};
-    for (const v of variants) {
+    for (const name of managedNames) {
+      const d = getDetail(name);
       const entry: { description?: string; price?: number; image_url?: string } = {};
-      if (v.description.trim()) entry.description = v.description.trim();
-      if (v.price.trim() && !Number.isNaN(Number(v.price))) entry.price = Number(v.price);
-      if (v.imageUrl) entry.image_url = v.imageUrl;
-      if (Object.keys(entry).length > 0) variantDetails[v.name] = entry;
+      if (d.description.trim()) entry.description = d.description.trim();
+      if (d.price.trim() && !Number.isNaN(Number(d.price))) entry.price = Number(d.price);
+      if (d.imageUrl) entry.image_url = d.imageUrl;
+      if (Object.keys(entry).length > 0) variantDetails[name] = entry;
     }
 
     const res = await fetch(`/api/admin/products/${product.slug}`, {
@@ -275,7 +304,7 @@ function ProductRow({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         price: Number(price),
-        colors: variants.map((v) => v.name),
+        colors,
         track_stock: trackStock,
         stock_quantity: Number(stockQuantity),
         allow_preorder: allowPreorder,
@@ -292,7 +321,7 @@ function ProductRow({
     onSaved({
       ...product,
       price: Number(price),
-      colors: variants.map((v) => v.name),
+      colors,
       track_stock: trackStock,
       stock_quantity: Number(stockQuantity),
       allow_preorder: allowPreorder,
@@ -378,14 +407,26 @@ function ProductRow({
       <div className="mt-4">
         <p className="text-sm font-medium text-black">Variants</p>
         <div className="mt-2 flex flex-col gap-2">
-          {variants.map((variant, i) => (
-            <VariantRow
-              key={variant.name}
-              slug={product.slug}
-              variant={variant}
-              onChange={(next) => updateVariant(i, next)}
-              onRemove={() => removeVariant(i)}
-            />
+          {colors.map((name) => (
+            <div key={name} className="flex flex-col gap-2">
+              <VariantRow
+                slug={product.slug}
+                name={name}
+                detail={getDetail(name)}
+                derived={false}
+                onChange={(next) => updateDetail(name, next)}
+                onRemove={() => removeVariant(name)}
+              />
+              {product.slug === "review-card" && (
+                <VariantRow
+                  slug={product.slug}
+                  name={`${name}${QR_VARIANT_SUFFIX}`}
+                  detail={getDetail(`${name}${QR_VARIANT_SUFFIX}`)}
+                  derived
+                  onChange={(next) => updateDetail(`${name}${QR_VARIANT_SUFFIX}`, next)}
+                />
+              )}
+            </div>
           ))}
         </div>
         <div className="mt-2 flex gap-2">
@@ -432,28 +473,99 @@ function ProductRow({
   );
 }
 
+function AddProductForm({ onCreated }: { onCreated: () => void }) {
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    const res = await fetch("/api/admin/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, price: Number(price), description }),
+    });
+    const data = await res.json();
+    setSaving(false);
+    if (!res.ok) {
+      setError(data.error ?? "Something went wrong.");
+      return;
+    }
+    setTitle("");
+    setPrice("");
+    setDescription("");
+    onCreated();
+  };
+
+  return (
+    <form onSubmit={submit} className="flex max-w-xl flex-col gap-3 rounded-2xl border border-black/10 p-4">
+      <p className="text-sm font-semibold text-black">Add product</p>
+      <div className="flex gap-3">
+        <input
+          type="text"
+          placeholder="Product title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          className="min-w-0 flex-1 rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+        />
+        <input
+          type="number"
+          min={0}
+          step="0.01"
+          placeholder="Price (USD)"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          required
+          className="w-32 rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+        />
+      </div>
+      <textarea
+        placeholder="Description (optional)"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        rows={2}
+        className="resize-none rounded-xl border border-black/15 px-4 py-2.5 text-sm outline-none focus:border-black"
+      />
+      {error && <p className="text-xs text-red-600">{error}</p>}
+      <button
+        type="submit"
+        disabled={saving}
+        className="self-start rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+      >
+        {saving ? "Adding…" : "+ Add product"}
+      </button>
+      <p className="text-xs text-black/40">
+        New products use a generic personalized-card checkout flow and won&apos;t appear on the
+        homepage automatically — you&apos;ll need a direct link to /product/[slug] until it&apos;s
+        added there.
+      </p>
+    </form>
+  );
+}
+
 export default function InventoryManager() {
   const [products, setProducts] = useState<Product[] | null>(null);
 
-  useEffect(() => {
-    let active = true;
+  const load = () => {
     fetch("/api/admin/products")
       .then((res) => res.json())
-      .then((data) => {
-        if (active) setProducts(data.products);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+      .then((data) => setProducts(data.products));
+  };
 
-  if (products === null) {
-    return <p className="text-sm text-black/40">Loading products…</p>;
-  }
+  useEffect(() => {
+    load();
+  }, []);
 
   return (
     <div className="flex flex-col gap-4">
-      {products.map((product) => (
+      <AddProductForm onCreated={load} />
+      {products === null && <p className="text-sm text-black/40">Loading products…</p>}
+      {products?.map((product) => (
         <ProductRow
           key={product.slug}
           product={product}

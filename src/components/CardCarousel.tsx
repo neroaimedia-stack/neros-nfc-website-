@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 const MAX_VISIBLE_DISTANCE = 2.4;
 
@@ -14,14 +13,20 @@ function wrappedDelta(raw: number, n: number) {
   return d;
 }
 
+const TRANSITION_MS = 500;
+
 export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [cardGap, setCardGap] = useState(300);
   const [activeIndex, setActiveIndex] = useState(0);
+  // Stacking order lags behind activeIndex until a snap animation finishes,
+  // so a card never jumps in front of one it's still visually sliding past.
+  const [zIndexBase, setZIndexBase] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startXRef = useRef(0);
   const draggedRef = useRef(false);
+  const zTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const n = items.length;
 
   useEffect(() => {
@@ -34,7 +39,18 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
     return () => observer.disconnect();
   }, []);
 
-  const goTo = (i: number) => setActiveIndex(((i % n) + n) % n);
+  useEffect(() => {
+    return () => {
+      if (zTimeoutRef.current) clearTimeout(zTimeoutRef.current);
+    };
+  }, []);
+
+  const goTo = (i: number) => {
+    const next = ((i % n) + n) % n;
+    setActiveIndex(next);
+    if (zTimeoutRef.current) clearTimeout(zTimeoutRef.current);
+    zTimeoutRef.current = setTimeout(() => setZIndexBase(next), TRANSITION_MS);
+  };
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     setDragging(true);
@@ -68,86 +84,50 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   };
 
   return (
-    <div>
-      <div
-        ref={containerRef}
-        className="relative h-[440px] max-w-full touch-pan-y overflow-hidden select-none"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={endDrag}
-        onPointerLeave={endDrag}
-        onPointerCancel={endDrag}
-        onClickCapture={handleClickCapture}
-      >
-        {items.map((item, i) => {
-          const distance = wrappedDelta(i - activeIndex - dragOffset / cardGap, n);
-          const abs = Math.abs(distance);
-          if (abs > MAX_VISIBLE_DISTANCE) return null;
+    <div
+      ref={containerRef}
+      className="relative h-[440px] max-w-full touch-pan-y overflow-hidden select-none"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerLeave={endDrag}
+      onPointerCancel={endDrag}
+      onClickCapture={handleClickCapture}
+    >
+      {items.map((item, i) => {
+        const distance = wrappedDelta(i - activeIndex - dragOffset / cardGap, n);
+        const abs = Math.abs(distance);
+        if (abs > MAX_VISIBLE_DISTANCE) return null;
 
-          const translateX = distance * cardGap;
-          const scale = Math.max(0.78, 1 - abs * 0.16);
-          const opacity = Math.max(0.2, 1 - abs * 0.45);
-          const brightness = Math.max(0.55, 1 - abs * 0.35);
-          const isActive = i === activeIndex && dragOffset === 0;
+        const translateX = distance * cardGap;
+        const scale = Math.max(0.78, 1 - abs * 0.16);
+        const opacity = Math.max(0.2, 1 - abs * 0.45);
+        const brightness = Math.max(0.55, 1 - abs * 0.35);
+        const isActive = i === activeIndex && dragOffset === 0;
+        const zAbs = dragging ? abs : Math.abs(wrappedDelta(i - zIndexBase, n));
 
-          return (
-            <div
-              key={i}
-              className="absolute top-1/2 left-1/2"
-              style={{
-                transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale})`,
-                opacity,
-                filter: `brightness(${brightness})`,
-                zIndex: 100 - Math.round(abs * 10),
-                transition: dragging
-                  ? "none"
-                  : "transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease, filter 0.5s ease",
-                cursor: isActive ? "default" : "pointer",
-              }}
-              onClick={() => {
-                if (!isActive) goTo(i);
-              }}
-            >
-              {item}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-6 flex items-center justify-center gap-5">
-        <button
-          type="button"
-          onClick={() => goTo(activeIndex - 1)}
-          aria-label="Previous card"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-black/15 text-black transition-opacity hover:opacity-60"
-        >
-          <FiChevronLeft className="h-4 w-4" />
-        </button>
-
-        <div className="flex gap-2">
-          {items.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              aria-label={`Go to card ${i + 1}`}
-              aria-current={i === activeIndex}
-              className={`h-2 rounded-full transition-all ${
-                i === activeIndex ? "w-6 bg-black" : "w-2 bg-black/20 hover:bg-black/40"
-              }`}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => goTo(activeIndex + 1)}
-          aria-label="Next card"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-black/15 text-black transition-opacity hover:opacity-60"
-        >
-          <FiChevronRight className="h-4 w-4" />
-        </button>
-      </div>
+        return (
+          <div
+            key={i}
+            className="absolute top-1/2 left-1/2"
+            style={{
+              transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale})`,
+              opacity,
+              filter: `brightness(${brightness})`,
+              zIndex: 100 - Math.round(zAbs * 10),
+              transition: dragging
+                ? "none"
+                : `transform ${TRANSITION_MS}ms cubic-bezier(0.22,1,0.36,1), opacity ${TRANSITION_MS}ms ease, filter ${TRANSITION_MS}ms ease`,
+              cursor: isActive ? "default" : "pointer",
+            }}
+            onClick={() => {
+              if (!isActive) goTo(i);
+            }}
+          >
+            {item}
+          </div>
+        );
+      })}
     </div>
   );
 }

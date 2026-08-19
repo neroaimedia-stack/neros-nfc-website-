@@ -124,11 +124,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="buy" className="mx-auto w-full max-w-6xl px-6 py-20">
+      <section id="buy" className="mx-auto w-full max-w-6xl px-6 py-12">
         <h2 className="text-center text-3xl font-bold text-black">
           Choose your card
         </h2>
-        <div className="mt-8">
+        <div className="mt-4">
           <CardCarousel items={cardItems} />
         </div>
       </section>

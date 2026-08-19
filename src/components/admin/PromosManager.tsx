@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FiCheck } from "react-icons/fi";
+import { FiCheck, FiSearch } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
 import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import ProductThumb from "@/components/admin/ProductThumb";
@@ -29,42 +29,105 @@ function ProductScopePicker({
   products,
   selected,
   discountPercent,
-  onToggle,
+  onChange,
 }: {
   products: ProductOption[];
   selected: ScopeEntry[];
   discountPercent: number;
-  onToggle: (entry: ScopeEntry) => void;
+  onChange: (next: ScopeEntry[]) => void;
 }) {
+  const [search, setSearch] = useState("");
   const discounted = discountPercent > 0 && discountPercent <= 100;
   const isSelected = (slug: string, variant: string) =>
     selected.some((s) => s.slug === slug && s.variant === variant);
 
+  const toggleOne = (entry: ScopeEntry) => {
+    onChange(
+      isSelected(entry.slug, entry.variant)
+        ? selected.filter((s) => !(s.slug === entry.slug && s.variant === entry.variant))
+        : [...selected, entry]
+    );
+  };
+
+  const query = search.trim().toLowerCase();
+  const filteredProducts = products
+    .map((p) => {
+      const allVariants = p.colors.length > 0 ? managedVariantNames(p.slug, p.colors) : [""];
+      const productMatches = !query || p.title.toLowerCase().includes(query);
+      const variantNames = allVariants.filter(
+        (v) => productMatches || (v || "whole product").toLowerCase().includes(query)
+      );
+      return { ...p, variantNames };
+    })
+    .filter((p) => p.variantNames.length > 0);
+
+  const visibleEntries: ScopeEntry[] = filteredProducts.flatMap((p) =>
+    p.variantNames.map((variant) => ({ slug: p.slug, variant }))
+  );
+  const allVisibleSelected =
+    visibleEntries.length > 0 && visibleEntries.every((v) => isSelected(v.slug, v.variant));
+
+  const toggleAllVisible = () => {
+    if (allVisibleSelected) {
+      onChange(
+        selected.filter((s) => !visibleEntries.some((v) => v.slug === s.slug && v.variant === s.variant))
+      );
+    } else {
+      const additions = visibleEntries.filter((v) => !isSelected(v.slug, v.variant));
+      onChange([...selected, ...additions]);
+    }
+  };
+
   return (
     <div>
-      <p className="text-xs font-medium text-black/50">
-        Applies to <span className="font-normal">(leave all unchecked for every product)</span>
-      </p>
-      <div className="mt-1.5 flex flex-col gap-3">
-        {products.map((p) => {
-          const variantNames = p.colors.length > 0 ? managedVariantNames(p.slug, p.colors) : [""];
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-medium text-black/50">
+          Applies to <span className="font-normal">(leave all unchecked for every product)</span>
+        </p>
+        {visibleEntries.length > 0 && (
+          <button
+            type="button"
+            onClick={toggleAllVisible}
+            className="shrink-0 text-xs font-semibold text-black underline decoration-black/30 underline-offset-2 hover:decoration-black"
+          >
+            {allVisibleSelected ? "Remove all" : "Apply to all"}
+          </button>
+        )}
+      </div>
+
+      <div className="relative mt-1.5">
+        <FiSearch className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-black/30" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search products or variants"
+          className="w-full rounded-full border border-black/15 bg-white py-1.5 pr-3 pl-8 text-xs outline-none focus:border-black"
+        />
+      </div>
+
+      <div className="mt-2 flex max-h-80 flex-col gap-3 overflow-y-auto pr-1">
+        {filteredProducts.length === 0 && (
+          <p className="py-2 text-xs text-black/40">No products match &ldquo;{search}&rdquo;.</p>
+        )}
+        {filteredProducts.map((p) => {
           const afterPrice = discounted ? p.price * (1 - discountPercent / 100) : null;
           return (
             <div key={p.slug}>
               <p className="mb-1 text-xs font-semibold text-black/70">{p.title}</p>
               <div className="flex flex-col gap-1.5">
-                {variantNames.map((variant) => {
+                {p.variantNames.map((variant) => {
                   const active = isSelected(p.slug, variant);
                   return (
                     <div
                       key={variant || "__whole__"}
                       role="button"
                       tabIndex={0}
-                      onClick={() => onToggle({ slug: p.slug, variant })}
+                      onClick={() => toggleOne({ slug: p.slug, variant })}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          onToggle({ slug: p.slug, variant });
+                          toggleOne({ slug: p.slug, variant });
                         }
                       }}
                       aria-pressed={active}
@@ -145,15 +208,6 @@ export default function PromosManager() {
         }
       });
   }, []);
-
-  const toggleScope = (entries: ScopeEntry[], setter: (next: ScopeEntry[]) => void, entry: ScopeEntry) => {
-    const exists = entries.some((s) => s.slug === entry.slug && s.variant === entry.variant);
-    setter(
-      exists
-        ? entries.filter((s) => !(s.slug === entry.slug && s.variant === entry.variant))
-        : [...entries, entry]
-    );
-  };
 
   const addPromo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,7 +293,7 @@ export default function PromosManager() {
             products={products}
             selected={scope}
             discountPercent={Number(percent)}
-            onToggle={(entry) => toggleScope(scope, setScope, entry)}
+            onChange={setScope}
           />
         )}
         {error && <p className="text-xs text-red-600">{error}</p>}
@@ -298,7 +352,7 @@ export default function PromosManager() {
                   products={products}
                   selected={editScope}
                   discountPercent={Math.round(promo.discount_rate * 100)}
-                  onToggle={(entry) => toggleScope(editScope, setEditScope, entry)}
+                  onChange={setEditScope}
                 />
                 <button
                   type="button"

@@ -29,7 +29,7 @@ export default function AdminSidebar() {
 
   return (
     <>
-      <aside className="hidden md:flex md:w-60 md:shrink-0 md:flex-col md:border-r md:border-black/10 md:bg-white">
+      <aside className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-60 md:shrink-0 md:flex-col md:overflow-y-auto md:border-r md:border-black/10 md:bg-white">
         <div className="px-6 py-6">
           <p className="text-lg font-bold tracking-tight text-black">HERNEROS</p>
           <p className="text-xs text-black/40">Admin dashboard</p>

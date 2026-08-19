@@ -8,9 +8,9 @@ type Point = { date: string; orders: number; revenuePHP: number };
 type Metric = "revenue" | "orders";
 type Granularity = "hour" | "day" | "week" | "month";
 
-const BAR_HUE = "#2a78d6";
-const BAR_HUE_HOVER = "#3987e5";
-const LINE_HUE = "#184f95";
+const BAR_HUE = "#008300";
+const BAR_HUE_HOVER = "#00a300";
+const LINE_HUE = "#005c00";
 const GRID_COLOR = "#e5e5e3";
 const CHART_HEIGHT = 220;
 const PADDING_TOP = 20;
@@ -184,7 +184,7 @@ function ChartBody({
   const innerWidth = chartWidth - PADDING_LEFT - PADDING_RIGHT;
   const innerHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
   const bandWidth = innerWidth / n;
-  const barWidth = Math.min(24, Math.max(2, bandWidth - 4));
+  const barWidth = Math.min(8, Math.max(3, bandWidth * 0.3));
   const labelEvery = Math.max(1, Math.ceil(n / 7));
 
   const valueOf = (point: Point) => (metric === "revenue" ? point.revenuePHP : point.orders);
@@ -240,7 +240,7 @@ function ChartBody({
                 x={x}
                 y={y}
                 width={barWidth}
-                height={Math.max(barHeight, value > 0 ? 2 : 0)}
+                height={Math.max(barHeight, 2)}
                 rx={Math.min(4, barWidth / 2)}
                 fill={isHovered ? BAR_HUE_HOVER : BAR_HUE}
                 fillOpacity={0.55}

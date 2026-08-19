@@ -153,7 +153,7 @@ function VariantRow({
   return (
     <div
       className={`flex flex-col gap-3 rounded-xl border p-3 sm:flex-row ${
-        derived ? "border-black/5 bg-black/[0.015] sm:ml-8" : "border-black/10"
+        derived ? "border-black/5 bg-black/[0.015]" : "border-black/10"
       }`}
     >
       <div className="flex shrink-0 flex-col items-center gap-1.5">

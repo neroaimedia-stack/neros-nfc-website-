@@ -459,7 +459,7 @@ function ProductRow({
   const outOfStock = trackStock && Number(stockQuantity) <= 0;
 
   return (
-    <div className="rounded-2xl border border-black/10 bg-white p-5">
+    <div className="rounded-2xl border border-black/10 bg-white shadow-sm p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="font-semibold text-black">{product.title}</p>
@@ -664,7 +664,7 @@ function AddProductForm({ onCreated }: { onCreated: () => void }) {
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-white p-4">
+    <form onSubmit={submit} className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-white shadow-sm p-4">
       <p className="text-sm font-semibold text-black">Add product</p>
       <div className="flex gap-3">
         <input

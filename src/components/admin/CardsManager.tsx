@@ -231,7 +231,7 @@ export default function CardsManager() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
         <form
           onSubmit={generate}
-          className="flex w-full flex-col gap-3 rounded-2xl border border-black/10 bg-white p-4 lg:max-w-xl"
+          className="flex w-full flex-col gap-3 rounded-2xl border border-black/10 bg-white shadow-sm p-4 lg:max-w-xl"
         >
           <div className="flex gap-3">
             <div className="relative min-w-0 flex-1">
@@ -267,7 +267,7 @@ export default function CardsManager() {
           </button>
         </form>
 
-        <div className="flex flex-1 flex-col justify-between gap-4 rounded-2xl border border-black/10 bg-white p-4">
+        <div className="flex flex-1 flex-col justify-between gap-4 rounded-2xl border border-black/10 bg-white shadow-sm p-4">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-semibold text-black">Overview</p>
             <button
@@ -289,7 +289,7 @@ export default function CardsManager() {
       </div>
 
       {justGenerated.length > 0 && (
-        <div className="mt-4 max-w-xl rounded-2xl border border-black/10 bg-white p-4">
+        <div className="mt-4 max-w-xl rounded-2xl border border-black/10 bg-white shadow-sm p-4">
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-semibold text-black">
               Just generated ({justGenerated.length})
@@ -367,7 +367,7 @@ export default function CardsManager() {
             return (
               <div
                 key={card.id}
-                className="overflow-hidden rounded-2xl border border-black/10 bg-white"
+                className="overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm"
               >
                 <div className="flex items-center gap-2 px-4 py-3 sm:px-5">
                   <button

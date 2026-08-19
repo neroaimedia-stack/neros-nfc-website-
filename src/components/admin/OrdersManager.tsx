@@ -85,7 +85,7 @@ export default function OrdersManager() {
     <div>
       {analytics && (
         <div className="mb-6 flex flex-wrap gap-4">
-          <div className="rounded-2xl border border-black/10 bg-white p-4">
+          <div className="rounded-2xl border border-black/10 bg-white shadow-sm p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-black/50">
               Total revenue
             </p>
@@ -112,7 +112,7 @@ export default function OrdersManager() {
         {orders.map((order) => {
           const isOpen = expanded === order.id;
           return (
-            <div key={order.id} className="rounded-2xl border border-black/10 bg-white">
+            <div key={order.id} className="rounded-2xl border border-black/10 bg-white shadow-sm">
               <button
                 type="button"
                 onClick={() => setExpanded(isOpen ? null : order.id)}

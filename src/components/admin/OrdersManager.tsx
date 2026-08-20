@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FiChevronDown } from "react-icons/fi";
+import { FiBarChart2, FiChevronDown, FiClock, FiTrendingUp } from "react-icons/fi";
+import type { IconType } from "react-icons";
 import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
 
 type OrderItem = {
@@ -46,6 +47,29 @@ const STATUS_STYLES: Record<string, string> = {
   cancelled: "bg-red-100 text-red-700",
 };
 
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: IconType;
+  label: string;
+  value: string;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-black/10 bg-white shadow-sm p-5">
+      <div className="flex items-center gap-2 text-black/50">
+        <Icon className="h-4 w-4 shrink-0" />
+        <p className="text-xs font-medium uppercase tracking-wide">{label}</p>
+      </div>
+      <p className="mt-2 text-2xl font-bold text-black">{value}</p>
+      {hint && <p className="mt-1 text-xs text-black/40">{hint}</p>}
+    </div>
+  );
+}
+
 export default function OrdersManager() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -73,12 +97,15 @@ export default function OrdersManager() {
 
   const analytics = useMemo(() => {
     if (!orders) return null;
-    const revenuePHP = orders
-      .filter((o) => o.status !== "cancelled")
-      .reduce((sum, o) => sum + fromUSD(toUSD(Number(o.total), o.currency), "PHP"), 0);
+    const billable = orders.filter((o) => o.status !== "cancelled");
+    const revenuePHP = billable.reduce(
+      (sum, o) => sum + fromUSD(toUSD(Number(o.total), o.currency), "PHP"),
+      0
+    );
+    const avgOrderValuePHP = billable.length ? revenuePHP / billable.length : 0;
     const counts: Record<string, number> = {};
     for (const o of orders) counts[o.status] = (counts[o.status] ?? 0) + 1;
-    return { revenuePHP, counts, total: orders.length };
+    return { revenuePHP, avgOrderValuePHP, counts, total: orders.length };
   }, [orders]);
 
   if (orders === null) {
@@ -88,16 +115,27 @@ export default function OrdersManager() {
   return (
     <div>
       {analytics && (
-        <div className="mb-6 flex flex-wrap gap-4">
-          <div className="rounded-2xl border border-black/10 bg-white shadow-sm p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-black/50">
-              Total revenue
-            </p>
-            <p className="mt-1 text-xl font-bold text-black">
-              {formatCurrency(analytics.revenuePHP, "PHP")}
-            </p>
+        <div className="mb-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <StatCard
+              icon={FiTrendingUp}
+              label="Total revenue"
+              value={formatCurrency(analytics.revenuePHP, "PHP")}
+              hint="Excludes cancelled orders"
+            />
+            <StatCard
+              icon={FiClock}
+              label="Pending orders"
+              value={String(analytics.counts.pending ?? 0)}
+              hint={`${analytics.total} order${analytics.total === 1 ? "" : "s"} total`}
+            />
+            <StatCard
+              icon={FiBarChart2}
+              label="Avg. order value"
+              value={formatCurrency(analytics.avgOrderValuePHP, "PHP")}
+            />
           </div>
-          <div className="flex flex-wrap gap-2 self-center">
+          <div className="mt-4 flex flex-wrap gap-2">
             {STATUS_OPTIONS.filter((s) => analytics.counts[s]).map((s) => (
               <span
                 key={s}

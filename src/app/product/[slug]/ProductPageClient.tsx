@@ -724,6 +724,7 @@ export default function ProductPageClient({
         myRating={reviewsData.myRating}
         myMessage={reviewsData.myMessage}
         hasMyReview={reviewsData.hasMyReview}
+        canReview={reviewsData.canReview}
         submitReview={reviewsData.submitReview}
       />
 

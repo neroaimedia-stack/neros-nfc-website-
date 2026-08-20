@@ -28,6 +28,7 @@ export default function ReviewsSection({
   myRating,
   myMessage,
   hasMyReview,
+  canReview,
   submitReview,
 }: {
   productTitle: string;
@@ -37,6 +38,7 @@ export default function ReviewsSection({
   myRating: number;
   myMessage: string;
   hasMyReview: boolean;
+  canReview: boolean;
   submitReview: (
     rating: number,
     message: string
@@ -79,13 +81,37 @@ export default function ReviewsSection({
       <h2 className="text-xl font-bold text-black">Reviews</h2>
 
       <div className="mt-6 rounded-2xl border border-black/10 p-6">
-        {user ? (
+        {!user ? (
+          <p className="text-sm text-black/60">
+            <Link
+              href="/account"
+              className="font-semibold text-black underline underline-offset-2"
+            >
+              Sign in
+            </Link>{" "}
+            to leave a review.
+          </p>
+        ) : hasMyReview ? (
           <>
-            <p className="text-sm font-semibold text-black">
-              {hasMyReview ? "Update your review" : "Leave a review"}
-            </p>
+            <p className="text-sm font-semibold text-black">Your review</p>
             <p className="mt-1 text-xs text-black/40">
-              Posted anonymously — your name is never shown.
+              Reviews can&apos;t be edited once submitted.
+            </p>
+            <div className="mt-3">
+              <StarDisplay value={myRating} className="text-2xl" />
+            </div>
+            {myMessage && <p className="mt-3 text-sm text-black/70">{myMessage}</p>}
+          </>
+        ) : !canReview ? (
+          <p className="text-sm text-black/60">
+            Only customers who&apos;ve ordered {productTitle} can leave a review.
+          </p>
+        ) : (
+          <>
+            <p className="text-sm font-semibold text-black">Leave a review</p>
+            <p className="mt-1 text-xs text-black/40">
+              Posted anonymously — your name is never shown. You can only review
+              once, so make it count.
             </p>
             <div className="mt-3">
               <StarPicker value={rating} onChange={setRating} />
@@ -104,25 +130,9 @@ export default function ReviewsSection({
               disabled={submitting}
               className="mt-3 rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:opacity-50"
             >
-              {submitting
-                ? "Saving…"
-                : done
-                  ? "Saved ✓"
-                  : hasMyReview
-                    ? "Update review"
-                    : "Submit review"}
+              {submitting ? "Saving…" : done ? "Saved ✓" : "Submit review"}
             </button>
           </>
-        ) : (
-          <p className="text-sm text-black/60">
-            <Link
-              href="/account"
-              className="font-semibold text-black underline underline-offset-2"
-            >
-              Sign in
-            </Link>{" "}
-            to leave a review.
-          </p>
         )}
       </div>
 

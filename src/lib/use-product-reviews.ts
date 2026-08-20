@@ -20,6 +20,11 @@ export function useProductReviews(productSlug: string) {
   const [myRating, setMyRating] = useState(0);
   const [myMessage, setMyMessage] = useState("");
   const [hasMyReview, setHasMyReview] = useState(false);
+  // Whether the signed-in user has an order containing this product —
+  // reviews are limited to verified purchasers, checked server-side too
+  // (RLS insert policy calls the same has_ordered_product function), so
+  // this is purely for UI messaging, not the actual enforcement.
+  const [canReview, setCanReview] = useState(false);
 
   const load = useCallback(async () => {
     if (!productSlug) {
@@ -61,6 +66,7 @@ export function useProductReviews(productSlug: string) {
       setHasMyReview(false);
       setMyRating(0);
       setMyMessage("");
+      setCanReview(false);
       return;
     }
     supabase
@@ -73,28 +79,36 @@ export function useProductReviews(productSlug: string) {
           setHasMyReview(true);
           setMyRating(data.rating);
           setMyMessage(data.message ?? "");
+        } else {
+          setHasMyReview(false);
         }
       });
+    supabase
+      .rpc("has_ordered_product", { p_product_slug: productSlug })
+      .then(({ data }) => setCanReview(Boolean(data)));
   }, [user, productSlug]);
 
   const submitReview = useCallback(
     async (rating: number, message: string) => {
       if (!user) return { error: "Not signed in" };
       try {
-        const { error } = await supabase.from("product_reviews").upsert(
-          {
-            product_slug: productSlug,
-            user_id: user.id,
-            rating,
-            message: message.trim() || null,
-          },
-          { onConflict: "product_slug,user_id" }
-        );
+        // A plain insert, not an upsert — reviews are one-time. A repeat
+        // attempt hits the (product_slug, user_id) unique constraint and
+        // fails, which the UI never offers a path to anyway since the
+        // form is replaced by a read-only view once hasMyReview is true.
+        const { error } = await supabase.from("product_reviews").insert({
+          product_slug: productSlug,
+          user_id: user.id,
+          rating,
+          message: message.trim() || null,
+        });
         if (!error) {
           setHasMyReview(true);
+          setMyRating(rating);
+          setMyMessage(message.trim());
           // A failure here (e.g. a transient network error) must not throw
           // past this point, or the caller's "submitting" state never
-          // clears and the update button looks permanently stuck.
+          // clears and the submit button looks permanently stuck.
           await load().catch(() => {});
         }
         return { error: error?.message ?? null };
@@ -115,6 +129,7 @@ export function useProductReviews(productSlug: string) {
     myRating,
     myMessage,
     hasMyReview,
+    canReview,
     submitReview,
   };
 }

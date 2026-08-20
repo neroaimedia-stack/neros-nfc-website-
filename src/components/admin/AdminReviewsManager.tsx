@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FiTrash2 } from "react-icons/fi";
+import { FiChevronDown, FiTrash2 } from "react-icons/fi";
 import { StarDisplay, StarPicker } from "@/components/StarRating";
 
 type Review = {
@@ -124,18 +124,21 @@ export default function AdminReviewsManager() {
         className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-white shadow-sm p-4"
       >
         <p className="text-sm font-semibold text-black">Add a review</p>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-          <select
-            value={newSlug}
-            onChange={(e) => setNewSlug(e.target.value)}
-            className="rounded-xl border border-black/15 bg-white px-4 py-2.5 text-sm outline-none focus:border-black sm:w-56"
-          >
-            {products.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.title}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:w-72">
+            <select
+              value={newSlug}
+              onChange={(e) => setNewSlug(e.target.value)}
+              className="w-full appearance-none rounded-xl border border-black/15 bg-white py-2.5 pr-10 pl-4 text-sm outline-none focus:border-black"
+            >
+              {products.map((p) => (
+                <option key={p.slug} value={p.slug}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+            <FiChevronDown className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 text-black/40" />
+          </div>
           <StarPicker value={newRating} onChange={setNewRating} />
         </div>
         <textarea
@@ -155,20 +158,23 @@ export default function AdminReviewsManager() {
         </button>
       </form>
 
-      <div className="mt-8 flex items-center justify-between gap-3">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold text-black">All reviews</p>
-        <select
-          value={filterSlug}
-          onChange={(e) => setFilterSlug(e.target.value)}
-          className="rounded-full border border-black/15 bg-white px-3.5 py-1.5 text-xs font-medium outline-none focus:border-black"
-        >
-          <option value="all">All products</option>
-          {products.map((p) => (
-            <option key={p.slug} value={p.slug}>
-              {p.title}
-            </option>
-          ))}
-        </select>
+        <div className="relative min-w-[10rem]">
+          <select
+            value={filterSlug}
+            onChange={(e) => setFilterSlug(e.target.value)}
+            className="w-full appearance-none rounded-full border border-black/15 bg-white py-1.5 pr-9 pl-3.5 text-xs font-medium outline-none focus:border-black"
+          >
+            <option value="all">All products</option>
+            {products.map((p) => (
+              <option key={p.slug} value={p.slug}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+          <FiChevronDown className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-black/40" />
+        </div>
       </div>
 
       {reviews === null && <p className="mt-3 text-sm text-black/40">Loading…</p>}

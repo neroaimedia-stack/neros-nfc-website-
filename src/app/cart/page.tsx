@@ -9,6 +9,7 @@ import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD } from "@/lib/currency";
 import { computeTotals } from "@/lib/promo";
 import ProductThumb from "@/components/ProductThumb";
+import { FiInfo } from "react-icons/fi";
 
 export default function CartPage() {
   const router = useRouter();
@@ -116,14 +117,18 @@ export default function CartPage() {
       <h1 className="text-2xl font-bold text-black">Your cart</h1>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap items-center gap-1.5 rounded-full bg-black/[0.04] py-2 px-4 text-xs font-medium text-black/60">
-          <span>PH orders only — international is bulk-only,</span>
-          <a
-            href="mailto:herneros.ph@gmail.com?subject=International%20Bulk%20Order"
-            className="shrink-0 font-semibold text-black underline underline-offset-2 hover:text-black/70"
-          >
-            email us
-          </a>
+        <div className="flex items-center gap-1.5 text-xs font-medium text-black/60">
+          <FiInfo className="h-3.5 w-3.5 shrink-0 text-black/40" />
+          <span>
+            PH orders only —{" "}
+            <a
+              href="mailto:herneros.ph@gmail.com?subject=International%20Bulk%20Order"
+              className="font-semibold text-black underline underline-offset-2 hover:text-black/70"
+            >
+              email us
+            </a>{" "}
+            to order bulk outside PH.
+          </span>
         </div>
         <button
           type="button"

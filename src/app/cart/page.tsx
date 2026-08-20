@@ -161,9 +161,12 @@ export default function CartPage() {
           phone: phone.trim(),
           shipping_country: shippingAddress.country.trim(),
           shipping_region: shippingAddress.region.trim(),
+          shipping_province: shippingAddress.province.trim() || null,
           shipping_city: shippingAddress.city.trim(),
-          shipping_postal_code: shippingAddress.postalCode.trim(),
+          shipping_barangay: shippingAddress.barangay.trim() || null,
+          shipping_house_no: shippingAddress.houseNo.trim() || null,
           shipping_street: shippingAddress.street.trim(),
+          shipping_postal_code: shippingAddress.postalCode.trim(),
           shipping_note: shippingNote.trim() || null,
         })
         .select("id")
@@ -188,9 +191,12 @@ export default function CartPage() {
             monthly_fee: item.monthlyFee ?? null,
             ship_country: override?.country.trim() || null,
             ship_region: override?.region.trim() || null,
+            ship_province: override?.province.trim() || null,
             ship_city: override?.city.trim() || null,
-            ship_postal_code: override?.postalCode.trim() || null,
+            ship_barangay: override?.barangay.trim() || null,
+            ship_house_no: override?.houseNo.trim() || null,
             ship_street: override?.street.trim() || null,
+            ship_postal_code: override?.postalCode.trim() || null,
           };
         })
       );

@@ -21,9 +21,12 @@ type OrderItem = {
   monthly_fee: number | null;
   ship_country: string | null;
   ship_region: string | null;
+  ship_province: string | null;
   ship_city: string | null;
-  ship_postal_code: string | null;
+  ship_barangay: string | null;
+  ship_house_no: string | null;
   ship_street: string | null;
+  ship_postal_code: string | null;
 };
 
 type Order = {
@@ -40,9 +43,12 @@ type Order = {
   phone: string | null;
   shipping_country: string | null;
   shipping_region: string | null;
+  shipping_province: string | null;
   shipping_city: string | null;
-  shipping_postal_code: string | null;
+  shipping_barangay: string | null;
+  shipping_house_no: string | null;
   shipping_street: string | null;
+  shipping_postal_code: string | null;
   shipping_note: string | null;
   order_items: OrderItem[];
 };
@@ -52,9 +58,12 @@ function itemOverrideAddress(item: OrderItem) {
   return formatAddress({
     country: item.ship_country ?? "",
     region: item.ship_region ?? "",
+    province: item.ship_province ?? "",
     city: item.ship_city ?? "",
-    postalCode: item.ship_postal_code ?? "",
+    barangay: item.ship_barangay ?? "",
+    houseNo: item.ship_house_no ?? "",
     street: item.ship_street ?? "",
+    postalCode: item.ship_postal_code ?? "",
   });
 }
 
@@ -237,9 +246,12 @@ export default function OrdersManager() {
                             {formatAddress({
                               country: order.shipping_country ?? "",
                               region: order.shipping_region ?? "",
+                              province: order.shipping_province ?? "",
                               city: order.shipping_city ?? "",
-                              postalCode: order.shipping_postal_code ?? "",
+                              barangay: order.shipping_barangay ?? "",
+                              houseNo: order.shipping_house_no ?? "",
                               street: order.shipping_street ?? "",
+                              postalCode: order.shipping_postal_code ?? "",
                             })}
                           </p>
                         )}

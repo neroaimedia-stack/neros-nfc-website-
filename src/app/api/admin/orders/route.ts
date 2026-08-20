@@ -10,7 +10,7 @@ export async function GET() {
   const { data, error } = await getSupabaseAdmin()
     .from("orders")
     .select(
-      "id, subtotal, discount, total, promo_code, currency, status, created_at, customer_name, email, phone, shipping_country, shipping_region, shipping_city, shipping_postal_code, shipping_street, shipping_note, order_items(id, product_slug, title, color, price, quantity, notes, name, job_title, qr_destination_link, nfc_destination_link, monthly_fee, ship_country, ship_region, ship_city, ship_postal_code, ship_street)"
+      "id, subtotal, discount, total, promo_code, currency, status, created_at, customer_name, email, phone, shipping_country, shipping_region, shipping_province, shipping_city, shipping_barangay, shipping_house_no, shipping_street, shipping_postal_code, shipping_note, order_items(id, product_slug, title, color, price, quantity, notes, name, job_title, qr_destination_link, nfc_destination_link, monthly_fee, ship_country, ship_region, ship_province, ship_city, ship_barangay, ship_house_no, ship_street, ship_postal_code)"
     )
     .order("created_at", { ascending: false })
     .limit(300);

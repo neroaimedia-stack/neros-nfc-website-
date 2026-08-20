@@ -116,13 +116,13 @@ export default function CartPage() {
       <h1 className="text-2xl font-bold text-black">Your cart</h1>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap items-center gap-2 rounded-full bg-black/[0.04] py-1.5 pr-1.5 pl-4 text-xs font-medium text-black/60">
-          <span>PH orders only — international is bulk-only</span>
+        <div className="flex flex-wrap items-center gap-1.5 rounded-full bg-black/[0.04] py-2 px-4 text-xs font-medium text-black/60">
+          <span>PH orders only — international is bulk-only,</span>
           <a
             href="mailto:herneros.ph@gmail.com?subject=International%20Bulk%20Order"
-            className="shrink-0 rounded-full bg-black px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-80"
+            className="shrink-0 font-semibold text-black underline underline-offset-2 hover:text-black/70"
           >
-            Email us
+            email us
           </a>
         </div>
         <button

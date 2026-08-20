@@ -346,19 +346,6 @@ function CheckoutPageInner() {
               ? "Applies to every item, unless you set a different address for one below."
               : "Where should we send your order?"}
           </p>
-          <div className="mt-2 rounded-lg bg-black/[0.03] px-3 py-3 text-xs text-black/50">
-            <p>
-              We only support direct orders from the Philippines on our website. If
-              you&apos;re outside the Philippines, we only support bulk orders
-              internationally — contact us via email to arrange yours.
-            </p>
-            <a
-              href="mailto:herneros.ph@gmail.com?subject=International%20Bulk%20Order"
-              className="mt-2 inline-block rounded-full border border-black/20 px-3.5 py-1.5 text-xs font-semibold text-black transition-colors hover:border-black hover:bg-black hover:text-white"
-            >
-              Email us: International Bulk Order
-            </a>
-          </div>
           <div className="mt-3">
             <AddressFields
               idPrefix="default"

@@ -230,22 +230,6 @@ export default function OrdersManager() {
               </button>
             ))}
           </div>
-
-          <div className="mt-4 flex flex-col gap-1.5 rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold tracking-wide text-black/50 uppercase">
-              What each status means
-            </p>
-            {STATUS_OPTIONS.map((s) => (
-              <p key={s} className="text-xs text-black/60">
-                <span
-                  className={`mr-1.5 inline-block rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${STATUS_STYLES[s]}`}
-                >
-                  {s}
-                </span>
-                {STATUS_DEFINITIONS[s]}
-              </p>
-            ))}
-          </div>
         </div>
       )}
 

@@ -6,7 +6,8 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FiCheck, FiUpload } from "react-icons/fi";
 import { useCart } from "@/lib/cart-context";
-import { supabaseAnon } from "@/lib/supabase-anon";
+import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/lib/supabase";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD } from "@/lib/currency";
 import { computeTotals } from "@/lib/promo";
@@ -37,6 +38,7 @@ export default function CheckoutPage() {
 function CheckoutPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const { items: cartItems, removeItems, clearCart, discountRate, promoScope, appliedCode } =
     useCart();
   const currency = useCurrency();
@@ -48,12 +50,20 @@ function CheckoutPageInner() {
     : cartItems;
   const isPartial = selectedIds !== null;
 
+  const checkoutPath = `/checkout${idsParam ? `?items=${idsParam}` : ""}`;
+
   const redirectedRef = useRef(false);
   useEffect(() => {
     if (items.length === 0 && !redirectedRef.current) {
       router.replace("/cart");
     }
   }, [items.length, router]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace(`/account?next=${encodeURIComponent(checkoutPath)}`);
+    }
+  }, [authLoading, user, checkoutPath, router]);
 
   const [step, setStep] = useState(1);
   const [stepError, setStepError] = useState("");
@@ -63,6 +73,9 @@ function CheckoutPageInner() {
   const [customerName, setCustomerName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  // Falls back to the signed-in account's email until the customer types
+  // their own, instead of copying it into state via an effect.
+  const effectiveEmail = email || user?.email || "";
 
   // Step 2: shipping
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
@@ -113,7 +126,7 @@ function CheckoutPageInner() {
 
   const checkoutBody = [
     `Recipient: ${customerName}`,
-    `Email: ${email}`,
+    `Email: ${effectiveEmail}`,
     `Phone: ${phone}`,
     `Shipping address: ${formatAddress(shippingAddress)}`,
     shippingNote ? `Delivery note: ${shippingNote}` : "",
@@ -148,7 +161,7 @@ function CheckoutPageInner() {
   const goNext = () => {
     setStepError("");
     if (step === 1) {
-      if (!customerName.trim() || !email.trim() || !phone.trim()) {
+      if (!customerName.trim() || !effectiveEmail.trim() || !phone.trim()) {
         setStepError("Please fill in your name, email, and phone number.");
         return;
       }
@@ -196,27 +209,40 @@ function CheckoutPageInner() {
     setCheckingOut(true);
     setStepError("");
     try {
+      // getSession() refreshes an expired access token if the refresh
+      // token is still valid, so a session that went stale while filling
+      // out the form doesn't get silently rejected by the RLS-scoped
+      // insert below.
+      const { data: sessionData } = await supabase.auth.getSession();
+      const authedUserId = sessionData.session?.user.id;
+      if (!authedUserId) {
+        setStepError("Your session expired. Please sign in again.");
+        router.replace(`/account?next=${encodeURIComponent(checkoutPath)}`);
+        return;
+      }
+
       let paymentProofPath: string | null = null;
       if (proofFile) {
         const ext = proofFile.name.split(".").pop() || "jpg";
         const path = `${crypto.randomUUID()}.${ext}`;
-        const { error: uploadError } = await supabaseAnon.storage
+        const { error: uploadError } = await supabase.storage
           .from("payment-proofs")
           .upload(path, proofFile);
         if (uploadError) throw uploadError;
         paymentProofPath = path;
       }
 
-      const { data: order, error: orderError } = await supabaseAnon
+      const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
+          user_id: authedUserId,
           subtotal,
           discount,
           total,
           promo_code: appliedCode,
           currency: "USD",
           customer_name: customerName.trim(),
-          email: email.trim(),
+          email: effectiveEmail.trim(),
           phone: phone.trim(),
           shipping_country: shippingAddress.country.trim(),
           shipping_region: shippingAddress.region.trim(),
@@ -236,7 +262,7 @@ function CheckoutPageInner() {
         .single();
       if (orderError) throw orderError;
 
-      const { error: itemsError } = await supabaseAnon.from("order_items").insert(
+      const { error: itemsError } = await supabase.from("order_items").insert(
         items.map((item) => {
           const override = itemOverridesOn[item.id] ? itemAddress(item.id) : null;
           return {
@@ -279,10 +305,12 @@ function CheckoutPageInner() {
     }
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 || authLoading || !user) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-6 py-24 text-center">
-        <p className="text-sm text-black/40">Redirecting…</p>
+        <p className="text-sm text-black/40">
+          {authLoading ? "Loading…" : "Redirecting…"}
+        </p>
       </main>
     );
   }
@@ -350,7 +378,7 @@ function CheckoutPageInner() {
             />
             <input
               type="email"
-              value={email}
+              value={effectiveEmail}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
               autoComplete="email"
@@ -492,7 +520,7 @@ function CheckoutPageInner() {
 
           <div className="mt-4 rounded-xl bg-black/[0.03] p-3 text-sm text-black/60">
             <p className="text-black">{customerName}</p>
-            <p>{email} · {phone}</p>
+            <p>{effectiveEmail} · {phone}</p>
             <p className="mt-1">{formatAddress(shippingAddress)}</p>
             <p className="mt-1">
               Paid by {paymentPayerName} · Ref: {paymentReference}

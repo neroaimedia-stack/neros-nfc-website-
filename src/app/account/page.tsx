@@ -2,9 +2,10 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
+import { formatCurrency } from "@/lib/currency";
 import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
@@ -16,11 +17,38 @@ type OwnedCard = {
   claimed_at: string | null;
 };
 
+type OrderSummary = {
+  id: string;
+  total: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  order_items: { id: string }[];
+};
+
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
   "business-card": "Business Card",
   "review-card": "Review Card",
   "order-card": "Order Card",
   "wifi-card": "Wifi Card",
+};
+
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  pending: "Payment pending verification",
+  paid: "Payment confirmed",
+  processing: "Preparing your order",
+  shipped: "On the way",
+  completed: "Delivered",
+  cancelled: "Cancelled",
+};
+
+const ORDER_STATUS_STYLES: Record<string, string> = {
+  pending: "bg-amber-100 text-amber-700",
+  paid: "bg-blue-100 text-blue-700",
+  processing: "bg-blue-100 text-blue-700",
+  shipped: "bg-purple-100 text-purple-700",
+  completed: "bg-green-100 text-green-700",
+  cancelled: "bg-red-100 text-red-700",
 };
 
 function CardThumbnail({ productType }: { productType: string }) {
@@ -84,6 +112,7 @@ function SignedInAccount({
   onSignOut: () => Promise<void>;
 }) {
   const [cards, setCards] = useState<OwnedCard[] | null>(null);
+  const [orders, setOrders] = useState<OrderSummary[] | null>(null);
   const [code, setCode] = useState(prefillCode);
   const [claimError, setClaimError] = useState("");
   const [claiming, setClaiming] = useState(false);
@@ -97,8 +126,18 @@ function SignedInAccount({
     setCards(data ?? []);
   };
 
+  const loadOrders = async () => {
+    const { data } = await supabase
+      .from("orders")
+      .select("id, total, currency, status, created_at, order_items(id)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    setOrders(data ?? []);
+  };
+
   useEffect(() => {
     loadCards();
+    loadOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
@@ -123,22 +162,24 @@ function SignedInAccount({
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-16">
       <h1 className="text-center text-3xl font-bold text-black">
-        Your cards
+        Your account
       </h1>
       <p className="mt-3 text-center text-sm text-black/60">{userEmail}</p>
 
-      <div className="mt-10 rounded-3xl border border-black/10 p-8 shadow-sm">
+      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+      <div className="rounded-3xl border border-black/10 p-8 shadow-sm">
+        <p className="text-sm font-semibold text-black">Your cards</p>
         {cards === null ? (
-          <p className="text-center text-sm text-black/40">Loading…</p>
+          <p className="mt-4 text-center text-sm text-black/40">Loading…</p>
         ) : cards.length === 0 ? (
-          <p className="text-center text-sm text-black/60">
+          <p className="mt-4 text-center text-sm text-black/60">
             You don&apos;t have any cards yet — tap or scan your card to set
             it up.
           </p>
         ) : (
-          <div className="flex flex-col divide-y divide-black/10">
+          <div className="mt-4 flex flex-col divide-y divide-black/10">
             {cards.map((card) => (
               <Link
                 key={card.id}
@@ -207,7 +248,53 @@ function SignedInAccount({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3">
+      <div className="rounded-3xl border border-black/10 p-8 shadow-sm">
+        <p className="text-sm font-semibold text-black">Your orders</p>
+        {orders === null ? (
+          <p className="mt-4 text-center text-sm text-black/40">Loading…</p>
+        ) : orders.length === 0 ? (
+          <p className="mt-4 text-center text-sm text-black/60">
+            No orders yet — your order status will show up here once you
+            check out.
+          </p>
+        ) : (
+          <div className="mt-4 flex flex-col divide-y divide-black/10">
+            {orders.map((order) => (
+              <div key={order.id} className="py-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-black">
+                      Order #{order.id.slice(0, 8)}
+                    </p>
+                    <p className="text-xs text-black/40">
+                      {new Date(order.created_at).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}{" "}
+                      · {order.order_items.length} item
+                      {order.order_items.length === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-sm font-semibold text-black">
+                    {formatCurrency(order.total, order.currency)}
+                  </span>
+                </div>
+                <span
+                  className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                    ORDER_STATUS_STYLES[order.status] ?? "bg-black/5 text-black/60"
+                  }`}
+                >
+                  {ORDER_STATUS_LABELS[order.status] ?? order.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      </div>
+
+      <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-3">
         <Link
           href="/#buy"
           className="rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
@@ -242,8 +329,11 @@ export default function AccountPage() {
 
 function AccountPageInner() {
   const { user, loading, signIn, signUp, signOut } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const prefillCode = searchParams.get("code") ?? "";
+  const nextPath = searchParams.get("next");
+  const fromCheckout = nextPath?.startsWith("/checkout") ?? false;
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
@@ -280,10 +370,22 @@ function AccountPageInner() {
     if (authError) setError(authError);
   };
 
+  useEffect(() => {
+    if (user && nextPath) router.replace(nextPath);
+  }, [user, nextPath, router]);
+
   if (loading) {
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16 text-center">
         <p className="text-sm text-black/40">Loading…</p>
+      </main>
+    );
+  }
+
+  if (user && nextPath) {
+    return (
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16 text-center">
+        <p className="text-sm text-black/40">Redirecting…</p>
       </main>
     );
   }
@@ -302,11 +404,12 @@ function AccountPageInner() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16">
       <h1 className="text-center text-3xl font-bold text-black">
-        Set up your card
+        {fromCheckout ? "Sign in to check out" : "Set up your card"}
       </h1>
       <p className="mt-3 text-center text-sm text-black/60">
-        Log in to manage your profile, or create an account to claim a new
-        card.
+        {fromCheckout
+          ? "Log in or create an account to place your order."
+          : "Log in to manage your profile, or create an account to claim a new card."}
       </p>
       {prefillCode && (
         <p className="mt-2 text-center text-xs text-black/40">

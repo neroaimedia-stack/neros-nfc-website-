@@ -82,6 +82,26 @@ const STATUS_STYLES: Record<string, string> = {
   cancelled: "bg-red-100 text-red-700",
 };
 
+const STATUS_DOT: Record<string, string> = {
+  pending: "bg-amber-500",
+  paid: "bg-blue-500",
+  processing: "bg-blue-400",
+  shipped: "bg-purple-500",
+  completed: "bg-green-500",
+  cancelled: "bg-red-500",
+};
+
+// Order status definitions, shown as help text so admins know what each
+// stage means and when to move an order into it.
+const STATUS_DEFINITIONS: Record<string, string> = {
+  pending: "Order placed, payment not yet verified against the reference/screenshot provided.",
+  paid: "Payment verified — ready to personalize/prepare for shipment.",
+  processing: "Being prepared: card personalization, QR/NFC programming, packing.",
+  shipped: "Handed off to the courier — customer's order is in transit.",
+  completed: "Delivered and confirmed received by the customer.",
+  cancelled: "Order will not be fulfilled (no payment, customer request, etc.).",
+};
+
 function StatCard({
   icon: Icon,
   label,
@@ -177,29 +197,53 @@ export default function OrdersManager() {
               value={formatCurrency(analytics.avgOrderValuePHP, "PHP")}
             />
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
             <button
               type="button"
               onClick={() => setFilterStatus("all")}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
+              className={`rounded-2xl border bg-white px-3.5 py-3 text-left shadow-sm transition-colors ${
                 filterStatus === "all"
-                  ? "bg-black text-white"
-                  : "bg-black/5 text-black/60 hover:bg-black/10"
+                  ? "border-black ring-1 ring-black"
+                  : "border-black/10 hover:border-black/25"
               }`}
             >
-              All: {analytics.total}
+              <p className="text-xs font-medium text-black/50">All</p>
+              <p className="mt-1 text-lg font-bold text-black">{analytics.total}</p>
             </button>
             {STATUS_OPTIONS.map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setFilterStatus(s)}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-opacity ${STATUS_STYLES[s]} ${
-                  filterStatus === s ? "ring-2 ring-black/40" : "opacity-60 hover:opacity-100"
+                title={STATUS_DEFINITIONS[s]}
+                className={`rounded-2xl border bg-white px-3.5 py-3 text-left shadow-sm transition-colors ${
+                  filterStatus === s
+                    ? "border-black ring-1 ring-black"
+                    : "border-black/10 hover:border-black/25"
                 }`}
               >
-                {s}: {analytics.counts[s] ?? 0}
+                <div className="flex items-center gap-1.5">
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[s]}`} />
+                  <p className="text-xs font-medium capitalize text-black/50">{s}</p>
+                </div>
+                <p className="mt-1 text-lg font-bold text-black">{analytics.counts[s] ?? 0}</p>
               </button>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-col gap-1.5 rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
+            <p className="text-xs font-semibold tracking-wide text-black/50 uppercase">
+              What each status means
+            </p>
+            {STATUS_OPTIONS.map((s) => (
+              <p key={s} className="text-xs text-black/60">
+                <span
+                  className={`mr-1.5 inline-block rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${STATUS_STYLES[s]}`}
+                >
+                  {s}
+                </span>
+                {STATUS_DEFINITIONS[s]}
+              </p>
             ))}
           </div>
         </div>

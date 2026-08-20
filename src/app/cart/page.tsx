@@ -115,25 +115,23 @@ export default function CartPage() {
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
       <h1 className="text-2xl font-bold text-black">Your cart</h1>
 
-      <div className="mt-6 flex items-start justify-between gap-3 rounded-lg bg-black/[0.03] px-3 py-3">
-        <p className="text-xs text-black/50">
-          PH orders only. Outside the Philippines? We only support bulk
-          orders —{" "}
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-full bg-black/[0.04] py-1.5 pr-1.5 pl-4 text-xs font-medium text-black/60">
+          <span>PH orders only — international is bulk-only</span>
           <a
             href="mailto:herneros.ph@gmail.com?subject=International%20Bulk%20Order"
-            className="font-semibold text-black underline"
+            className="shrink-0 rounded-full bg-black px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-80"
           >
-            email us
+            Email us
           </a>
-          .
-        </p>
+        </div>
         <button
           type="button"
           onClick={() => {
             setSelectMode((s) => !s);
             setSelectedIds([]);
           }}
-          className="shrink-0 rounded-full border border-black/20 px-3.5 py-1.5 text-xs font-semibold text-black transition-colors hover:border-black"
+          className="ml-auto shrink-0 rounded-full border border-black/20 px-3.5 py-1.5 text-xs font-semibold text-black transition-colors hover:border-black"
         >
           {selectMode ? "Cancel" : "Select"}
         </button>

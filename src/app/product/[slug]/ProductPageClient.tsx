@@ -717,6 +717,7 @@ export default function ProductPageClient({
       </div>
 
       <ReviewsSection
+        productTitle={product.title}
         reviews={reviewsData.reviews}
         loading={reviewsData.loading}
         user={reviewsData.user}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
+import { FiUser } from "react-icons/fi";
 import { StarDisplay, StarPicker } from "@/components/StarRating";
 import type { PublicReview } from "@/lib/use-product-reviews";
 
@@ -20,6 +21,7 @@ function formatRelativeDate(iso: string) {
 }
 
 export default function ReviewsSection({
+  productTitle,
   reviews,
   loading,
   user,
@@ -28,6 +30,7 @@ export default function ReviewsSection({
   hasMyReview,
   submitReview,
 }: {
+  productTitle: string;
   reviews: PublicReview[];
   loading: boolean;
   user: User | null;
@@ -128,16 +131,24 @@ export default function ReviewsSection({
           </p>
         ) : (
           reviews.map((r, i) => (
-            <div key={i} className="py-5">
-              <div className="flex items-center justify-between">
-                <StarDisplay value={r.rating} />
-                <span className="text-xs text-black/40">
-                  {formatRelativeDate(r.created_at)}
-                </span>
+            <div key={i} className="flex items-start gap-3 py-5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/5 text-black/40">
+                <FiUser className="h-4 w-4" />
               </div>
-              {r.message && (
-                <p className="mt-2 text-sm text-black/70">{r.message}</p>
-              )}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <StarDisplay value={r.rating} />
+                  <span className="text-xs text-black/40">
+                    {formatRelativeDate(r.created_at)}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-black/40">
+                  Anonymous · Ordered {productTitle}
+                </p>
+                {r.message && (
+                  <p className="mt-2 text-sm text-black/70">{r.message}</p>
+                )}
+              </div>
             </div>
           ))
         )}

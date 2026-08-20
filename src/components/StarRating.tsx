@@ -14,7 +14,7 @@ export function StarDisplay({
       aria-label={`${value} out of 5 stars`}
     >
       {Array.from({ length: 5 }, (_, i) => (
-        <span key={i} className={i < rounded ? "text-black" : "text-black/20"}>
+        <span key={i} className={i < rounded ? "text-yellow-400" : "text-black/20"}>
           ★
         </span>
       ))}
@@ -42,7 +42,7 @@ export function StarPicker({
             aria-pressed={starValue === value}
             className={`text-2xl leading-none transition-colors ${
               starValue <= value
-                ? "text-black"
+                ? "text-yellow-400"
                 : "text-black/20 hover:text-black/40"
             }`}
           >

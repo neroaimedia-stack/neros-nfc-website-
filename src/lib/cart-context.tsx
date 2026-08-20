@@ -27,14 +27,22 @@ export type CartItem = {
   monthlyFee?: number;
 };
 
+export type PromoScope = { slug: string; variant: string };
+
 type CartContextValue = {
   items: CartItem[];
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
+  removeItems: (ids: string[]) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   count: number;
   subtotal: number;
+  appliedCode: string | null;
+  discountRate: number;
+  promoScope: PromoScope[];
+  applyPromo: (code: string, discountRate: number, scope: PromoScope[]) => void;
+  removePromo: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -43,6 +51,9 @@ const STORAGE_KEY = "herneros-cart";
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [discountRate, setDiscountRate] = useState(0);
+  const [promoScope, setPromoScope] = useState<PromoScope[]>([]);
 
   useEffect(() => {
     try {
@@ -88,6 +99,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const removeItems = (ids: string[]) => {
+    const idSet = new Set(ids);
+    setItems((prev) => prev.filter((i) => !idSet.has(i.id)));
+  };
+
   const updateQuantity = (id: string, quantity: number) => {
     setItems((prev) =>
       prev.map((i) =>
@@ -98,6 +114,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => setItems([]);
 
+  const applyPromo = (code: string, rate: number, scope: PromoScope[]) => {
+    setAppliedCode(code);
+    setDiscountRate(rate);
+    setPromoScope(scope);
+  };
+
+  const removePromo = () => {
+    setAppliedCode(null);
+    setDiscountRate(0);
+    setPromoScope([]);
+  };
+
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotal = items.reduce((sum, i) => sum + i.quantity * i.price, 0);
 
@@ -107,10 +135,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
         items,
         addItem,
         removeItem,
+        removeItems,
         updateQuantity,
         clearCart,
         count,
         subtotal,
+        appliedCode,
+        discountRate,
+        promoScope,
+        applyPromo,
+        removePromo,
       }}
     >
       {children}

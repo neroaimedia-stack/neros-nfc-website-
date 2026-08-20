@@ -50,6 +50,10 @@ type Order = {
   shipping_street: string | null;
   shipping_postal_code: string | null;
   shipping_note: string | null;
+  payment_reference: string | null;
+  payment_payer_name: string | null;
+  payment_proof_url: string | null;
+  shipping_fee_agreed: boolean;
   order_items: OrderItem[];
 };
 
@@ -258,6 +262,35 @@ export default function OrdersManager() {
                         {order.shipping_note && (
                           <p className="text-black/50 italic">Note: {order.shipping_note}</p>
                         )}
+                      </div>
+                    </div>
+                  )}
+
+                  {(order.payment_reference || order.payment_payer_name || order.payment_proof_url) && (
+                    <div className="mb-4 rounded-xl bg-black/[0.03] p-3 text-sm">
+                      <p className="text-xs font-semibold tracking-wide text-black/50 uppercase">Payment</p>
+                      <div className="mt-1.5 flex flex-col gap-1">
+                        {order.payment_payer_name && (
+                          <p className="text-black/70">Paid by: {order.payment_payer_name}</p>
+                        )}
+                        {order.payment_reference && (
+                          <p className="text-black/70">Reference: {order.payment_reference}</p>
+                        )}
+                        {order.payment_proof_url && (
+                          <a
+                            href={order.payment_proof_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-black underline"
+                          >
+                            View proof of payment
+                          </a>
+                        )}
+                        <p className="text-black/50">
+                          {order.shipping_fee_agreed
+                            ? "Customer agreed to be contacted about the shipping fee."
+                            : "Customer has not confirmed the shipping fee yet."}
+                        </p>
                       </div>
                     </div>
                   )}

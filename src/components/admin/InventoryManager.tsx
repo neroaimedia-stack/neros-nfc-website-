@@ -5,7 +5,7 @@ import { FiCamera, FiChevronDown, FiSearch, FiTrash2 } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
 import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
 import ImageCropModal from "@/components/ImageCropModal";
-import ProductThumb from "@/components/admin/ProductThumb";
+import ProductThumb from "@/components/ProductThumb";
 
 function Toggle({
   checked,

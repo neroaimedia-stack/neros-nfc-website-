@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FiCheck, FiSearch } from "react-icons/fi";
 import { formatCurrency } from "@/lib/currency";
 import { QR_VARIANT_SUFFIX } from "@/lib/review-platforms";
-import ProductThumb from "@/components/admin/ProductThumb";
+import ProductThumb from "@/components/ProductThumb";
 
 type Promo = {
   code: string;

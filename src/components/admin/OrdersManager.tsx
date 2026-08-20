@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FiBarChart2, FiChevronDown, FiClock, FiTrendingUp } from "react-icons/fi";
 import type { IconType } from "react-icons";
 import { formatCurrency, fromUSD, toUSD } from "@/lib/currency";
+import { formatAddress } from "@/lib/shipping";
 
 type OrderItem = {
   id: string;
@@ -18,6 +19,11 @@ type OrderItem = {
   qr_destination_link: string | null;
   nfc_destination_link: string | null;
   monthly_fee: number | null;
+  ship_country: string | null;
+  ship_region: string | null;
+  ship_city: string | null;
+  ship_postal_code: string | null;
+  ship_street: string | null;
 };
 
 type Order = {
@@ -32,9 +38,25 @@ type Order = {
   customer_name: string | null;
   email: string | null;
   phone: string | null;
-  shipping_address: string | null;
+  shipping_country: string | null;
+  shipping_region: string | null;
+  shipping_city: string | null;
+  shipping_postal_code: string | null;
+  shipping_street: string | null;
+  shipping_note: string | null;
   order_items: OrderItem[];
 };
+
+function itemOverrideAddress(item: OrderItem) {
+  if (!item.ship_street && !item.ship_city && !item.ship_country) return null;
+  return formatAddress({
+    country: item.ship_country ?? "",
+    region: item.ship_region ?? "",
+    city: item.ship_city ?? "",
+    postalCode: item.ship_postal_code ?? "",
+    street: item.ship_street ?? "",
+  });
+}
 
 const STATUS_OPTIONS = ["pending", "paid", "processing", "shipped", "completed", "cancelled"];
 
@@ -189,7 +211,7 @@ export default function OrdersManager() {
 
               {isOpen && (
                 <div className="border-t border-black/10 px-4 py-4">
-                  {(order.customer_name || order.email || order.phone || order.shipping_address) && (
+                  {(order.customer_name || order.email || order.phone || order.shipping_street) && (
                     <div className="mb-4 rounded-xl bg-black/[0.03] p-3 text-sm">
                       <p className="text-xs font-semibold tracking-wide text-black/50 uppercase">Customer</p>
                       <div className="mt-1.5 flex flex-col gap-1">
@@ -210,8 +232,19 @@ export default function OrdersManager() {
                             </a>
                           </p>
                         )}
-                        {order.shipping_address && (
-                          <p className="whitespace-pre-line text-black/70">{order.shipping_address}</p>
+                        {order.shipping_street && (
+                          <p className="text-black/70">
+                            {formatAddress({
+                              country: order.shipping_country ?? "",
+                              region: order.shipping_region ?? "",
+                              city: order.shipping_city ?? "",
+                              postalCode: order.shipping_postal_code ?? "",
+                              street: order.shipping_street ?? "",
+                            })}
+                          </p>
+                        )}
+                        {order.shipping_note && (
+                          <p className="text-black/50 italic">Note: {order.shipping_note}</p>
                         )}
                       </div>
                     </div>
@@ -274,6 +307,11 @@ export default function OrdersManager() {
                         )}
                         {item.notes && (
                           <p className="mt-1 text-black/60">Notes: {item.notes}</p>
+                        )}
+                        {itemOverrideAddress(item) && (
+                          <p className="mt-1 text-amber-700">
+                            Ships separately to: {itemOverrideAddress(item)}
+                          </p>
                         )}
                       </div>
                     ))}

@@ -6,6 +6,13 @@ import { useCart } from "@/lib/cart-context";
 import { supabase } from "@/lib/supabase";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD } from "@/lib/currency";
+import AddressFields from "@/components/AddressFields";
+import {
+  EMPTY_ADDRESS,
+  formatAddress,
+  isAddressComplete,
+  type ShippingAddress,
+} from "@/lib/shipping";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, subtotal } = useCart();
@@ -22,7 +29,16 @@ export default function CartPage() {
   const [customerName, setCustomerName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
+  const [shippingNote, setShippingNote] = useState("");
+  const [itemOverridesOn, setItemOverridesOn] = useState<Record<string, boolean>>({});
+  const [itemAddresses, setItemAddresses] = useState<Record<string, ShippingAddress>>({});
+
+  const itemAddress = (id: string) => itemAddresses[id] ?? EMPTY_ADDRESS;
+  const setItemAddress = (id: string, next: ShippingAddress) =>
+    setItemAddresses((prev) => ({ ...prev, [id]: next }));
+  const toggleItemOverride = (id: string) =>
+    setItemOverridesOn((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const itemMatchesScope = (item: (typeof items)[number]) =>
     promoScope.some(
@@ -83,7 +99,8 @@ export default function CartPage() {
     `Recipient: ${customerName}`,
     `Email: ${email}`,
     `Phone: ${phone}`,
-    `Shipping address: ${shippingAddress}`,
+    `Shipping address: ${formatAddress(shippingAddress)}`,
+    shippingNote ? `Delivery note: ${shippingNote}` : "",
     "",
     ...items.map((item) => {
       const lines = [`- ${item.title} (${item.color}) x${item.quantity}`];
@@ -96,6 +113,8 @@ export default function CartPage() {
       if (item.monthlyFee)
         lines.push(`  Recurring: ${display(item.monthlyFee)}/month`);
       if (item.notes) lines.push(`  Notes: ${item.notes}`);
+      if (itemOverridesOn[item.id])
+        lines.push(`  Ships to: ${formatAddress(itemAddress(item.id))}`);
       return lines.join("\n");
     }),
     appliedCode ? `\nPromo code: ${appliedCode}` : "",
@@ -109,8 +128,21 @@ export default function CartPage() {
   const checkoutHref = `mailto:herneros.ph@gmail.com?subject=Order%20Checkout&body=${encodeURIComponent(checkoutBody)}`;
 
   const handleCheckout = async () => {
-    if (!customerName.trim() || !email.trim() || !phone.trim() || !shippingAddress.trim()) {
-      setCheckoutError("Please fill in your name, email, phone, and shipping address.");
+    if (!customerName.trim() || !email.trim() || !phone.trim()) {
+      setCheckoutError("Please fill in your name, email, and phone number.");
+      return;
+    }
+    if (!isAddressComplete(shippingAddress)) {
+      setCheckoutError("Please fill in your country, city, and street address.");
+      return;
+    }
+    const incompleteOverride = items.find(
+      (item) => itemOverridesOn[item.id] && !isAddressComplete(itemAddress(item.id))
+    );
+    if (incompleteOverride) {
+      setCheckoutError(
+        `Please finish the custom shipping address for "${incompleteOverride.title}", or turn it off.`
+      );
       return;
     }
     setCheckingOut(true);
@@ -127,27 +159,40 @@ export default function CartPage() {
           customer_name: customerName.trim(),
           email: email.trim(),
           phone: phone.trim(),
-          shipping_address: shippingAddress.trim(),
+          shipping_country: shippingAddress.country.trim(),
+          shipping_region: shippingAddress.region.trim(),
+          shipping_city: shippingAddress.city.trim(),
+          shipping_postal_code: shippingAddress.postalCode.trim(),
+          shipping_street: shippingAddress.street.trim(),
+          shipping_note: shippingNote.trim() || null,
         })
         .select("id")
         .single();
       if (orderError) throw orderError;
 
       const { error: itemsError } = await supabase.from("order_items").insert(
-        items.map((item) => ({
-          order_id: order.id,
-          product_slug: item.productSlug,
-          title: item.title,
-          color: item.color,
-          price: item.price,
-          quantity: item.quantity,
-          notes: item.notes ?? null,
-          name: item.name ?? null,
-          job_title: item.jobTitle ?? null,
-          qr_destination_link: item.qrDestinationLink ?? null,
-          nfc_destination_link: item.nfcDestinationLink ?? null,
-          monthly_fee: item.monthlyFee ?? null,
-        }))
+        items.map((item) => {
+          const override = itemOverridesOn[item.id] ? itemAddress(item.id) : null;
+          return {
+            order_id: order.id,
+            product_slug: item.productSlug,
+            title: item.title,
+            color: item.color,
+            price: item.price,
+            quantity: item.quantity,
+            notes: item.notes ?? null,
+            name: item.name ?? null,
+            job_title: item.jobTitle ?? null,
+            qr_destination_link: item.qrDestinationLink ?? null,
+            nfc_destination_link: item.nfcDestinationLink ?? null,
+            monthly_fee: item.monthlyFee ?? null,
+            ship_country: override?.country.trim() || null,
+            ship_region: override?.region.trim() || null,
+            ship_city: override?.city.trim() || null,
+            ship_postal_code: override?.postalCode.trim() || null,
+            ship_street: override?.street.trim() || null,
+          };
+        })
       );
       if (itemsError) throw itemsError;
 
@@ -181,7 +226,8 @@ export default function CartPage() {
       <h1 className="text-2xl font-bold text-black">Your cart</h1>
       <div className="mt-8 flex flex-col divide-y divide-black/10">
         {items.map((item) => (
-          <div key={item.id} className="flex items-center justify-between py-5">
+          <div key={item.id} className="py-5">
+          <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold text-black">{item.title}</p>
               <p className="text-sm text-black/50">{item.color}</p>
@@ -244,6 +290,30 @@ export default function CartPage() {
                 {display(item.price * item.quantity)}
               </span>
             </div>
+          </div>
+
+          {items.length > 1 && (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => toggleItemOverride(item.id)}
+                className="text-xs font-semibold text-black underline decoration-black/30 underline-offset-2 hover:decoration-black"
+              >
+                {itemOverridesOn[item.id]
+                  ? "Ship to the address above instead"
+                  : "Ship this item to a different address"}
+              </button>
+              {itemOverridesOn[item.id] && (
+                <div className="mt-3 rounded-xl bg-black/[0.03] p-3">
+                  <AddressFields
+                    idPrefix={`item-${item.id}`}
+                    value={itemAddress(item.id)}
+                    onChange={(next) => setItemAddress(item.id, next)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
           </div>
         ))}
       </div>
@@ -313,13 +383,14 @@ export default function CartPage() {
       </div>
 
       <div className="mt-6 border-t border-black/10 pt-6">
-        <p className="text-sm font-semibold text-black">Shipping details</p>
+        <p className="text-sm font-semibold text-black">Contact info</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <input
             type="text"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
             placeholder="Full name"
+            autoComplete="name"
             className="rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black"
           />
           <input
@@ -327,6 +398,7 @@ export default function CartPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Phone number"
+            autoComplete="tel"
             className="rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black"
           />
           <input
@@ -334,16 +406,33 @@ export default function CartPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
+            autoComplete="email"
             className="rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black sm:col-span-2"
           />
-          <textarea
+        </div>
+      </div>
+
+      <div className="mt-6 border-t border-black/10 pt-6">
+        <p className="text-sm font-semibold text-black">Shipping address</p>
+        <p className="mt-1 text-xs text-black/40">
+          {items.length > 1
+            ? "Applies to every item, unless you set a different address for one below."
+            : "Where should we send your order?"}
+        </p>
+        <div className="mt-3">
+          <AddressFields
+            idPrefix="default"
             value={shippingAddress}
-            onChange={(e) => setShippingAddress(e.target.value)}
-            placeholder="Shipping address"
-            rows={2}
-            className="resize-none rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black sm:col-span-2"
+            onChange={setShippingAddress}
           />
         </div>
+        <textarea
+          value={shippingNote}
+          onChange={(e) => setShippingNote(e.target.value)}
+          placeholder="Delivery note (optional) — gate code, landmark, preferred time…"
+          rows={2}
+          className="mt-3 w-full resize-none rounded-xl border border-black/20 px-4 py-2.5 text-sm outline-none focus:border-black"
+        />
       </div>
 
       <div className="mt-6 flex flex-col gap-2 border-t border-black/10 pt-6">

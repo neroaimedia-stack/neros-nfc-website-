@@ -108,6 +108,7 @@ function StatCard({
 export default function OrdersManager() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
 
   const load = async () => {
     const res = await fetch("/api/admin/orders");
@@ -143,6 +144,12 @@ export default function OrdersManager() {
     return { revenuePHP, avgOrderValuePHP, counts, total: orders.length };
   }, [orders]);
 
+  const visibleOrders = useMemo(() => {
+    if (!orders) return orders;
+    if (filterStatus === "all") return orders;
+    return orders.filter((o) => o.status === filterStatus);
+  }, [orders, filterStatus]);
+
   if (orders === null) {
     return <p className="text-sm text-black/40">Loading orders…</p>;
   }
@@ -171,22 +178,40 @@ export default function OrdersManager() {
             />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            {STATUS_OPTIONS.filter((s) => analytics.counts[s]).map((s) => (
-              <span
+            <button
+              type="button"
+              onClick={() => setFilterStatus("all")}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
+                filterStatus === "all"
+                  ? "bg-black text-white"
+                  : "bg-black/5 text-black/60 hover:bg-black/10"
+              }`}
+            >
+              All: {analytics.total}
+            </button>
+            {STATUS_OPTIONS.map((s) => (
+              <button
                 key={s}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${STATUS_STYLES[s]}`}
+                type="button"
+                onClick={() => setFilterStatus(s)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-opacity ${STATUS_STYLES[s]} ${
+                  filterStatus === s ? "ring-2 ring-black/40" : "opacity-60 hover:opacity-100"
+                }`}
               >
-                {s}: {analytics.counts[s]}
-              </span>
+                {s}: {analytics.counts[s] ?? 0}
+              </button>
             ))}
           </div>
         </div>
       )}
 
       {orders.length === 0 && <p className="text-sm text-black/40">No orders yet.</p>}
+      {orders.length > 0 && visibleOrders?.length === 0 && (
+        <p className="text-sm text-black/40">No {filterStatus} orders.</p>
+      )}
 
       <div className="flex flex-col gap-3">
-        {orders.map((order) => {
+        {visibleOrders?.map((order) => {
           const isOpen = expanded === order.id;
           return (
             <div key={order.id} className="rounded-2xl border border-black/10 bg-white shadow-sm">

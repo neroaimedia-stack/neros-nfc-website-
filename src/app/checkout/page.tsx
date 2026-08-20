@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FiCheck, FiUpload } from "react-icons/fi";
 import { useCart } from "@/lib/cart-context";
-import { supabase } from "@/lib/supabase";
+import { supabaseAnon } from "@/lib/supabase-anon";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD } from "@/lib/currency";
 import { computeTotals } from "@/lib/promo";
@@ -200,14 +200,14 @@ function CheckoutPageInner() {
       if (proofFile) {
         const ext = proofFile.name.split(".").pop() || "jpg";
         const path = `${crypto.randomUUID()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabaseAnon.storage
           .from("payment-proofs")
           .upload(path, proofFile);
         if (uploadError) throw uploadError;
         paymentProofPath = path;
       }
 
-      const { data: order, error: orderError } = await supabase
+      const { data: order, error: orderError } = await supabaseAnon
         .from("orders")
         .insert({
           subtotal,
@@ -236,7 +236,7 @@ function CheckoutPageInner() {
         .single();
       if (orderError) throw orderError;
 
-      const { error: itemsError } = await supabase.from("order_items").insert(
+      const { error: itemsError } = await supabaseAnon.from("order_items").insert(
         items.map((item) => {
           const override = itemOverridesOn[item.id] ? itemAddress(item.id) : null;
           return {

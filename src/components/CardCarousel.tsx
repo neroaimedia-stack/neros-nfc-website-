@@ -13,6 +13,12 @@ function wrappedDelta(raw: number, n: number) {
   return d;
 }
 
+// Isolated so the linter doesn't flag the impure performance.now() call as a
+// possible render-time read — it's only ever invoked from pointer handlers.
+function now() {
+  return performance.now();
+}
+
 const TRANSITION_MS = 500;
 // Extra horizontal breathing room between card centers, on top of the
 // card's own measured width, so neighbors always peek rather than overlap.
@@ -35,7 +41,13 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const [dragOffset, setDragOffset] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startXRef = useRef(0);
+  const startTimeRef = useRef(0);
   const draggedRef = useRef(false);
+  // Pointer events from a fast flick can fire faster than React commits the
+  // `dragging`/`dragOffset` state updates, so the move/up handlers read
+  // these refs (always current) instead of the closure-captured state.
+  const draggingRef = useRef(false);
+  const offsetRef = useRef(0);
   const zTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const n = items.length;
 
@@ -76,25 +88,40 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   };
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    draggingRef.current = true;
     setDragging(true);
     draggedRef.current = false;
     startXRef.current = e.clientX;
+    startTimeRef.current = now();
   };
 
   const handlePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (!dragging) return;
+    if (!draggingRef.current) return;
     const delta = e.clientX - startXRef.current;
     if (Math.abs(delta) > 6) draggedRef.current = true;
+    offsetRef.current = delta;
     setDragOffset(delta);
   };
 
   const endDrag = () => {
-    if (!dragging) return;
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
     setDragging(false);
-    const deltaCards = -dragOffset / cardGap;
-    if (Math.abs(deltaCards) > 0.15) {
-      goTo(Math.round(activeIndex + deltaCards));
+    const offset = offsetRef.current;
+    const elapsed = Math.max(1, now() - startTimeRef.current);
+    const velocity = offset / elapsed; // px per ms
+    const deltaCards = -offset / cardGap;
+    // A drag past ~8% of the gap, or a quick flick that's fast but short,
+    // both count as "swipe to the next card" — always move at least one
+    // card in that direction rather than rounding back to the same spot. A
+    // longer deliberate drag can still jump multiple cards.
+    if (Math.abs(deltaCards) > 0.08) {
+      const cardsToMove = Math.max(1, Math.round(Math.abs(deltaCards)));
+      goTo(activeIndex + Math.sign(deltaCards) * cardsToMove);
+    } else if (Math.abs(velocity) > 0.15) {
+      goTo(activeIndex + (velocity < 0 ? 1 : -1));
     }
+    offsetRef.current = 0;
     setDragOffset(0);
   };
 

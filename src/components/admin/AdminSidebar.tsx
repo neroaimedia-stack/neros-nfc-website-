@@ -7,6 +7,7 @@ import {
   FiCreditCard,
   FiGrid,
   FiShoppingBag,
+  FiStar,
   FiTag,
 } from "react-icons/fi";
 import type { IconType } from "react-icons";
@@ -17,6 +18,7 @@ const NAV_ITEMS: { href: string; label: string; icon: IconType }[] = [
   { href: "/admin/promos", label: "Promo codes", icon: FiTag },
   { href: "/admin/inventory", label: "Inventory", icon: FiBox },
   { href: "/admin/cards", label: "NFC cards", icon: FiCreditCard },
+  { href: "/admin/reviews", label: "Reviews", icon: FiStar },
 ];
 
 function isActive(pathname: string, href: string) {

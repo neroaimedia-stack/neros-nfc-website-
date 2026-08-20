@@ -60,8 +60,12 @@ export default function ReviewsSection({
     }
     setSubmitting(true);
     setError("");
-    const { error: submitErr } = await submitReview(rating, message);
-    setSubmitting(false);
+    let submitErr: string | null = null;
+    try {
+      ({ error: submitErr } = await submitReview(rating, message));
+    } finally {
+      setSubmitting(false);
+    }
     if (submitErr) {
       setError("Something went wrong submitting your review.");
       return;

@@ -80,20 +80,27 @@ export function useProductReviews(productSlug: string) {
   const submitReview = useCallback(
     async (rating: number, message: string) => {
       if (!user) return { error: "Not signed in" };
-      const { error } = await supabase.from("product_reviews").upsert(
-        {
-          product_slug: productSlug,
-          user_id: user.id,
-          rating,
-          message: message.trim() || null,
-        },
-        { onConflict: "product_slug,user_id" }
-      );
-      if (!error) {
-        setHasMyReview(true);
-        await load();
+      try {
+        const { error } = await supabase.from("product_reviews").upsert(
+          {
+            product_slug: productSlug,
+            user_id: user.id,
+            rating,
+            message: message.trim() || null,
+          },
+          { onConflict: "product_slug,user_id" }
+        );
+        if (!error) {
+          setHasMyReview(true);
+          // A failure here (e.g. a transient network error) must not throw
+          // past this point, or the caller's "submitting" state never
+          // clears and the update button looks permanently stuck.
+          await load().catch(() => {});
+        }
+        return { error: error?.message ?? null };
+      } catch (err) {
+        return { error: err instanceof Error ? err.message : "Something went wrong." };
       }
-      return { error: error?.message ?? null };
     },
     [user, productSlug, load]
   );

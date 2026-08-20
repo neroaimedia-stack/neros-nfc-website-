@@ -110,7 +110,7 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
     <div>
       <div
         ref={containerRef}
-        className="relative -ml-[calc(50vw-50%)] h-[408px] w-screen touch-pan-y overflow-hidden select-none sm:ml-0 sm:w-full sm:max-w-full"
+        className="relative -ml-[calc(50vw-50%)] h-[408px] w-screen touch-none overflow-hidden select-none sm:ml-0 sm:w-full sm:max-w-full"
         style={{
           WebkitMaskImage:
             "linear-gradient(to right, transparent, black 32px, black calc(100% - 32px), transparent)",

@@ -425,6 +425,17 @@ export default function CartPage() {
             ? "Applies to every item, unless you set a different address for one below."
             : "Where should we send your order?"}
         </p>
+        <p className="mt-2 rounded-lg bg-black/[0.03] px-3 py-2 text-xs text-black/50">
+          We currently ship within the Philippines only. Ordering internationally or in
+          bulk?{" "}
+          <a
+            href="mailto:herneros.ph@gmail.com?subject=International%2FBulk%20Order"
+            className="font-semibold text-black underline underline-offset-2 hover:decoration-black"
+          >
+            Email us at herneros.ph@gmail.com
+          </a>{" "}
+          to arrange it.
+        </p>
         <div className="mt-3">
           <AddressFields
             idPrefix="default"

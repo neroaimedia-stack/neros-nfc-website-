@@ -416,7 +416,7 @@ function CheckoutPageInner() {
           <div className="mt-4 flex justify-center">
             <div className="relative h-64 w-52 overflow-hidden rounded-2xl border border-black/10">
               <Image
-                src="/payments/gotyme-qr.png"
+                src="/payments/gotyme-qr.jpg"
                 alt="GoTyme Bank QR code for payment"
                 fill
                 className="object-contain"

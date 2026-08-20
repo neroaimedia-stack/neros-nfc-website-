@@ -93,6 +93,24 @@ function CheckoutPageInner() {
   const display = (amountUSD: number) =>
     formatCurrency(fromUSD(amountUSD, currency), currency);
 
+  const orderSummaryList = (
+    <div className="flex flex-col divide-y divide-black/10 rounded-2xl border border-black/10 px-4">
+      {items.map((item) => (
+        <div key={item.id} className="flex items-center justify-between gap-3 py-4">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-black">{item.title}</p>
+            <p className="text-xs text-black/50">
+              {item.color} · x{item.quantity}
+            </p>
+          </div>
+          <span className="shrink-0 text-sm font-semibold text-black">
+            {display(item.price * item.quantity)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
   const checkoutBody = [
     `Recipient: ${customerName}`,
     `Email: ${email}`,
@@ -153,6 +171,10 @@ function CheckoutPageInner() {
     if (step === 3) {
       if (!paymentReference.trim() || !paymentPayerName.trim()) {
         setStepError("Please enter the transaction reference number and the name on the payment.");
+        return;
+      }
+      if (!proofFile) {
+        setStepError("Please upload a screenshot of your payment as proof.");
         return;
       }
     }
@@ -397,19 +419,39 @@ function CheckoutPageInner() {
         <div className="mt-8">
           <p className="text-sm font-semibold text-black">Payment</p>
           <p className="mt-1 text-xs text-black/40">
-            Pay {display(total)} via GoTyme Bank / InstaPay using the QR code below,
-            then tell us the details so we can match your payment.
+            Review your order, pay the total via GoTyme Bank / InstaPay, then tell
+            us the details so we can match your payment.
           </p>
-          <div className="mt-4 flex justify-center">
-            <div className="relative h-64 w-52 overflow-hidden rounded-2xl border border-black/10">
-              <Image
-                src="/payments/gotyme-qr.jpg"
-                alt="GoTyme Bank QR code for payment"
-                fill
-                className="object-contain"
-              />
+
+          <p className="mt-5 text-xs font-semibold text-black/60">Your order</p>
+          <div className="mt-2">{orderSummaryList}</div>
+          <div className="mt-3 flex items-center justify-between px-1">
+            <span className="text-sm text-black/60">Total to pay</span>
+            <span className="text-lg font-bold text-black">{display(total)}</span>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-black/10 p-4">
+            <p className="text-xs font-semibold text-black/60">How to pay</p>
+            <ol className="mt-2 list-inside list-decimal space-y-1.5 text-sm text-black/70">
+              <li>Open your GoTyme Bank app, or any InstaPay-enabled bank app.</li>
+              <li>Scan the QR code below to bring up the payment details.</li>
+              <li>
+                Send exactly <span className="font-semibold text-black">{display(total)}</span>.
+              </li>
+              <li>Enter your payment details below and upload a screenshot as proof.</li>
+            </ol>
+            <div className="mt-4 flex justify-center">
+              <div className="relative h-64 w-52 overflow-hidden rounded-2xl border border-black/10">
+                <Image
+                  src="/payments/gotyme-qr.jpg"
+                  alt="GoTyme Bank QR code for payment"
+                  fill
+                  className="object-contain"
+                />
+              </div>
             </div>
           </div>
+
           <div className="mt-6 grid gap-3">
             <input
               type="text"
@@ -427,7 +469,7 @@ function CheckoutPageInner() {
             />
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-black/20 px-4 py-3 text-sm text-black/60 hover:border-black/40">
               <FiUpload className="h-4 w-4 shrink-0" />
-              {proofFile ? proofFile.name : "Upload screenshot of payment (optional)"}
+              {proofFile ? proofFile.name : "Upload screenshot of payment"}
               <input
                 type="file"
                 accept="image/*"
@@ -435,6 +477,9 @@ function CheckoutPageInner() {
                 className="hidden"
               />
             </label>
+            <p className="text-xs text-black/40">
+              Required — this speeds up verification and shipping.
+            </p>
           </div>
         </div>
       )}
@@ -443,21 +488,7 @@ function CheckoutPageInner() {
         <div className="mt-8">
           <p className="text-sm font-semibold text-black">Confirm your order</p>
 
-          <div className="mt-3 flex flex-col divide-y divide-black/10 rounded-2xl border border-black/10 px-4">
-            {items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-3 py-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-black">{item.title}</p>
-                  <p className="text-xs text-black/50">
-                    {item.color} · x{item.quantity}
-                  </p>
-                </div>
-                <span className="shrink-0 text-sm font-semibold text-black">
-                  {display(item.price * item.quantity)}
-                </span>
-              </div>
-            ))}
-          </div>
+          <div className="mt-3">{orderSummaryList}</div>
 
           <div className="mt-4 rounded-xl bg-black/[0.03] p-3 text-sm text-black/60">
             <p className="text-black">{customerName}</p>

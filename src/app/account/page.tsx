@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import FlippableCard from "@/components/FlippableCard";
@@ -74,14 +75,16 @@ function EyeIcon({ open }: { open: boolean }) {
 function SignedInAccount({
   userId,
   userEmail,
+  prefillCode,
   onSignOut,
 }: {
   userId: string;
   userEmail: string;
+  prefillCode: string;
   onSignOut: () => Promise<void>;
 }) {
   const [cards, setCards] = useState<OwnedCard[] | null>(null);
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(prefillCode);
   const [claimError, setClaimError] = useState("");
   const [claiming, setClaiming] = useState(false);
 
@@ -224,7 +227,23 @@ function SignedInAccount({
 }
 
 export default function AccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16 text-center">
+          <p className="text-sm text-black/40">Loading…</p>
+        </main>
+      }
+    >
+      <AccountPageInner />
+    </Suspense>
+  );
+}
+
+function AccountPageInner() {
   const { user, loading, signIn, signUp, signOut } = useAuth();
+  const searchParams = useSearchParams();
+  const prefillCode = searchParams.get("code") ?? "";
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [email, setEmail] = useState("");
@@ -270,7 +289,14 @@ export default function AccountPage() {
   }
 
   if (user) {
-    return <SignedInAccount userId={user.id} userEmail={user.email ?? ""} onSignOut={signOut} />;
+    return (
+      <SignedInAccount
+        userId={user.id}
+        userEmail={user.email ?? ""}
+        prefillCode={prefillCode}
+        onSignOut={signOut}
+      />
+    );
   }
 
   return (
@@ -282,6 +308,12 @@ export default function AccountPage() {
         Log in to manage your profile, or create an account to claim a new
         card.
       </p>
+      {prefillCode && (
+        <p className="mt-2 text-center text-xs text-black/40">
+          Your activation code <span className="font-mono font-semibold text-black">{prefillCode}</span>{" "}
+          will be ready to claim once you&apos;re signed in.
+        </p>
+      )}
 
       <div className="mt-10 rounded-3xl border border-black/10 p-8 shadow-sm">
         <form

@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import QRCode from "qrcode";
 import {
   FiChevronDown,
   FiCopy,
-  FiDownload,
   FiExternalLink,
+  FiDownload,
   FiSearch,
   FiTrash2,
   FiUser,
@@ -51,11 +52,10 @@ function StatTile({ label, value }: { label: string; value: number }) {
   );
 }
 
-function CardDetails({ card }: { card: CardRow }) {
+function LinkWithCopy({ label, hint, link }: { label: string; hint: string; link: string }) {
   const [copied, setCopied] = useState(false);
-  const link = typeof window !== "undefined" ? `${window.location.origin}/c/${card.id}` : "";
 
-  const copyLink = async () => {
+  const copy = async () => {
     try {
       await navigator.clipboard.writeText(link);
       setCopied(true);
@@ -66,7 +66,81 @@ function CardDetails({ card }: { card: CardRow }) {
   };
 
   return (
-    <div className="flex flex-col gap-3 border-t border-black/10 bg-black/[0.02] px-4 py-4 sm:px-5">
+    <div>
+      <p className="text-xs font-semibold tracking-wide text-black/50 uppercase">{label}</p>
+      <p className="mt-0.5 text-xs text-black/40">{hint}</p>
+      <div className="mt-1.5 flex items-center gap-2">
+        <a
+          href={link}
+          target="_blank"
+          rel="noreferrer"
+          className="flex min-w-0 items-center gap-1 truncate font-mono text-xs font-medium text-black underline decoration-black/20 underline-offset-2 hover:decoration-black"
+        >
+          <span className="truncate">{link}</span>
+          <FiExternalLink className="h-3 w-3 shrink-0" />
+        </a>
+        <button
+          type="button"
+          onClick={copy}
+          className="shrink-0 rounded-full border border-black/15 p-1 text-black/50 hover:border-black/30 hover:text-black"
+          aria-label={`Copy ${label.toLowerCase()}`}
+        >
+          <FiCopy className="h-3 w-3" />
+        </button>
+        {copied && <span className="shrink-0 text-[10px] text-green-600">Copied</span>}
+      </div>
+    </div>
+  );
+}
+
+function CardDetails({ card }: { card: CardRow }) {
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const isBusinessCard = card.product_type === "business-card";
+  const visitLink = `${origin}/c/${card.id}`;
+  const setupLink = `${origin}/account?code=${encodeURIComponent(card.code)}`;
+
+  useEffect(() => {
+    if (!isBusinessCard || !origin) return;
+    let cancelled = false;
+    QRCode.toDataURL(visitLink, { margin: 1, width: 160 }).then((url) => {
+      if (!cancelled) setQrDataUrl(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBusinessCard, visitLink]);
+
+  return (
+    <div className="flex flex-col gap-4 border-t border-black/10 bg-black/[0.02] px-4 py-4 sm:px-5">
+      {isBusinessCard && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          {qrDataUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={qrDataUrl}
+              alt={`QR code for card ${card.code}`}
+              className="h-24 w-24 shrink-0 rounded-lg border border-black/10 bg-white p-1.5"
+            />
+          )}
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <LinkWithCopy
+              label="Visiting link (NFC + QR)"
+              hint="Program this into the NFC chip and use the QR code alongside it."
+              link={visitLink}
+            />
+            <LinkWithCopy
+              label="Setup link for the owner"
+              hint="Send this to the buyer — it takes them straight to claiming and editing this card."
+              link={setupLink}
+            />
+          </div>
+        </div>
+      )}
+
+      {card.claimed_at && (
+      <>
       <div className="flex items-center gap-3">
         {card.profile_avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -101,30 +175,29 @@ function CardDetails({ card }: { card: CardRow }) {
           <dt className="text-black/40">Account email</dt>
           <dd className="mt-0.5 truncate font-medium text-black">{card.owner_email ?? "—"}</dd>
         </div>
-        <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-          <dt className="text-black/40">Public link</dt>
-          <dd className="flex items-center gap-2">
-            <a
-              href={link}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1 truncate font-medium text-black underline decoration-black/20 underline-offset-2 hover:decoration-black"
-            >
-              /c/{card.id.slice(0, 8)}…
-              <FiExternalLink className="h-3 w-3 shrink-0" />
-            </a>
-            <button
-              type="button"
-              onClick={copyLink}
-              className="shrink-0 rounded-full border border-black/15 p-1 text-black/50 hover:border-black/30 hover:text-black"
-              aria-label="Copy public link"
-            >
-              <FiCopy className="h-3 w-3" />
-            </button>
-            {copied && <span className="text-[10px] text-green-600">Copied</span>}
-          </dd>
-        </div>
+        {!isBusinessCard && (
+          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
+            <dt className="text-black/40">Public link</dt>
+            <dd className="flex items-center gap-2">
+              <a
+                href={visitLink}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 truncate font-medium text-black underline decoration-black/20 underline-offset-2 hover:decoration-black"
+              >
+                /c/{card.id.slice(0, 8)}…
+                <FiExternalLink className="h-3 w-3 shrink-0" />
+              </a>
+            </dd>
+          </div>
+        )}
       </dl>
+      </>
+      )}
+
+      {isBusinessCard && !card.claimed_at && (
+        <p className="text-xs text-black/40">Not claimed yet — no owner profile to show.</p>
+      )}
     </div>
   );
 }
@@ -364,6 +437,7 @@ export default function CardsManager() {
           {filteredCards?.map((card) => {
             const isClaimed = !!card.claimed_at;
             const isOpen = expanded === card.id;
+            const canExpand = isClaimed || card.product_type === "business-card";
             return (
               <div
                 key={card.id}
@@ -372,7 +446,7 @@ export default function CardsManager() {
                 <div className="flex items-center gap-2 px-4 py-3 sm:px-5">
                   <button
                     type="button"
-                    disabled={!isClaimed}
+                    disabled={!canExpand}
                     onClick={() => setExpanded(isOpen ? null : card.id)}
                     className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-default"
                   >
@@ -405,7 +479,7 @@ export default function CardsManager() {
                   </button>
                 </div>
 
-                {isClaimed && isOpen && <CardDetails card={card} />}
+                {canExpand && isOpen && <CardDetails card={card} />}
               </div>
             );
           })}

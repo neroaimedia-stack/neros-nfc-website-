@@ -21,7 +21,7 @@ const PEEK_GAP = 28;
 // container's edge — on narrow screens the card is nearly as wide as the
 // container, so without this the "ideal" gap above pushes neighbors
 // entirely out of view and the carousel stops looking like one.
-const MIN_PEEK = 40;
+const MIN_PEEK = 60;
 
 export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +41,9 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
 
   const idealGap = cardWidth + PEEK_GAP;
   const maxGapForPeek = containerWidth / 2 + cardWidth / 2 - MIN_PEEK;
-  const cardGap = Math.min(idealGap, Math.max(maxGapForPeek, cardWidth * 0.6));
+  // Never let the gap drop below the card's own width, or neighbors would
+  // start overlapping the active card instead of just sitting closer.
+  const cardGap = Math.min(idealGap, Math.max(maxGapForPeek, cardWidth));
 
   useEffect(() => {
     const cardEl = cardRef.current;
@@ -105,51 +107,67 @@ export default function CardCarousel({ items }: { items: React.ReactNode[] }) {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="relative h-[440px] max-w-full touch-pan-y overflow-hidden select-none"
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={endDrag}
-      onPointerLeave={endDrag}
-      onPointerCancel={endDrag}
-      onClickCapture={handleClickCapture}
-    >
-      {items.map((item, i) => {
-        const distance = wrappedDelta(i - activeIndex - dragOffset / cardGap, n);
-        const abs = Math.abs(distance);
-        if (abs > MAX_VISIBLE_DISTANCE) return null;
+    <div>
+      <div
+        ref={containerRef}
+        className="relative h-[408px] max-w-full touch-pan-y overflow-hidden select-none"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerLeave={endDrag}
+        onPointerCancel={endDrag}
+        onClickCapture={handleClickCapture}
+      >
+        {items.map((item, i) => {
+          const distance = wrappedDelta(i - activeIndex - dragOffset / cardGap, n);
+          const abs = Math.abs(distance);
+          if (abs > MAX_VISIBLE_DISTANCE) return null;
 
-        const translateX = distance * cardGap;
-        const scale = Math.max(0.78, 1 - abs * 0.16);
-        const opacity = Math.max(0.2, 1 - abs * 0.45);
-        const brightness = Math.max(0.55, 1 - abs * 0.35);
-        const isActive = i === activeIndex && dragOffset === 0;
-        const zAbs = dragging ? abs : Math.abs(wrappedDelta(i - zIndexBase, n));
+          const translateX = distance * cardGap;
+          const scale = Math.max(0.78, 1 - abs * 0.16);
+          const opacity = Math.max(0.2, 1 - abs * 0.45);
+          const brightness = Math.max(0.55, 1 - abs * 0.35);
+          const isActive = i === activeIndex && dragOffset === 0;
+          const zAbs = dragging ? abs : Math.abs(wrappedDelta(i - zIndexBase, n));
 
-        return (
-          <div
+          return (
+            <div
+              key={i}
+              ref={isActive ? cardRef : undefined}
+              className="absolute top-1/2 left-1/2"
+              style={{
+                transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale})`,
+                opacity,
+                filter: `brightness(${brightness})`,
+                zIndex: 100 - Math.round(zAbs * 10),
+                transition: dragging
+                  ? "none"
+                  : `transform ${TRANSITION_MS}ms cubic-bezier(0.22,1,0.36,1), opacity ${TRANSITION_MS}ms ease, filter ${TRANSITION_MS}ms ease`,
+                cursor: isActive ? "default" : "pointer",
+              }}
+              onClick={() => {
+                if (!isActive) goTo(i);
+              }}
+            >
+              {item}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-3 flex justify-center gap-1.5">
+        {items.map((_, i) => (
+          <button
             key={i}
-            ref={isActive ? cardRef : undefined}
-            className="absolute top-1/2 left-1/2"
-            style={{
-              transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale})`,
-              opacity,
-              filter: `brightness(${brightness})`,
-              zIndex: 100 - Math.round(zAbs * 10),
-              transition: dragging
-                ? "none"
-                : `transform ${TRANSITION_MS}ms cubic-bezier(0.22,1,0.36,1), opacity ${TRANSITION_MS}ms ease, filter ${TRANSITION_MS}ms ease`,
-              cursor: isActive ? "default" : "pointer",
-            }}
-            onClick={() => {
-              if (!isActive) goTo(i);
-            }}
-          >
-            {item}
-          </div>
-        );
-      })}
+            type="button"
+            aria-label={`Go to card ${i + 1}`}
+            onClick={() => goTo(i)}
+            className={`h-1.5 rounded-full transition-all ${
+              i === activeIndex ? "w-5 bg-black" : "w-1.5 bg-black/20"
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }

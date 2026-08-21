@@ -68,6 +68,7 @@ function CheckoutPageInner() {
   const [step, setStep] = useState(1);
   const [stepError, setStepError] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
+  const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
 
   // Step 1: contact
   const [customerName, setCustomerName] = useState("");
@@ -124,39 +125,6 @@ function CheckoutPageInner() {
     </div>
   );
 
-  const checkoutBody = [
-    `Recipient: ${customerName}`,
-    `Email: ${effectiveEmail}`,
-    `Phone: ${phone}`,
-    `Shipping address: ${formatAddress(shippingAddress)}`,
-    shippingNote ? `Delivery note: ${shippingNote}` : "",
-    `Payment reference: ${paymentReference} (paid by ${paymentPayerName})`,
-    proofFile ? "Proof of payment: uploaded — see admin dashboard" : "",
-    "",
-    ...items.map((item) => {
-      const lines = [`- ${item.title} (${item.color}) x${item.quantity}`];
-      if (item.name) lines.push(`  Name: ${item.name}`);
-      if (item.jobTitle) lines.push(`  Title: ${item.jobTitle}`);
-      if (item.qrDestinationLink)
-        lines.push(`  QR destination link: ${item.qrDestinationLink}`);
-      if (item.nfcDestinationLink)
-        lines.push(`  NFC destination link: ${item.nfcDestinationLink}`);
-      if (item.monthlyFee)
-        lines.push(`  Recurring: ${display(item.monthlyFee)}/month`);
-      if (item.notes) lines.push(`  Notes: ${item.notes}`);
-      if (itemOverridesOn[item.id])
-        lines.push(`  Ships to: ${formatAddress(itemAddress(item.id))}`);
-      return lines.join("\n");
-    }),
-    appliedCode ? `\nPromo code: ${appliedCode}` : "",
-    monthlyTotal
-      ? `\nRecurring total: ${display(monthlyTotal)}/month (billed separately)`
-      : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  const checkoutHref = `mailto:herneros.ph@gmail.com?subject=Order%20Checkout&body=${encodeURIComponent(checkoutBody)}`;
 
   const goNext = () => {
     setStepError("");
@@ -297,13 +265,42 @@ function CheckoutPageInner() {
       } else {
         clearCart();
       }
-      window.open(checkoutHref, "_self");
+      setPlacedOrderId(order.id);
     } catch {
       setStepError("Something went wrong placing your order. Please try again.");
     } finally {
       setCheckingOut(false);
     }
   };
+
+  if (placedOrderId) {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-6 py-24 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
+          <FiCheck className="h-8 w-8" />
+        </div>
+        <h1 className="mt-6 text-2xl font-bold text-black">Order placed!</h1>
+        <p className="mt-2 text-sm text-black/60">
+          Order #{placedOrderId.slice(0, 8)} — we&apos;ll verify your payment
+          and get it moving.
+        </p>
+        <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
+          <Link
+            href="/account"
+            className="rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
+          >
+            Track your order
+          </Link>
+          <Link
+            href="/#buy"
+            className="rounded-full border border-black px-6 py-3 text-center text-sm font-semibold text-black transition-opacity hover:opacity-60"
+          >
+            View other products
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   if (items.length === 0 || authLoading || !user) {
     return (

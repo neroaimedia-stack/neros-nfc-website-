@@ -163,10 +163,19 @@ function SignedInAccount({
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-16">
-      <h1 className="text-center text-3xl font-bold text-black">
-        Your account
-      </h1>
-      <p className="mt-3 text-center text-sm text-black/60">{userEmail}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold text-black">Your account</h1>
+          <p className="mt-2 text-sm text-black/60">{userEmail}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onSignOut()}
+          className="shrink-0 text-sm font-medium text-black/50 underline decoration-black/30 underline-offset-2 hover:text-black hover:decoration-black"
+        >
+          Sign out
+        </button>
+      </div>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
       <div className="rounded-3xl border border-black/10 p-8 shadow-sm">
@@ -294,21 +303,12 @@ function SignedInAccount({
       </div>
       </div>
 
-      <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-3">
-        <Link
-          href="/#buy"
-          className="rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
-        >
-          Browse cards
-        </Link>
-        <button
-          type="button"
-          onClick={() => onSignOut()}
-          className="rounded-full border border-black px-6 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-60"
-        >
-          Sign out
-        </button>
-      </div>
+      <Link
+        href="/#buy"
+        className="mx-auto mt-6 w-full max-w-md rounded-full bg-black px-6 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
+      >
+        Browse cards
+      </Link>
     </main>
   );
 }

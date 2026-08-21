@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatCurrency } from "@/lib/currency";
 import type { RangeKey } from "@/lib/order-ranges";
 
@@ -8,13 +8,13 @@ type Point = { date: string; orders: number; revenuePHP: number };
 type Metric = "revenue" | "orders";
 type Granularity = "hour" | "day" | "week" | "month";
 
-const BAR_HUE = "#008300";
-const BAR_HUE_HOVER = "#00a300";
-const LINE_HUE = "#005c00";
-const GRID_COLOR = "#e5e5e3";
-const CHART_HEIGHT = 220;
-const PADDING_TOP = 20;
-const PADDING_BOTTOM = 28;
+const LINE_COLOR = "#171717";
+const AREA_COLOR = "#171717";
+const GRID_COLOR = "#ececeb";
+const AXIS_TEXT = "#8a8a86";
+const CHART_HEIGHT = 200;
+const PADDING_TOP = 16;
+const PADDING_BOTTOM = 26;
 const PADDING_LEFT = 4;
 const PADDING_RIGHT = 4;
 
@@ -179,30 +179,51 @@ function ChartBody({
   hovered: number | null;
   setHovered: (i: number | null) => void;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(600);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width;
+      if (w) setChartWidth(w);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const n = series.length;
-  const chartWidth = 600;
   const innerWidth = chartWidth - PADDING_LEFT - PADDING_RIGHT;
   const innerHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
-  const bandWidth = innerWidth / n;
-  const barWidth = Math.min(8, Math.max(3, bandWidth * 0.3));
+  const bandWidth = n > 0 ? innerWidth / n : 0;
   const labelEvery = Math.max(1, Math.ceil(n / 7));
+  const baselineY = PADDING_TOP + innerHeight;
 
   const valueOf = (point: Point) => (metric === "revenue" ? point.revenuePHP : point.orders);
-  const barTop = (point: Point) => {
-    const barHeight = maxValue > 0 ? (valueOf(point) / maxValue) * innerHeight : 0;
-    return PADDING_TOP + innerHeight - barHeight;
+  const pointY = (point: Point) => {
+    const h = maxValue > 0 ? (valueOf(point) / maxValue) * innerHeight : 0;
+    return baselineY - h;
   };
-  const barCenterX = (i: number) => PADDING_LEFT + i * bandWidth + bandWidth / 2;
+  const pointX = (i: number) => PADDING_LEFT + i * bandWidth + bandWidth / 2;
 
   const linePath = series
-    .map((point, i) => `${i === 0 ? "M" : "L"} ${barCenterX(i)} ${barTop(point)}`)
+    .map((point, i) => `${i === 0 ? "M" : "L"} ${pointX(i)} ${pointY(point)}`)
     .join(" ");
+  const areaPath =
+    n > 0
+      ? `${linePath} L ${pointX(n - 1)} ${baselineY} L ${pointX(0)} ${baselineY} Z`
+      : "";
+
+  const lastIndex = n - 1;
 
   return (
-    <div className="relative mt-4">
+    <div ref={containerRef} className="relative mt-4">
       <svg
         viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
-        className="w-full"
+        width={chartWidth}
+        height={CHART_HEIGHT}
+        className="block w-full"
         role="img"
         aria-label={`${metric === "revenue" ? "Earnings" : "Orders"} over time`}
       >
@@ -219,67 +240,88 @@ function ChartBody({
                 stroke={GRID_COLOR}
                 strokeWidth={1}
               />
-              <text x={PADDING_LEFT} y={y - 4} fontSize={9} fill="#8a8a86" className="tabular-nums">
+              <text x={PADDING_LEFT} y={y - 4} fontSize={9} fill={AXIS_TEXT} className="tabular-nums">
                 {metric === "revenue" ? compactPHP(value) : Math.round(value)}
               </text>
             </g>
           );
         })}
 
-        {series.map((point, i) => {
-          const value = valueOf(point);
-          const barHeight = maxValue > 0 ? (value / maxValue) * innerHeight : 0;
-          const x = PADDING_LEFT + i * bandWidth + (bandWidth - barWidth) / 2;
-          const y = barTop(point);
-          const showLabel = i % labelEvery === 0;
-          const isHovered = hovered === i;
+        <path d={areaPath} fill={AREA_COLOR} fillOpacity={0.08} stroke="none" />
+        <path
+          d={linePath}
+          fill="none"
+          stroke={LINE_COLOR}
+          strokeWidth={2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
 
+        {hovered !== null && series[hovered] && (
+          <line
+            x1={pointX(hovered)}
+            x2={pointX(hovered)}
+            y1={PADDING_TOP}
+            y2={baselineY}
+            stroke={LINE_COLOR}
+            strokeOpacity={0.15}
+            strokeWidth={1}
+          />
+        )}
+
+        {lastIndex >= 0 && (
+          <circle
+            cx={pointX(lastIndex)}
+            cy={pointY(series[lastIndex])}
+            r={4}
+            fill={LINE_COLOR}
+            stroke="#fff"
+            strokeWidth={2}
+          />
+        )}
+        {hovered !== null && hovered !== lastIndex && series[hovered] && (
+          <circle
+            cx={pointX(hovered)}
+            cy={pointY(series[hovered])}
+            r={4}
+            fill={LINE_COLOR}
+            stroke="#fff"
+            strokeWidth={2}
+          />
+        )}
+
+        {series.map((point, i) => {
+          const showLabel = i % labelEvery === 0;
           return (
-            <g key={point.date}>
-              <rect
-                x={x}
-                y={y}
-                width={barWidth}
-                height={Math.max(barHeight, 2)}
-                rx={Math.min(4, barWidth / 2)}
-                fill={isHovered ? BAR_HUE_HOVER : BAR_HUE}
-                fillOpacity={0.55}
-              />
-              {showLabel && (
-                <text
-                  x={barCenterX(i)}
-                  y={CHART_HEIGHT - 8}
-                  fontSize={9}
-                  fill="#8a8a86"
-                  textAnchor="middle"
-                >
-                  {formatBucketLabel(point.date, granularity)}
-                </text>
-              )}
-            </g>
+            showLabel && (
+              <text
+                key={point.date}
+                x={pointX(i)}
+                y={CHART_HEIGHT - 8}
+                fontSize={9}
+                fill={AXIS_TEXT}
+                textAnchor="middle"
+              >
+                {formatBucketLabel(point.date, granularity)}
+              </text>
+            )
           );
         })}
 
-        <path d={linePath} fill="none" stroke={LINE_HUE} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-
         {series.map((point, i) => (
-          <g key={`hit-${point.date}`}>
-            {hovered === i && (
-              <circle cx={barCenterX(i)} cy={barTop(point)} r={4} fill={LINE_HUE} stroke="#fff" strokeWidth={2} />
-            )}
-            <rect
-              x={PADDING_LEFT + i * bandWidth}
-              y={PADDING_TOP}
-              width={bandWidth}
-              height={innerHeight}
-              fill="transparent"
-              onPointerEnter={() => setHovered(i)}
-              onPointerLeave={() => setHovered(null)}
-              tabIndex={0}
-              onFocus={() => setHovered(i)}
-              onBlur={() => setHovered(null)}
-            />
-          </g>
+          <rect
+            key={`hit-${point.date}`}
+            x={PADDING_LEFT + i * bandWidth}
+            y={0}
+            width={bandWidth}
+            height={CHART_HEIGHT}
+            fill="transparent"
+            onPointerEnter={() => setHovered(i)}
+            onPointerLeave={() => setHovered(null)}
+            tabIndex={0}
+            onFocus={() => setHovered(i)}
+            onBlur={() => setHovered(null)}
+          />
         ))}
       </svg>
 
@@ -287,8 +329,8 @@ function ChartBody({
         <div
           className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-lg bg-black px-2.5 py-1.5 text-xs text-white shadow-lg"
           style={{
-            left: `${(barCenterX(hovered) / chartWidth) * 100}%`,
-            top: `calc(${(barTop(series[hovered]) / CHART_HEIGHT) * 100}% - 8px)`,
+            left: `${(pointX(hovered) / chartWidth) * 100}%`,
+            top: `calc(${(pointY(series[hovered]) / CHART_HEIGHT) * 100}% - 8px)`,
           }}
         >
           <p className="font-semibold">

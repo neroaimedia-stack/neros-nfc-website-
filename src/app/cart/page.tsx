@@ -160,20 +160,22 @@ export default function CartPage() {
       <div className="mt-4 flex flex-col divide-y divide-black/10">
         {items.map((item) => (
           <div key={item.id} className="flex items-start gap-3 py-5">
-            {selectMode && (
-              <input
-                type="checkbox"
-                checked={selectedIds.includes(item.id)}
-                onChange={() => toggleSelected(item.id)}
-                aria-label={`Select ${item.title}`}
-                className="mt-8 h-4 w-4 shrink-0 accent-black"
+            <div className="flex shrink-0 items-center gap-3">
+              {selectMode && (
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(item.id)}
+                  onChange={() => toggleSelected(item.id)}
+                  aria-label={`Select ${item.title}`}
+                  className="h-4 w-4 shrink-0 accent-black"
+                />
+              )}
+              <ProductThumb
+                slug={item.productSlug}
+                variant={item.color}
+                className="w-16 shrink-0"
               />
-            )}
-            <ProductThumb
-              slug={item.productSlug}
-              variant={item.color}
-              className="w-16 shrink-0"
-            />
+            </div>
             <div className="flex flex-1 items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-semibold text-black">{item.title}</p>

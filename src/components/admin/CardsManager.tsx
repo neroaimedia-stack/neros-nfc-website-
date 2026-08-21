@@ -11,6 +11,7 @@ import {
   FiTrash2,
   FiUser,
 } from "react-icons/fi";
+import { SITE_URL } from "@/lib/site";
 
 const PRODUCT_TYPES = [
   { value: "business-card", label: "Business Card" },
@@ -95,13 +96,12 @@ function LinkWithCopy({ label, hint, link }: { label: string; hint: string; link
 
 function CardDetails({ card }: { card: CardRow }) {
   const [qrDataUrl, setQrDataUrl] = useState("");
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
   const isBusinessCard = card.product_type === "business-card";
-  const visitLink = `${origin}/c/${card.id}`;
-  const setupLink = `${origin}/account?code=${encodeURIComponent(card.code)}`;
+  const visitLink = `${SITE_URL}/c/${card.id}`;
+  const setupLink = `${SITE_URL}/account?code=${encodeURIComponent(card.code)}`;
 
   useEffect(() => {
-    if (!isBusinessCard || !origin) return;
+    if (!isBusinessCard) return;
     let cancelled = false;
     QRCode.toDataURL(visitLink, { margin: 1, width: 160 }).then((url) => {
       if (!cancelled) setQrDataUrl(url);
@@ -109,7 +109,6 @@ function CardDetails({ card }: { card: CardRow }) {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isBusinessCard, visitLink]);
 
   return (

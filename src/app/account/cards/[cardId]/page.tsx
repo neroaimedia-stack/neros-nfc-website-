@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
+import { SITE_URL } from "@/lib/site";
 import FlippableCard from "@/components/FlippableCard";
 import ReviewCardMock from "@/components/ReviewCardMock";
 import WifiCardMock from "@/components/WifiCardMock";
@@ -93,7 +94,7 @@ export default function CardDetailPage() {
   const isBusinessCard = card.product_type === "business-card";
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/c/${card.id}`;
+    const url = `${SITE_URL}/c/${card.id}`;
     try {
       await navigator.clipboard.writeText(url);
     } catch {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD } from "@/lib/currency";
@@ -11,8 +12,95 @@ import { computeTotals } from "@/lib/promo";
 import ProductThumb from "@/components/ProductThumb";
 import { FiInfo } from "react-icons/fi";
 
+type OrderSummary = {
+  id: string;
+  total: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  order_items: { id: string }[];
+};
+
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  pending: "Payment pending verification",
+  paid: "Payment confirmed",
+  processing: "Preparing your order",
+  shipped: "On the way",
+  completed: "Delivered",
+  cancelled: "Cancelled",
+};
+
+const ORDER_STATUS_STYLES: Record<string, string> = {
+  pending: "bg-amber-100 text-amber-700",
+  paid: "bg-blue-100 text-blue-700",
+  processing: "bg-blue-100 text-blue-700",
+  shipped: "bg-purple-100 text-purple-700",
+  completed: "bg-green-100 text-green-700",
+  cancelled: "bg-red-100 text-red-700",
+};
+
+function OrderHistory({ userId }: { userId: string }) {
+  const [orders, setOrders] = useState<OrderSummary[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from("orders")
+      .select("id, total, currency, status, created_at, order_items(id)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (!cancelled) setOrders(data ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  if (orders === null || orders.length === 0) return null;
+
+  return (
+    <div className="mt-10 border-t border-black/10 pt-8">
+      <p className="text-sm font-semibold text-black">Your orders</p>
+      <div className="mt-4 flex flex-col divide-y divide-black/10">
+        {orders.map((order) => (
+          <div key={order.id} className="py-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-black">
+                  Order #{order.id.slice(0, 8)}
+                </p>
+                <p className="text-xs text-black/40">
+                  {new Date(order.created_at).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}{" "}
+                  · {order.order_items.length} item
+                  {order.order_items.length === 1 ? "" : "s"}
+                </p>
+              </div>
+              <span className="shrink-0 text-sm font-semibold text-black">
+                {formatCurrency(order.total, order.currency)}
+              </span>
+            </div>
+            <span
+              className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                ORDER_STATUS_STYLES[order.status] ?? "bg-black/5 text-black/60"
+              }`}
+            >
+              {ORDER_STATUS_LABELS[order.status] ?? order.status}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function CartPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const {
     items,
     removeItem,
@@ -98,24 +186,22 @@ export default function CartPage() {
     setShowPromoInput(false);
   };
 
-  if (items.length === 0) {
-    return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-6 py-24 text-center">
-        <h1 className="text-2xl font-bold text-black">Your cart is empty</h1>
-        <Link
-          href="/#buy"
-          className="mt-6 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
-        >
-          Browse cards
-        </Link>
-      </main>
-    );
-  }
-
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
       <h1 className="text-2xl font-bold text-black">Your cart</h1>
 
+      {items.length === 0 ? (
+        <div className="mt-10 flex flex-col items-center rounded-2xl border border-dashed border-black/15 px-6 py-12 text-center">
+          <p className="text-sm text-black/60">Your cart is empty.</p>
+          <Link
+            href="/#buy"
+            className="mt-4 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-80"
+          >
+            Browse cards
+          </Link>
+        </div>
+      ) : (
+        <>
       <div className="mt-6 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5 text-xs font-medium text-black/60">
           <FiInfo className="h-3.5 w-3.5 shrink-0 text-black/40" />
@@ -369,6 +455,10 @@ export default function CartPage() {
           Checkout
         </button>
       )}
+        </>
+      )}
+
+      {user && <OrderHistory userId={user.id} />}
     </main>
   );
 }

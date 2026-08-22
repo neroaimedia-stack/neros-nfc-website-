@@ -118,20 +118,25 @@ function OrderHistory({ userId }: { userId: string }) {
               </span>
               {order.status === "pending" &&
                 (order.cancellation_requested ? (
-                  <span className="text-xs text-black/40">
-                    Cancellation requested — we&apos;ll confirm shortly.
+                  <span className="rounded-full bg-black/5 px-3 py-1 text-xs font-medium text-black/50">
+                    Cancellation requested
                   </span>
                 ) : (
                   <button
                     type="button"
                     onClick={() => requestCancel(order.id)}
                     disabled={requestingId === order.id}
-                    className="text-xs font-semibold text-red-600 underline decoration-red-200 underline-offset-2 hover:decoration-red-600 disabled:opacity-50"
+                    className="rounded-full border border-red-200 px-3 py-1 text-xs font-semibold text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 disabled:opacity-50"
                   >
                     {requestingId === order.id ? "Requesting…" : "Request to cancel"}
                   </button>
                 ))}
             </div>
+            {order.status === "pending" && order.cancellation_requested && (
+              <p className="mt-1.5 text-xs text-black/40">
+                We&apos;ll review and confirm shortly.
+              </p>
+            )}
           </div>
         ))}
       </div>

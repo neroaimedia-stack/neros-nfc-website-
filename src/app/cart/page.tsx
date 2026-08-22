@@ -18,6 +18,7 @@ type OrderSummary = {
   currency: string;
   status: string;
   created_at: string;
+  cancellation_requested: boolean;
   order_items: { id: string }[];
 };
 
@@ -41,12 +42,15 @@ const ORDER_STATUS_STYLES: Record<string, string> = {
 
 function OrderHistory({ userId }: { userId: string }) {
   const [orders, setOrders] = useState<OrderSummary[] | null>(null);
+  const [requestingId, setRequestingId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     supabase
       .from("orders")
-      .select("id, total, currency, status, created_at, order_items(id)")
+      .select(
+        "id, total, currency, status, created_at, cancellation_requested, order_items(id)"
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
@@ -57,11 +61,31 @@ function OrderHistory({ userId }: { userId: string }) {
     };
   }, [userId]);
 
+  const requestCancel = async (orderId: string) => {
+    setRequestingId(orderId);
+    const { error } = await supabase
+      .from("orders")
+      .update({ cancellation_requested: true })
+      .eq("id", orderId);
+    setRequestingId(null);
+    if (!error) {
+      setOrders((prev) =>
+        prev
+          ? prev.map((o) =>
+              o.id === orderId ? { ...o, cancellation_requested: true } : o
+            )
+          : prev
+      );
+    }
+  };
+
   if (orders === null || orders.length === 0) return null;
 
   return (
-    <div className="mt-10 border-t border-black/10 pt-8">
-      <p className="text-sm font-semibold text-black">Your orders</p>
+    <div className="mt-10 rounded-2xl border border-black/10 bg-white shadow-sm p-6">
+      <p className="text-xs font-semibold tracking-wide text-black/40 uppercase">
+        Order dashboard
+      </p>
       <div className="mt-4 flex flex-col divide-y divide-black/10">
         {orders.map((order) => (
           <div key={order.id} className="py-4">
@@ -84,13 +108,30 @@ function OrderHistory({ userId }: { userId: string }) {
                 {formatCurrency(order.total, order.currency)}
               </span>
             </div>
-            <span
-              className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                ORDER_STATUS_STYLES[order.status] ?? "bg-black/5 text-black/60"
-              }`}
-            >
-              {ORDER_STATUS_LABELS[order.status] ?? order.status}
-            </span>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span
+                className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+                  ORDER_STATUS_STYLES[order.status] ?? "bg-black/5 text-black/60"
+                }`}
+              >
+                {ORDER_STATUS_LABELS[order.status] ?? order.status}
+              </span>
+              {order.status === "pending" &&
+                (order.cancellation_requested ? (
+                  <span className="text-xs text-black/40">
+                    Cancellation requested — we&apos;ll confirm shortly.
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => requestCancel(order.id)}
+                    disabled={requestingId === order.id}
+                    className="text-xs font-semibold text-red-600 underline decoration-red-200 underline-offset-2 hover:decoration-red-600 disabled:opacity-50"
+                  >
+                    {requestingId === order.id ? "Requesting…" : "Request to cancel"}
+                  </button>
+                ))}
+            </div>
           </div>
         ))}
       </div>
@@ -201,8 +242,8 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <>
-      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <div className="mt-6 rounded-2xl border border-black/10 bg-white shadow-sm p-6">
+      <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5 text-xs font-medium text-black/60">
           <FiInfo className="h-3.5 w-3.5 shrink-0 text-black/40" />
           <span>
@@ -455,7 +496,7 @@ export default function CartPage() {
           Checkout
         </button>
       )}
-        </>
+        </div>
       )}
 
       {user && <OrderHistory userId={user.id} />}

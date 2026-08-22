@@ -54,6 +54,7 @@ type Order = {
   payment_payer_name: string | null;
   payment_proof_url: string | null;
   shipping_fee_agreed: boolean;
+  cancellation_requested: boolean;
   order_items: OrderItem[];
 };
 
@@ -267,6 +268,11 @@ export default function OrdersManager() {
                   <span className="text-sm font-semibold text-black">
                     {formatCurrency(order.total, order.currency)}
                   </span>
+                  {order.cancellation_requested && (
+                    <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                      Cancellation requested
+                    </span>
+                  )}
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[order.status] ?? "bg-black/5 text-black/60"}`}
                   >

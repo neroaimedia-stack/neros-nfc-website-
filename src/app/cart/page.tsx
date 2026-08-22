@@ -10,6 +10,7 @@ import { useCurrency } from "@/lib/currency-context";
 import { formatCurrency, fromUSD } from "@/lib/currency";
 import { computeTotals } from "@/lib/promo";
 import ProductThumb from "@/components/ProductThumb";
+import CopyEmailButton from "@/components/CopyEmailButton";
 import { FiInfo } from "react-icons/fi";
 
 type OrderSummary = {
@@ -260,6 +261,11 @@ export default function CartPage() {
             >
               email us
             </a>{" "}
+            <CopyEmailButton
+              email="herneros.ph@gmail.com"
+              iconOnly
+              className="text-black/30 hover:text-black"
+            />{" "}
             to order bulk outside PH.
           </span>
         </div>

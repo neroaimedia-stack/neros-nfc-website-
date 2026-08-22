@@ -6,6 +6,7 @@ import WifiCardMock from "@/components/WifiCardMock";
 import OrderCardMock from "@/components/OrderCardMock";
 import HowItWorks from "@/components/HowItWorks";
 import CardCarousel from "@/components/CardCarousel";
+import CopyEmailButton from "@/components/CopyEmailButton";
 
 export default function Home() {
   const cardItems = [
@@ -153,6 +154,13 @@ export default function Home() {
               Support
             </Link>
           </div>
+          <p className="mt-4 text-xs text-white/40">
+            Email app not opening?{" "}
+            <CopyEmailButton
+              email="herneros.ph@gmail.com"
+              className="font-medium text-white/60 underline decoration-white/20 underline-offset-2 hover:text-white hover:decoration-white"
+            />
+          </p>
         </div>
       </section>
     </main>

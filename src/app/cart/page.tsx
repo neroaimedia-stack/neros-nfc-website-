@@ -31,13 +31,13 @@ const ORDER_STATUS_LABELS: Record<string, string> = {
   cancelled: "Cancelled",
 };
 
-const ORDER_STATUS_STYLES: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-700",
-  paid: "bg-blue-100 text-blue-700",
-  processing: "bg-blue-100 text-blue-700",
-  shipped: "bg-purple-100 text-purple-700",
-  completed: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-700",
+const ORDER_STATUS_DOT: Record<string, string> = {
+  pending: "bg-amber-500",
+  paid: "bg-blue-500",
+  processing: "bg-blue-400",
+  shipped: "bg-purple-500",
+  completed: "bg-green-500",
+  cancelled: "bg-red-500",
 };
 
 function OrderHistory({ userId }: { userId: string }) {
@@ -109,11 +109,12 @@ function OrderHistory({ userId }: { userId: string }) {
               </span>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span
-                className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                  ORDER_STATUS_STYLES[order.status] ?? "bg-black/5 text-black/60"
-                }`}
-              >
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs font-semibold text-black/70">
+                <span
+                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                    ORDER_STATUS_DOT[order.status] ?? "bg-black/30"
+                  }`}
+                />
                 {ORDER_STATUS_LABELS[order.status] ?? order.status}
               </span>
               {order.status === "pending" &&

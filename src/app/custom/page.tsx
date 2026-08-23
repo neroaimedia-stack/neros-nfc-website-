@@ -1,5 +1,4 @@
 import Link from "next/link";
-import CopyEmailButton from "@/components/CopyEmailButton";
 
 export default function CustomOrderPage() {
   return (
@@ -19,10 +18,12 @@ export default function CustomOrderPage() {
       </Link>
       <p className="mt-3 text-xs text-black/40">
         Email app not opening?{" "}
-        <CopyEmailButton
-          email="herneros.ph@gmail.com"
+        <a
+          href="mailto:herneros.ph@gmail.com?subject=Custom%20Order"
           className="font-medium text-black/60 underline decoration-black/20 underline-offset-2 hover:text-black hover:decoration-black"
-        />
+        >
+          herneros.ph@gmail.com
+        </a>
       </p>
     </main>
   );

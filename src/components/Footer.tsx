@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import CopyEmailButton from "@/components/CopyEmailButton";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -21,10 +20,12 @@ export default function Footer() {
           <Link href="/terms" className="transition-opacity hover:opacity-60">
             Terms &amp; Conditions
           </Link>
-          <CopyEmailButton
-            email="herneros.ph@gmail.com"
-            className="text-black/60 hover:text-black"
-          />
+          <a
+            href="mailto:herneros.ph@gmail.com"
+            className="transition-opacity hover:opacity-60"
+          >
+            herneros.ph@gmail.com
+          </a>
         </div>
       </div>
     </footer>

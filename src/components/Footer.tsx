@@ -10,11 +10,11 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-black/10">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
-        <p className="text-sm text-black/40">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-6 py-5 text-center sm:flex-row sm:justify-between sm:text-left">
+        <p className="text-xs text-black/40">
           &copy; {new Date().getFullYear()} HERNEROS. All rights reserved.
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-black/60">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs font-medium text-black/60">
           <Link href="/privacy" className="transition-opacity hover:opacity-60">
             Privacy Policy
           </Link>

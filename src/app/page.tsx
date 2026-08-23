@@ -134,8 +134,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-black py-20">
-        <div className="mx-auto max-w-3xl px-6 text-center">
+      <section className="mx-auto w-full max-w-4xl px-6 py-20">
+        <div className="rounded-3xl bg-black px-6 py-14 text-center sm:px-16">
           <h2 className="text-3xl font-bold text-white">Already have one?</h2>
           <p className="mt-4 text-white/60">
             Claim your card and set up your profile in under a minute.

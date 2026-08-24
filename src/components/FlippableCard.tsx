@@ -31,7 +31,7 @@ function CardFaceContent({
           <div className="card-edge-shade" />
           <div className="relative flex h-full items-center justify-center p-7">
             <span
-              className={`text-2xl font-bold tracking-tight uppercase ${style.textClass}`}
+              className={`text-2xl font-bold tracking-[0.08em] uppercase ${style.textClass}`}
             >
               HERNEROS
             </span>

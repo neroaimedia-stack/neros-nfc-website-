@@ -69,7 +69,7 @@ function CardFaceContent({
           HERNEROS
         </span>
         <div className="flex flex-1 flex-col items-start justify-center gap-2">
-          <QrCode color={style.qrColor} className="w-[26%]" />
+          <QrCode color={style.qrColor} className="w-[18%]" />
           <span className={`text-sm tracking-[0.2em] uppercase ${style.subTextClass}`}>
             Tap &amp; Scan
           </span>

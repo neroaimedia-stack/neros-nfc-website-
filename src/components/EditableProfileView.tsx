@@ -1,31 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import type { IconType } from "react-icons";
 import {
-  FiActivity,
   FiBookOpen,
   FiBriefcase,
   FiCalendar,
   FiExternalLink,
-  FiFilm,
   FiGlobe,
   FiHash,
   FiHeart,
   FiMail,
   FiMapPin,
-  FiMusic,
   FiPhone,
   FiStar,
-  FiTarget,
-  FiTv,
   FiUser,
 } from "react-icons/fi";
 import { findSocialPlatform } from "@/lib/social-platforms";
 import { isValidEmail, isValidPhone, sanitizeText } from "@/lib/sanitize";
 import { useImageUpload } from "@/lib/use-image-upload";
 import {
-  type Interests,
   type ProfileState,
   type SectionKey,
   RELATIONSHIP_OPTIONS,
@@ -341,12 +334,6 @@ export default function EditableProfileView({
     value: ProfileState[K]
   ) => setDraft((prev) => ({ ...prev, [key]: value }));
 
-  const updateDraftInterest = (key: keyof Interests, value: string[]) =>
-    setDraft((prev) => ({
-      ...prev,
-      interests: { ...prev.interests, [key]: value },
-    }));
-
   const handleSheetSave = async () => {
     setSavingSheet(true);
     setSheetError("");
@@ -389,13 +376,6 @@ export default function EditableProfileView({
   const works = profile.works.filter((w) => w.company || w.title);
   const education = profile.education.filter((e) => e.school || e.degree || e.level);
   const links = profile.links.filter((l) => l.url?.trim());
-  const interestGroups: { label: string; icon: IconType; values: string[] }[] = [
-    { label: "Music", icon: FiMusic, values: profile.interests.music },
-    { label: "Movies", icon: FiFilm, values: profile.interests.movies },
-    { label: "Games", icon: FiTarget, values: profile.interests.games },
-    { label: "TV shows", icon: FiTv, values: profile.interests.tvShows },
-    { label: "Sports & athletes", icon: FiActivity, values: profile.interests.sports },
-  ].filter((g) => g.values.length > 0);
   const hasAbout =
     !!profile.current_city ||
     !!profile.hometown ||
@@ -550,28 +530,19 @@ export default function EditableProfileView({
     {
       key: "interests",
       title: "Interests",
-      empty: interestGroups.length === 0,
+      empty: profile.interests.length === 0,
       content: (
-        <div className="flex flex-col gap-3">
-          {interestGroups.map((group) => (
-            <div key={group.label}>
-              <p className="flex items-center gap-1.5 text-xs font-medium text-black/50">
-                <group.icon className="h-3.5 w-3.5 shrink-0" />
-                {group.label}
-              </p>
-              <ExpandableList
-                items={group.values}
-                max={6}
-                className="mt-1.5 flex flex-col gap-1.5 pl-5 text-sm"
-                renderItem={(v) => (
-                  <span key={v} className="font-medium text-black">
-                    {v}
-                  </span>
-                )}
-              />
+        <ExpandableList
+          items={profile.interests}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(interest) => (
+            <div key={interest} className="flex items-center gap-1.5">
+              <FiHeart className="h-4 w-4 shrink-0 text-black/50" />
+              <span className="font-medium text-black">{interest}</span>
             </div>
-          ))}
-        </div>
+          )}
+        />
       ),
     },
     {
@@ -973,38 +944,10 @@ export default function EditableProfileView({
           error={sheetError}
         >
           <TagListInput
-            label="Music"
-            values={draft.interests.music}
-            onChange={(v) => updateDraftInterest("music", v)}
-            placeholder="Jazz"
-            maxLength={40}
-          />
-          <TagListInput
-            label="Movies"
-            values={draft.interests.movies}
-            onChange={(v) => updateDraftInterest("movies", v)}
-            placeholder="Sci-fi"
-            maxLength={40}
-          />
-          <TagListInput
-            label="Games"
-            values={draft.interests.games}
-            onChange={(v) => updateDraftInterest("games", v)}
-            placeholder="Chess"
-            maxLength={40}
-          />
-          <TagListInput
-            label="TV shows"
-            values={draft.interests.tvShows}
-            onChange={(v) => updateDraftInterest("tvShows", v)}
-            placeholder="Documentaries"
-            maxLength={40}
-          />
-          <TagListInput
-            label="Sports & athletes"
-            values={draft.interests.sports}
-            onChange={(v) => updateDraftInterest("sports", v)}
-            placeholder="Basketball"
+            label="Interests"
+            values={draft.interests}
+            onChange={(v) => updateDraft("interests", v)}
+            placeholder="Jazz, Chess, Basketball..."
             maxLength={40}
           />
         </FieldEditSheet>

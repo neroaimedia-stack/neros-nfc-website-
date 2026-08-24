@@ -12,22 +12,6 @@ export type SectionKey =
   | "travel"
   | "links";
 
-export type Interests = {
-  music: string[];
-  movies: string[];
-  games: string[];
-  tvShows: string[];
-  sports: string[];
-};
-
-export const emptyInterests: Interests = {
-  music: [],
-  movies: [],
-  games: [],
-  tvShows: [],
-  sports: [],
-};
-
 export type ProfileState = {
   full_name: string;
   job_title: string;
@@ -47,7 +31,7 @@ export type ProfileState = {
   languages: string[];
   works: Record<string, string>[];
   education: Record<string, string>[];
-  interests: Interests;
+  interests: string[];
   travel_places: string[];
   links: Record<string, string>[];
 };
@@ -71,7 +55,7 @@ export const emptyProfile: ProfileState = {
   languages: [],
   works: [],
   education: [],
-  interests: emptyInterests,
+  interests: [],
   travel_places: [],
   links: [],
 };
@@ -85,6 +69,21 @@ export const RELATIONSHIP_OPTIONS = [
   "It's complicated",
   "Prefer not to say",
 ];
+
+const LEGACY_INTEREST_GROUPS = ["music", "movies", "games", "tvShows", "sports"];
+
+// Interests used to be stored as { music: [], movies: [], ... } instead of
+// a flat list. Flatten any old-shape rows so existing users' data still shows up.
+export function normalizeInterests(value: unknown): string[] {
+  if (Array.isArray(value)) return value as string[];
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return LEGACY_INTEREST_GROUPS.flatMap((key) =>
+      Array.isArray(record[key]) ? (record[key] as string[]) : []
+    );
+  }
+  return [];
+}
 
 export function profileFromRow(data: Record<string, unknown>): ProfileState {
   return {
@@ -106,7 +105,7 @@ export function profileFromRow(data: Record<string, unknown>): ProfileState {
     languages: (data.languages as string[]) ?? [],
     works: (data.works as Record<string, string>[]) ?? [],
     education: (data.education as Record<string, string>[]) ?? [],
-    interests: { ...emptyInterests, ...((data.interests as Interests) ?? {}) },
+    interests: normalizeInterests(data.interests),
     travel_places: (data.travel_places as string[]) ?? [],
     links: (data.links as Record<string, string>[]) ?? [],
   };

@@ -236,19 +236,23 @@ function BirthdayField({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  const year = match ? match[1] : "";
-  const month = match ? match[2] : "";
-  const day = match ? match[3] : "";
+  const initial = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const [year, setYear] = useState(initial ? initial[1] : "");
+  const [month, setMonth] = useState(initial ? initial[2] : "");
+  const [day, setDay] = useState(initial ? initial[3] : "");
 
   function update(nextYear: string, nextMonth: string, nextDay: string) {
+    setYear(nextYear);
+    setMonth(nextMonth);
     if (!nextYear || !nextMonth || !nextDay) {
+      setDay(nextDay);
       onChange("");
       return;
     }
     const clampedDay = String(
       Math.min(Number(nextDay), daysInMonth(nextYear, nextMonth))
     ).padStart(2, "0");
+    setDay(clampedDay);
     onChange(`${nextYear}-${nextMonth}-${clampedDay}`);
   }
 

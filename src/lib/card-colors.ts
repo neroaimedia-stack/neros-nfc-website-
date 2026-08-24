@@ -13,10 +13,10 @@ export const CARD_COLOR_ORDER = ["Jet Black"];
 
 export const CARD_COLORS: Record<string, CardColorStyle> = {
   "Jet Black": {
-    swatch: "linear-gradient(135deg, #3a3a3a, #050505)",
-    cardGradient: "linear-gradient(135deg, #262626, #050505)",
+    swatch: "linear-gradient(135deg, #17171a, #050506)",
+    cardGradient: "linear-gradient(160deg, #111113, #060607)",
     textClass: "text-white",
-    subTextClass: "text-white/85",
+    subTextClass: "text-white/70",
     qrColor: "#ffffff",
   },
 };

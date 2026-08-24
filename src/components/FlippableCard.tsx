@@ -28,10 +28,7 @@ function CardFaceContent({
     if (!personalized) {
       return (
         <>
-          <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10" />
           <div className="card-edge-shade" />
-          <div className="card-corner-gloss" />
-          <div className="card-sheen" />
           <div className="relative flex h-full items-center justify-center p-7">
             <span
               className={`text-2xl font-bold tracking-tight uppercase ${style.textClass}`}
@@ -45,10 +42,7 @@ function CardFaceContent({
 
     return (
       <>
-        <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10" />
         <div className="card-edge-shade" />
-        <div className="card-corner-gloss" />
-        <div className="card-sheen" />
         <div className="relative flex h-full min-w-0 flex-col justify-end gap-1 p-7">
           <span
             className={`min-w-0 overflow-hidden whitespace-nowrap text-xl font-bold tracking-tight uppercase ${style.textClass}`}
@@ -67,17 +61,19 @@ function CardFaceContent({
 
   return (
     <>
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/10" />
       <div className="card-edge-shade" />
-      <div className="card-corner-gloss-dim" />
       <div className="relative flex h-full flex-col p-7">
-        <span className={`text-xl font-bold tracking-tight ${style.textClass}`}>HERNEROS</span>
-        <div className="flex flex-1 items-center justify-center">
-          <QrCode color={style.qrColor} className="w-[30%]" />
-        </div>
-        <span className={`self-end text-sm tracking-[0.2em] ${style.subTextClass}`}>
-          TAP &amp; SCAN
+        <span
+          className={`self-end text-lg font-bold tracking-tight uppercase ${style.textClass}`}
+        >
+          HERNEROS
         </span>
+        <div className="mt-auto flex flex-col items-start gap-2">
+          <QrCode color={style.qrColor} className="w-[26%]" />
+          <span className={`text-sm tracking-[0.2em] uppercase ${style.subTextClass}`}>
+            Tap &amp; Scan
+          </span>
+        </div>
       </div>
     </>
   );

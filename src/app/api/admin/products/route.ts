@@ -10,7 +10,7 @@ export async function GET() {
   const { data, error } = await getSupabaseAdmin()
     .from("products")
     .select(
-      "slug, title, description, price, compare_at_price, currency, colors, track_stock, stock_quantity, allow_preorder, sort_order, variant_details"
+      "slug, title, description, price, compare_at_price, currency, colors, track_stock, stock_quantity, allow_preorder, sold_offset, sort_order, variant_details"
     )
     .order("sort_order", { ascending: true });
 

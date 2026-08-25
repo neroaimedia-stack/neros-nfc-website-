@@ -11,6 +11,7 @@ type ProductPatch = {
   track_stock?: unknown;
   stock_quantity?: unknown;
   allow_preorder?: unknown;
+  sold_offset?: unknown;
   variant_details?: unknown;
 };
 
@@ -117,6 +118,14 @@ export async function PATCH(
       return NextResponse.json({ error: "allow_preorder must be a boolean." }, { status: 400 });
     }
     update.allow_preorder = body.allow_preorder;
+  }
+
+  if (body.sold_offset !== undefined) {
+    const soldOffset = Number(body.sold_offset);
+    if (!Number.isInteger(soldOffset)) {
+      return NextResponse.json({ error: "Sold count adjustment must be a whole number." }, { status: 400 });
+    }
+    update.sold_offset = soldOffset;
   }
 
   if (body.variant_details !== undefined) {

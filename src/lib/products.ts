@@ -17,6 +17,7 @@ export type Product = {
   trackStock: boolean;
   stockQuantity: number;
   allowPreorder: boolean;
+  soldOffset: number;
   variantDetails: Record<string, VariantDetail>;
 };
 
@@ -28,7 +29,7 @@ export async function getProducts(): Promise<Record<string, Product>> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "slug, title, description, price, compare_at_price, currency, colors, track_stock, stock_quantity, allow_preorder, variant_details"
+      "slug, title, description, price, compare_at_price, currency, colors, track_stock, stock_quantity, allow_preorder, sold_offset, variant_details"
     )
     .order("sort_order", { ascending: true });
 
@@ -61,6 +62,7 @@ export async function getProducts(): Promise<Record<string, Product>> {
       trackStock: row.track_stock ?? false,
       stockQuantity: row.stock_quantity ?? 0,
       allowPreorder: row.allow_preorder ?? true,
+      soldOffset: row.sold_offset ?? 0,
       variantDetails,
     };
   }

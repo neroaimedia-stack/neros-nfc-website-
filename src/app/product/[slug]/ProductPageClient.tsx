@@ -273,7 +273,10 @@ export default function ProductPageClient({
           <RatingSummary
             averageRating={reviewsData.averageRating}
             reviewCount={reviewsData.reviewCount}
-            orderCount={reviewsData.orderCount}
+            orderCount={Math.max(
+              0,
+              reviewsData.orderCount + (product.soldOffset ?? 0)
+            )}
           />
 
           <div className="mt-4 flex items-center gap-3">

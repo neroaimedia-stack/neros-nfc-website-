@@ -53,6 +53,7 @@ type Product = {
   track_stock: boolean;
   stock_quantity: number;
   allow_preorder: boolean;
+  sold_offset: number;
   sort_order: number;
   variant_details: Record<
     string,
@@ -309,6 +310,7 @@ function ProductRow({
   const [trackStock, setTrackStock] = useState(product.track_stock);
   const [stockQuantity, setStockQuantity] = useState(String(product.stock_quantity));
   const [allowPreorder, setAllowPreorder] = useState(product.allow_preorder);
+  const [soldOffset, setSoldOffset] = useState(String(product.sold_offset));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -335,7 +337,8 @@ function ProductRow({
     JSON.stringify(currentManaged) !== JSON.stringify(originalManaged) ||
     trackStock !== product.track_stock ||
     stockQuantity !== String(product.stock_quantity) ||
-    allowPreorder !== product.allow_preorder;
+    allowPreorder !== product.allow_preorder ||
+    soldOffset !== String(product.sold_offset);
 
   const addVariant = () => {
     const trimmed = newVariantName.trim();
@@ -370,6 +373,7 @@ function ProductRow({
 
     const compareAtPriceValue =
       compareAtPrice.trim() && !Number.isNaN(Number(compareAtPrice)) ? Number(compareAtPrice) : null;
+    const soldOffsetValue = Number.isInteger(Number(soldOffset)) ? Number(soldOffset) : 0;
 
     const res = await fetch(`/api/admin/products/${product.slug}`, {
       method: "PATCH",
@@ -382,6 +386,7 @@ function ProductRow({
         track_stock: trackStock,
         stock_quantity: Number(stockQuantity),
         allow_preorder: allowPreorder,
+        sold_offset: soldOffsetValue,
         variant_details: variantDetails,
       }),
     });
@@ -401,6 +406,7 @@ function ProductRow({
       track_stock: trackStock,
       stock_quantity: Number(stockQuantity),
       allow_preorder: allowPreorder,
+      sold_offset: soldOffsetValue,
       variant_details: variantDetails,
     });
     setTimeout(() => setSaved(false), 2000);
@@ -526,6 +532,22 @@ function ProductRow({
                 onChange={(e) => setCompareAtPrice(e.target.value)}
                 className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
               />
+            </div>
+
+            <div className="w-32">
+              <label className="text-xs font-medium text-black/60" htmlFor={`sold-offset-${product.slug}`}>
+                Sold count adjustment
+              </label>
+              <input
+                id={`sold-offset-${product.slug}`}
+                type="number"
+                step="1"
+                placeholder="0"
+                value={soldOffset}
+                onChange={(e) => setSoldOffset(e.target.value)}
+                className="mt-1 h-10 w-full rounded-xl border border-black/15 px-3 text-sm outline-none focus:border-black"
+              />
+              <p className="mt-1 text-[11px] text-black/40">Added to real orders on the &ldquo;sold&rdquo; count</p>
             </div>
 
             <div className="pb-2.5">

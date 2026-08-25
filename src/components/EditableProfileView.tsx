@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  FiAward,
   FiBookOpen,
   FiBriefcase,
   FiCalendar,
@@ -510,6 +511,24 @@ export default function EditableProfileView({
       ),
     },
     {
+      key: "skills",
+      title: "Skills",
+      empty: profile.skills.length === 0,
+      content: (
+        <ExpandableList
+          items={profile.skills}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(skill) => (
+            <div key={skill} className="flex items-center gap-1.5">
+              <FiAward className="h-4 w-4 shrink-0 text-black/50" />
+              <span className="font-medium text-black">{skill}</span>
+            </div>
+          )}
+        />
+      ),
+    },
+    {
       key: "hobbies",
       title: "Hobbies",
       empty: profile.hobbies.length === 0,
@@ -913,6 +932,24 @@ export default function EditableProfileView({
             onChange={(v) => updateDraft("languages", v)}
             placeholder="English"
             maxLength={30}
+          />
+        </FieldEditSheet>
+      )}
+
+      {activeSheet === "skills" && (
+        <FieldEditSheet
+          title="Skills"
+          onCancel={closeSheet}
+          onSave={handleSheetSave}
+          saving={savingSheet}
+          error={sheetError}
+        >
+          <TagListInput
+            label="Skills"
+            values={draft.skills}
+            onChange={(v) => updateDraft("skills", v)}
+            placeholder="Photoshop, Public speaking..."
+            maxLength={40}
           />
         </FieldEditSheet>
       )}

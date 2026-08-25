@@ -5,6 +5,7 @@ export type SectionKey =
   | "contact"
   | "social"
   | "about"
+  | "skills"
   | "hobbies"
   | "interests"
   | "work"
@@ -21,6 +22,7 @@ export type ProfileState = {
   emails: string[];
   phone_numbers: string[];
   social_links: SocialLink[];
+  skills: string[];
   hobbies: string[];
   relationship_status: string;
   current_city: string;
@@ -45,6 +47,7 @@ export const emptyProfile: ProfileState = {
   emails: [],
   phone_numbers: [],
   social_links: [],
+  skills: [],
   hobbies: [],
   relationship_status: "",
   current_city: "",
@@ -95,6 +98,7 @@ export function profileFromRow(data: Record<string, unknown>): ProfileState {
     emails: (data.emails as string[]) ?? [],
     phone_numbers: (data.phone_numbers as string[]) ?? [],
     social_links: (data.social_links as SocialLink[]) ?? [],
+    skills: (data.skills as string[]) ?? [],
     hobbies: (data.hobbies as string[]) ?? [],
     relationship_status: (data.relationship_status as string) ?? "",
     current_city: (data.current_city as string) ?? "",
@@ -125,6 +129,7 @@ export function profileToRow(
     emails: profile.emails,
     phone_numbers: profile.phone_numbers,
     social_links: profile.social_links,
+    skills: profile.skills,
     hobbies: profile.hobbies,
     relationship_status: profile.relationship_status || null,
     current_city: profile.current_city || null,

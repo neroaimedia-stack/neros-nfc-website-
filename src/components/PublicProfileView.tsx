@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  FiAward,
   FiBookOpen,
   FiBriefcase,
   FiCalendar,
@@ -34,6 +35,7 @@ export type BusinessProfileRow = {
   emails: string[] | null;
   phone_numbers: string[] | null;
   social_links: SocialLink[] | null;
+  skills: string[] | null;
   hobbies: string[] | null;
   relationship_status: string | null;
   current_city: string | null;
@@ -127,6 +129,7 @@ export default function PublicProfileView({
     (profile.phone_numbers && profile.phone_numbers.length > 0) ||
     socialLinks.length > 0 ||
     hasDetails ||
+    (profile.skills && profile.skills.length > 0) ||
     (profile.hobbies && profile.hobbies.length > 0) ||
     interests.length > 0 ||
     works.length > 0 ||
@@ -280,6 +283,24 @@ export default function PublicProfileView({
             </div>
           )}
         </dl>
+      ),
+    },
+    {
+      key: "skills",
+      title: "Skills",
+      empty: !profile.skills || profile.skills.length === 0,
+      content: (
+        <ExpandableList
+          items={profile.skills ?? []}
+          max={5}
+          className="flex flex-col gap-2 text-sm"
+          renderItem={(skill) => (
+            <div key={skill} className="flex items-center gap-1.5">
+              <FiAward className="h-4 w-4 shrink-0 text-black/50" />
+              <span className="font-medium text-black">{skill}</span>
+            </div>
+          )}
+        />
       ),
     },
     {

@@ -21,6 +21,7 @@ import { normalizeInterests, type SectionKey } from "@/lib/business-profile";
 import ExpandableList from "@/components/ExpandableList";
 import ExpandableText from "@/components/ExpandableText";
 import SaveContactButton from "@/components/SaveContactButton";
+import ShareProfileButton from "@/components/ShareProfileButton";
 
 type SocialLink = { platform: string; url: string };
 type Entry = Record<string, string>;
@@ -488,10 +489,16 @@ export default function PublicProfileView({
         )}
 
         {!isOwnerPreview && (
-          <SaveContactButton
-            profile={profile}
-            className="mt-3 block w-full rounded-full bg-black px-6 py-2 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
-          />
+          <div className="mt-3 flex gap-3">
+            <SaveContactButton
+              profile={profile}
+              className="flex-1 rounded-full bg-black px-4 py-2 text-center text-sm font-semibold text-white transition-opacity hover:opacity-80"
+            />
+            <ShareProfileButton
+              cardId={profile.card_id}
+              className="flex-1 rounded-full border border-black px-4 py-2 text-center text-sm font-semibold text-black transition-opacity hover:opacity-60"
+            />
+          </div>
         )}
 
         {actionButtons && <div className="mt-3">{actionButtons}</div>}
